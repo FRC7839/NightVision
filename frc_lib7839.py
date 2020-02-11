@@ -9,7 +9,7 @@ import cv2
 import zmq
 import os
 
-# Siyo dc gel nf
+# Siyo dc gesl nf
 
 #region global
 global cam_curses_port1
