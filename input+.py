@@ -103,36 +103,9 @@ def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
             break    
 
 
-def check_cam():
-    if os.name == "nt":
-        return "TRUE BECAUSE WINDOWS"
-
-    elif os.name == "posix" and socket.gethostname() == "frcvision":
-        if os.path.exists("/dev/video0"):
-            return "CAMERA.PY CONNECTED"
-
-        else:
-            return "CAMERA NOT FOUND"
-
-
-def get_ssid():
-    if os.name == "nt":
-        return "Tunapro1234 7/2/2020"
-
-    if os.name == "posix":
-        ssid = os.popen(
-            "iwconfig wlan0 \
-                | grep 'ESSID' \
-                | awk '{print $4}' \
-                | awk -F\\\" '{print $2}'"
-        ).read()
-
-        return ssid
-
-
 def get_first_menu_values(): 
-    ipaddr_func = ServerFunctions.get_ipaddr()
-    check_cam_func = check_cam()
+    ipaddr_func = CheckFunctions.get_ipaddr()
+    check_cam_func = CheckFunctions.check_cam()
 
     mainmenu = []
     mainmenucheck = []
@@ -168,7 +141,7 @@ def get_first_menu_values():
     return [mainmenu, mainmenucheck]
 
 
-def get_ip_menu_values(ssid_func=get_ssid(), ipaddr_func=ServerFunctions.get_ipaddr()):
+def get_ip_menu_values(ssid_func=CheckFunctions.get_ssid(), ipaddr_func=CheckFunctions.get_ipaddr()):
     mainmenu = []
     mainmenu_status = []
 
@@ -251,7 +224,7 @@ def get_arduino_menu_values(settings):
     return [mainmenu, mainmenu_status]
 
 
-def get_cam_menu_values(isCamOnline=check_cam()):
+def get_cam_menu_values(isCamOnline=CheckFunctions.check_cam()):
     mainmenu = []
     mainmenu_status = []
 
@@ -468,7 +441,7 @@ def refresh_screen(stdscr, cur_stat, key, ntmsg, settings):
     errmsg = cur_stat["current_error"]
 
     new_all_menu_elements[main_menu_value] = get_first_menu_values()
-    new_all_menu_elements[ip_menu_value] = get_ip_menu_values(get_ssid(), ServerFunctions.get_ipaddr())
+    new_all_menu_elements[ip_menu_value] = get_ip_menu_values(CheckFunctions.get_ssid(), CheckFunctions.get_ipaddr())
     new_all_menu_elements[arduino_menu_value] = get_arduino_menu_values(settings)
     new_all_menu_elements[camera_menu_value] = get_cam_menu_values()
 
@@ -629,7 +602,7 @@ def not_main(stdscr):
                 key not in ["button1", "button0", "switch on", "switch off"]
                 and cur_stat["current_row"] == 0
             ):
-                settings["Robot Location"] = ArduinoFunctions.get_robot_location_from_potansiometer_input(key, max_v)
+                settings["Robot Location"] = ArduinoFunctions.get_robo_loc_from_inp(key, max_v)
 
             elif (
                 key not in ["button1", "button0", "switch on", "switch off"]

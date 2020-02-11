@@ -6,16 +6,11 @@ import math
 import json
 import time
 import cv2
-import zmq
 import os
 
 # Siyo dc gesl nf
 
 #region global
-global cam_curses_port1
-global cam_curses_port2
-global led_control_port
-global is_input_started
 global setting_names
 global all_errors
 global file_lc
@@ -26,38 +21,33 @@ global wait_time_for_get_key
 
 setting_names = ["isTunaPro", "Robot Location", "Camera Tolerance", "Waiting Period", "Autonomous Mode"]
 wait_time_for_get_key = 0.11
-cam_curses_port1 = 5800
-cam_curses_port2 = 5801
-is_input_started = 5802
-led_control_port = 5803
 file_s = "settings.json"
 file_lc = "led_control.json"
 max_v = 30
 
 
-
 all_errors = {
-        "READ_ERROR" : "InputP ERROR: Dosya " + file_s+ " okunamıyor...",
-        "ARD_CONN_ERR" : "InputP ERROR: Arduino'ya baglanilamiyor...",
-        "ARD_POT_ERR" : "InputP ERROR: Potansiyometre cevap vermiyor...",
+        "READ_ERROR" : "InputP ERROR: JSON dosyası okunamıyor...",
+        "READ_ERROR_s" : "InputP ERROR: Dosya " + file_s + " okunamıyor...",
+        "READ_ERROR_lc" : "InputP ERROR: Dosya " + file_lc + " okunamıyor...",
+        "ARDUINO_CONNECTION_ERROR" : "InputP ERROR: Arduino'ya baglanilamiyor...",
+        "ARDUINO_INPUT_ERROR" : "InputP ERROR: Pyfirmta cevap vermiyor...",
         "FILE_NOT_FOUND" : "InputP ERROR: JSON Dosyasi yok ve olusturulamiyor...",
-        "SERVER_NOT_STRTD" : "InputP ERROR: Server baslatilamadi...",       
+        "SERVER_NOT_STARTED" : "InputP ERROR: Server baslatilamadi...",     
+        "INTERNAL_SYNTAX_ERROR" : "InputP ERROR: Tuna, kodunda hata var..."  
     }
 #endregion
 
+
+## DONE
 class ArduinoFunctions:
-    @staticmethod
-    def old_led_write(led, ledi, st):
-        led.write(st/50)
-        st = 1 - st
-        ledi.write(st)
-        
     @staticmethod
     def led_write(led1, out1, st, gnd = True):
         led1.write(st/50)
         if gnd == True:
             st = 1 - st
         out1.write(st)
+        
         
     @staticmethod
     def import_arduino(COM1="COM3", COM2="COM4"):
@@ -68,8 +58,9 @@ class ArduinoFunctions:
                 except:
                     board = pyfirmata.ArduinoNano(COM2)
             except:
-                print("CANNOT CONNECT TO ARDUINO")
-                exit()
+                ### ERROR ###
+                print(all_errors["ARD_CONN_ERR"])
+                return all_errors["ARD_CONN_ERR"]
 
         elif os.name == "posix":
             try:
@@ -79,10 +70,12 @@ class ArduinoFunctions:
                     board = pyfirmata.ArduinoNano("/dev/ttyUSB1")
 
             except:
-                print("Arduino connection failed please try again...")
-                exit()
+                ### ERROR ###
+                print(all_errors["ARD_CONN_ERR"])
+                return all_errors["ARD_CONN_ERR"]
 
         return board
+
 
     @staticmethod
     def map_x(value, min_v, max_v, min_wv, max_wv):
@@ -105,8 +98,9 @@ class ArduinoFunctions:
                     return max_wv
         else:
             ### ERROR ###
-            print("InputP: Pyfirmata değer döndürme problemi, Arduino'yu yeniden bağlamayı deneyin")
-            return "ERROR"
+            print(all_errors["ARD_INPUT_ERR"])
+            return all_errors["ARD_INPUT_ERR"]
+
         
     @staticmethod
     def map_xi(value, min_v, max_v, min_wv, max_wv):
@@ -130,264 +124,98 @@ class ArduinoFunctions:
                     return max_wv
         else:
             ### ERROR ###
-            print("InputP: Pyfirmata değer döndürme problemi, Arduino'yu yeniden bağlamayı deneyin")
-            return "ERROR"
+            print(all_errors["ARD_INPUT_ERR"])
+            return all_errors["ARD_INPUT_ERR"]
+
         
- 
-def key_get(
-    digital_input1,
-    digital_input2,
-    analog_input1,
-    wait_time=0.11,
-    func=None,
-    *args
-    ):
+    @staticmethod
+    def key_get(
+        digital_input1,
+        digital_input2,
+        analog_input1,
+        wait_time=0.11,
+        func=None,
+        *args
+        ):
+        
+        key = None
+        rv = None
+
+        but1 = None
+        but1_p = None
+
+        but2 = None
+        but2_p = None
+        
+        pot1_p = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
+        pot1 = pot1_p
+        
+        if str(pot1_p).startswith("InputP"):
+            ### ERROR ###
+            print(pot1_p)
+            return None, pot1_p
+
     
-    key = None
-    msg = None
+        while True:
 
-    but1 = None
-    but1_p = None
+            if (but1 != but1_p) and but2 > 0 and (not (but2 > 0)):
+                but1 = but1_p
+                key = "button0"
 
-    but2 = None
-    but2_p = None
-    
-    pot1_p = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
-    pot1 = pot1_p
-
-    while True:
-
-        if (but1 != but1_p) and but2 > 0 and (not (but2 > 0)):
-            but1 = but1_p
-            key = "button0"
-
-        elif (but2 != but2_p) and but2 > 0 and (not (but1 > 0)):
-            but2 = but2_p
-            key = "button1"
-        
-        elif (pot1_p != pot1):
-            key = pot1
-        
-        if func is not None:
-            ##
-            start_t = timeit.default_timer()
-            ##
+            elif (but2 != but2_p) and but2 > 0 and (not (but1 > 0)):
+                but2 = but2_p
+                key = "button1"
             
-            rv = func(*args)
+            elif (pot1_p != pot1):
+                key = pot1
             
-            ##
-            elapsed = timeit.default_timer() - start_t
-            ##
-            
-            if elapsed > wait_time:
-                pass
-            
+            if func is not None:
+                #
+                start_t = timeit.default_timer()                
+                
+                rv = func(*args)
+                
+                elapsed = timeit.default_timer() - start_t
+                #
+                
+                if elapsed > wait_time:
+                    pass
+                
+                else:
+                    time.sleep(wait_time - elapsed)
+                
             else:
-                time.sleep(wait_time - elapsed)
+                time.sleep(wait_time)
             
-        else:
-            time.sleep(wait_time)
-            
-        if key is not None:
-            return key, rv
+            if key is not None:
+                # if str(rv).startswith("InputP"): 
+                    ### ERROR ###
+                return key, rv
 
-        but1 = digital_input1.read()
-        but2 = digital_input2.read()
-        pot1 = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
-
+            but1 = digital_input1.read()
+            but2 = digital_input2.read()
+            pot1 = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
 
 
     @staticmethod
-    def get_robot_location_from_potansiometer_input(potan, max_v):
+    def get_robo_loc_from_inp(potan, max_v):
         i1 = ArduinoFunctions.map_x(potan, 0, max_v, 0, 2)
-        robo_loc = ""
-        while range(3):
-            if i1 == 0:
-                robo_loc = "LEFT"
-                return robo_loc
-                break
-            elif i1 == 1:
-                robo_loc = "MIDDLE"
-                return robo_loc
-                break
-            elif i1 == 2:
-                robo_loc = "RIGHT"
-                return robo_loc
-                break
-            time.sleep(0.3)
-
-# region old
-           
-# class oldDbFunctions:
-#     @staticmethod
-#     def find_setting(msg_array, wanted_setting, starting_point=1, return_number=False):
-#         i = starting_point
-#         while i < len(msg_array):
-#             if (msg_array[i] == wanted_setting) and ((i + 1) < len(msg_array)):
-#                 if return_number:
-#                     return i
-#                 else:    
-#                     return msg_array[i + 1]
-#             else:
-#                 pass
-#             i -= -1
-
-#         print("The specified setting cannot be found...")
-
-#     @staticmethod
-#     def addSetting(name, value, input_array):
-#         if input_array == []:
-#             input_array = ["tunapro"]
         
-#         input_array.append(str(Setting(name, value)))
-#         return input_array
+        if str(i1).startswith("InputP"):
+            ### ERROR ###
+            return i1
     
-#     @staticmethod
-#     def list_to_str(input_settings):
-#         return str("#".join(input_settings)) + "#"
+        elif i1 == 0:
+            return "LEFT"
 
-#     @staticmethod 
-#     def str_to_list(input_str):
-#         return input_str.split("#")
+        elif i1 == 1:
+            return "MIDDLE"
 
-#     @staticmethod
-#     def fix_settings_on_txt(file):
-#         setting_to_write = "#istunapro#True#"
-            
-#         if DbFunctions.read_setting_on_txt(file=file) is None:
-#             try:
-#                 with open(file,"w") as file2:
-#                     file2.write(setting_to_write)
-#             except:
-#                 with open(file,"w+") as file2:
-#                     file2.write(setting_to_write)
-            
-#             Eğer dosya yoksa oluştur ##
-        
-        
-#         else:
+        elif i1 == 2:
+            return "RIGHT"
 
-#             DOSYA OKUMA ########33
-
-#             with open(file, "r") as file1:
-#                 settings = file1.read()
-
-#             with open(file, "r") as file1:
-#                 settings = file1.read()
-            
-#             error = False
-                
-#             s_settings = []
-#             settings = DbFunctions.str_to_list(settings)
-            
-#             Normal okuma ##
-
-
-#             for setting in settings:
-#                 try:
-#                     int(setting)
-#                 except:
-#                     pass
-#                 else:
-#                     setting = ""
-                
-#                 if setting == "#" or setting == "True" or setting == "False" or setting == "":
-#                     pass
-#                 else:
-#                     s_settings.append(setting)
-
-#             Txt dosyası "#", "True", "False" gibi anahtar kelimelerden arındırlıp sadece ##
-#             setting adları alındı (Aynısınan birden fazla olup olmadığını görmek için) ##
-
-
-#             for i in range(len(s_settings)):
-#                 for i2 in range(len(s_settings)):
-#                     if s_settings[i] == s_settings[i2] and i > i2:
-#                         error = True
-            
-#             Aynı settingten birden fazla olup olmadığının kontolü
-
-            
-#             if error == True:
-#                 try:
-#                     with open(file,"w") as file2:
-#                         file2.write(setting_to_write)
-#                 except:
-#                     with open(file,"w+") as file2:
-#                         file2.write(setting_to_write)
-
-#                 Eğer aynı setting birden fazla kez girilmişse fazla girilenleri yok ediyor (umarım testleri yapmak için çok zamanım olmadı)
-
-
-
-#     @staticmethod
-#     def write_setting_to_txt(input_str, file="settings.txt", reset=False):
-#         if reset == True:
-#             try:
-#                 with open(file, "w") as file2:
-#                     file2.write("")
-#             except:
-#                 with open(file, "w+") as file2:
-#                     file2.write("")
-
-#             write_setting_to_txt(input_str, file, reset=False)
-    
-#         else:    
-#             try:
-#                 with open(file, "w") as file1:
-#                     file1.write(input_str)
-#             except:
-#                 with open(file, "w+") as file1:
-#                     file1.write(input_str)
-
-             
-#     @staticmethod
-#     def read_setting_on_txt(wanted_setting=None, file = "settings.txt"):
-#         try:
-#             with open(file, "r") as file1:
-#                 output = file1.read()
-#         except:
-#             return None
-        
-#         if wanted_setting is not None:
-#             try:
-#                 output = output.split("#")
-#                 output = DbFunctions.find_setting(output, wanted_setting)
-#             except:
-#                 return None
-        
-#         return output
-
-#     @staticmethod
-#     def save_settings(saving_setting, saving_value, path):
-#         DbFunctions.fix_settings_on_txt(path)
-#         settings = DbFunctions.read_setting_on_txt(file=path)
-#         settings = DbFunctions.str_to_list(settings)
-#         nows = DbFunctions.find_setting(settings, saving_setting, return_number=True)
-        
-#         if nows is not None:
-#             nows = int(nows)
-#             settings[nows] = saving_setting
-#             settings[nows+1] = str(saving_value)
-#             settings = DbFunctions.list_to_str(settings)
-#             DbFunctions.write_setting_to_txt(settings, file=path)
-        
-#         else:
-#             settings[len(settings)-1] = saving_setting
-#             settings.append(str(saving_value))
-#             settings = DbFunctions.list_to_str(settings)
-#             DbFunctions.write_setting_to_txt(settings, file=path)
-
-
-#     @staticmethod
-#     def get_settings():
-#         return DbFunctions.read_setting_on_txt(file=path)
-
-# endregion
-        
+ 
 class DbFunctions:
-
-        ## DONE
     @staticmethod
     def write_settings_to_json(input_dictionary=None, file=file_s, reset=False):
         if reset == True:
@@ -406,9 +234,10 @@ class DbFunctions:
                     json.dump(settings, p, indent=4)    
                     
             except:
-                print("File not created and cannot be created...")
-                return "ERROR"
-            
+                ### ERROR ###
+                print(all_errors["FILE_NOT_FOUND"])
+                return all_errors["FILE_NOT_FOUND"]
+
             DbFunctions.write_settings_to_json(input_dictionary, file, reset=False)
     
         else:    
@@ -418,19 +247,19 @@ class DbFunctions:
                     
             except:
                 ### ERROR ###
-                print("File not created and cannot be created...")
-                return "ERROR"
-    
-    ## DONE    
+                print(all_errors["FILE_NOT_FOUND"])
+                return all_errors["FILE_NOT_FOUND"]
+
+
     @staticmethod
-    def read_settings_on_json(wanted_setting=None, file = file_s):
+    def read_settings_on_json(wanted_setting=None, file=file_s):
         try:
             with open(file, "r") as p: 
                 settings = json.load(p)
         except:
             ### ERROR ###
-            print("InputP: Cannot read " + file_s + "...")
-            return "ERROR"
+            print(all_errors["READ_ERROR"])
+            return all_errors["READ_ERROR"]
 
         if wanted_setting is not None:
             try:
@@ -447,12 +276,16 @@ class DbFunctions:
     @staticmethod
     def save_settings(settings, file=file_s):
         c_s = DbFunctions.read_settings_on_json(file=file)
-        if c_s is None or c_s == "" or c_s == "ERROR":
-            DbFunctions.write_setting_to_json(file=file, reset=True)            
-        
+      
+        if c_s is None or c_s == "" or c_s.startswith("InputP"):
+            rv = DbFunctions.write_setting_to_json(file=file, reset=True)            
+          
+            if rv.startswith("InputP"):
+                return rv
+            
+            
         if settings is None:
             settings = c_s
-        del c_s
         
         for setting_name in setting_names:
             try:
@@ -460,21 +293,27 @@ class DbFunctions:
             except:
                 settings[setting_name] = None    
         
-        DbFunctions.write_settings_to_json(settings, file=file)
+        rv = DbFunctions.write_settings_to_json(settings, file=file)
         
-    
+        if rv.startswith("InputP"):
+            return rv
+        
 
     @staticmethod
     def get_setting(file=file_s, setting_name=None):
-        if (not (setting_name in setting_names)) and setting_name is not None and file == file_s:
+        if (not setting_name in setting_names) and file == file_s:
             ### ERROR ###
-            print("SYNTAX ERROR TUNA GERIZEKALI")
-            return "ERROR"
+            print(all_errors["INTERNAL_SYNTAX_ERROR"])
+            return all_errors["INTERNAL_SYNTAX_ERROR"]
             
         c_s = DbFunctions.read_settings_on_json(file=file)
         
-        if c_s is None or c_s == "ERROR" or c_s == "":
-            DbFunctions.write_settings_to_json(file=file, reset=True)
+        if c_s is None or c_s.startswith("InputP") or c_s == "":
+            rv = DbFunctions.write_settings_to_json(file=file, reset=True)
+
+            if rv.startswith("InputP"):
+                return rv
+        
         
         else:
             # eğer setting yoksa ekleniyor
@@ -486,10 +325,12 @@ class DbFunctions:
                         c_s[setting_name2] = None   
             
             
-            DbFunctions.write_settings_to_json(c_s, file=file)
+            rv2 = DbFunctions.write_settings_to_json(c_s, file=file)
         
         
         c_s = DbFunctions.read_settings_on_json(file=file)
+        if c_s.startswith("InputP"):
+            return c_s
         
         if setting_name is not None:
             try:
@@ -497,7 +338,7 @@ class DbFunctions:
             except:
                 ### ERROR ###
                 print("SETTING NOT FOUND IN THE JSON FILE")
-                return "ERROR"
+                return None
 
             output = c_s[setting_name]
             return output    
@@ -509,7 +350,7 @@ class DbFunctions:
         
 class ServerFunctions:
     @staticmethod
-    def check_server(port=is_input_started):
+    def check_server(port):
         try:
             sockettemp = ServerFunctions.start_server(port)
             sockettemp.close()
@@ -521,7 +362,7 @@ class ServerFunctions:
             return False
 
     @staticmethod
-    def start_server(port=is_input_started):
+    def start_server(port):
         s = socket.socket()
         time.sleep(0.1)
         s.bind(("", port))
@@ -531,7 +372,7 @@ class ServerFunctions:
         return s    
         
     @staticmethod
-    def recv_with_timer(s, time = 0.1):
+    def recv_with_timer(s, time):
         start_t = timeit.default_timer()
         s.settimeout(time)
         try:
@@ -598,21 +439,6 @@ class ServerFunctions:
         except:
             ### ERROR ###
             print("InputP: Bunu okuyorsan Kayra big gay")
-
-    @staticmethod
-    def get_ipaddr():
-        if os.name == "nt":
-            return socket.gethostbyname(socket.gethostname())
-
-        elif os.name == "posix":
-            ipaddress = os.popen(
-                "ifconfig wlan0 \
-                        | grep 'inet addr' \
-                        | awk -F: '{print $2}' \
-                        | awk '{print $1}'"
-            ).read()
-
-            return ipaddress
 
 
 class CameraFunctions:
@@ -723,3 +549,49 @@ class CameraFunctions:
         )
         y_error = 320 - center1x
         return True, y_error, distance
+
+
+class CheckFunctions:
+    
+    @staticmethod
+    def get_ipaddr():
+        if os.name == "nt":
+            return socket.gethostbyname(socket.gethostname())
+
+        elif os.name == "posix":
+            ipaddress = os.popen(
+                "ifconfig wlan0 \
+                        | grep 'inet addr' \
+                        | awk -F: '{print $2}' \
+                        | awk '{print $1}'"
+            ).read()
+
+            return ipaddress
+
+    @staticmethod
+    def check_cam():
+        if os.name == "nt":
+            return "TRUE BECAUSE WINDOWS"
+
+        elif os.name == "posix" and socket.gethostname() == "frcvision":
+            if os.path.exists("/dev/video0"):
+                return "CAMERA.PY CONNECTED"
+
+            else:
+                return "CAMERA NOT FOUND"
+
+    @staticmethod
+    def get_ssid():
+        if os.name == "nt":
+            return "Tunapro1234 7/2/2020"
+
+        if os.name == "posix":
+            ssid = os.popen(
+                "iwconfig wlan0 \
+                    | grep 'ESSID' \
+                    | awk '{print $4}' \
+                    | awk -F\\\" '{print $2}'"
+            ).read()
+
+            return ssid
+
