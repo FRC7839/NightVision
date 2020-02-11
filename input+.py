@@ -29,7 +29,7 @@ ip_menu_value = 1
 # Maç menüsünün hazırlanması                           #
 ########################################################
 
-# Sadece txt olayları fonksiyonları için:
+
 # write_settings_on_txt() fonksiyounu kullanrak dosyaydaki her şeyi alıp tekrar yazması gerekiyor
 
 ###################### CURSES CALISMA MANTIGI ##################################################
