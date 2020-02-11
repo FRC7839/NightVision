@@ -510,9 +510,7 @@ class DbFunctions:
         else:
             output = c_s
             return output    
-            
-                
-        
+
         
 class ServerFunctions:
     @staticmethod

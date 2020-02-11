@@ -34,29 +34,35 @@ ip_menu_value = 1
 
 ###################### CURSES CALISMA MANTIGI ##################################################
 # ilk olarak get menu values functionlari bir array'a ekranda yazilacak her bir satiri atiyor. #
+# her satir bir element oluyor ve surekli olarak get menu values fonksiyonunu elementler       #
+# uzerinde islem yapip onlari degistiriyor                                                     #
 # sonra print menu bunlari alip yerlerini hesapladiktan sonra ekrana yazdiriyor.               #
 # bu bize get menu values kullanark ekrandaki goruntuyu aktif olarak degistirmemizi sagliyor.  #
 ################################################################################################
 
 
+# DIKKAT
+# Match mode otonom yuzunden diger tum menulerden farkli bir print 
+# fonksiyonuna ve getvalues'a ihtiyac duyuyor
 # match mode icin get menu values fonksiyonu
 def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
     led_control = {}
-    while True:
-
-        # key, msg = ArduinoFunctions.key_get_with_recv(but1, but2, swt1, pot1, socket5803, wait_time=0.5)
+    # Ana yer
+    while True:        
+        led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
         
-        led_control = DbFunctions.get_setting(file_lc)
-        
-        m_menu_elements = []
-        m_menu_elements.append(" ## MATCH MODE STARTED ## ")
+        m_menu_elements = [] # Menu elementleri arrayi
+        m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
             
-        if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]:
+        # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
+        if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]: 
             m_menu_elements.append(" ## LED CONTROL : " + str(led_control["status"]) + " ## ")
       
+        # Eger kapali yada acik alamazsa error veriyor.
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
             
+        # Menunun geri kalani, durum reporu veriyor.
         m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
         m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
         m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
@@ -82,7 +88,7 @@ def check_cam():
     if os.name == "nt":
         return "TRUE BECAUSE WINDOWS"
 
-    elif os.name == "posix" and socket5802.gethostname() == "frcvision":
+    elif os.name == "posix" and socket.gethostname() == "frcvision":
         if os.path.exists("/dev/video0"):
             return "CAMERA.PY CONNECTED"
 
@@ -557,15 +563,6 @@ def not_main(stdscr):
     # Kodun çalışıp çalışmadıpını anlamak için kullandığımız port 5802
     # Ve ledin kapanıp açma bilgisinin yazıldığı port da 5803
     
-    try:
-        socket5802 = ServerFunctions.start_server(is_input_started)
-    except:
-        print("InputP - ERROR: Server acılamadı.")
-        exit()
-    else:
-        # print("InputP - Server acıldı.")
-        pass
-        
     #endregion
 
     while True:
@@ -582,7 +579,7 @@ def not_main(stdscr):
             print_error(stdscr, cur_stat)
 
         # Basilan key deger okundu
-        key, msg = ArduinoFunctions.key_get_with_recv(but1, but2, swt1, pot1, socket5802)
+        key, msg = ArduinoFunctions.key_get_with_recv(but1, but2, swt1, pot1)
         
         # Imlec hareketleri degiskenlere yazildi
         cur_stat["current_row"] = cursor_handler(key, cur_stat)
