@@ -125,7 +125,6 @@ class ArduinoFunctions:
         digital_input2,
         switch_input,
         analog_input1,
-        arduino_pins,
         socket5802=None,
         wait_time=0.11
         ):
@@ -398,33 +397,25 @@ class DbFunctions:
                 settings = input_dictionary 
             
             try:
-                with open(file, "w") as p: 
+                input_dictionary = settings 
+                with open(file, "w+") as p: 
                     json.dump(settings, p, indent=4)    
                     
             except:
-                try:
-                    with open(file, "w+") as p: 
-                        json.dump(settings, p, indent=4)    
-                except:
-                    ### ERROR ###
-                    print("File not created and cannot be created...")
-                    return "ERROR"
+                print("File not created and cannot be created...")
+                return "ERROR"
             
             DbFunctions.write_settings_to_json(input_dictionary, file, reset=False)
     
         else:    
             try:
-                with open(file, "w") as p: 
+                with open(file, "w+") as p: 
                     json.dump(input_dictionary, p, indent=4)    
                     
             except:
-                try:
-                    with open(file, "w+") as p: 
-                        json.dump(input_dictionary, p, indent=4)    
-                except:
-                    ### ERROR ###
-                    print("File not created and cannot be created...")
-                    return "ERROR"
+                ### ERROR ###
+                print("File not created and cannot be created...")
+                return "ERROR"
     
     ## DONE    
     @staticmethod
