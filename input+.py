@@ -49,7 +49,17 @@ def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
     led_control = {}
     # Ana yer
     while True:        
-        led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
+        try:
+            read = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
+        except:
+            pass
+            ### ERROR HANDLE ###
+        
+        if not led_control == "ERROR":
+            led_control = read
+        else:
+            pass
+            ### ERROR HANDLE ###
         
         m_menu_elements = [] # Menu elementleri arrayi
         m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
@@ -58,9 +68,12 @@ def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
         if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]: 
             m_menu_elements.append(" ## LED CONTROL : " + str(led_control["status"]) + " ## ")
       
+      
         # Eger kapali yada acik alamazsa error veriyor.
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
+            led_control["satatus"] = True 
+        
             
         # Menunun geri kalani, durum reporu veriyor.
         m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
@@ -69,14 +82,18 @@ def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
         m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## ")
         
         
-        if led_control["status"]:
+        if led_control["status"] in ["True", True]:
             ArduinoFunctions.led_write(led1, out1 , 1) # on
-        elif not led_control["status"]:
-            led_write(led1, out1, 0) # off
+        
+        elif not (led_control["status"] in ["False", False]):
+            ArduinoFunctions.led_write(led1, out1, 0) # off
+        
         else:
             ArduinoFunctions.led_write(led1, out1, 1) # on
 
+        
         print_menu_for_match(stdscr, m_menu_elements, cur_stat)
+        
         
         # Exit kodu
         if (
@@ -581,7 +598,7 @@ def not_main(stdscr):
             print_error(stdscr, cur_stat)
 
         # Basilan key deger okundu
-        key, msg = ArduinoFunctions.key_get_with_recv(but1, but2, swt1, pot1)
+        key, msg = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_to_get_key)
         
         # Imlec hareketleri degiskenlere yazildi
         cur_stat["current_row"] = cursor_handler(key, cur_stat)

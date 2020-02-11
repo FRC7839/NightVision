@@ -21,9 +21,11 @@ global all_errors
 global file_lc
 global file_s
 global max_v
+global wait_time_for_get_key
 
 
 setting_names = ["isTunaPro", "Robot Location", "Camera Tolerance", "Waiting Period", "Autonomous Mode"]
+wait_time_for_get_key = 0.11
 cam_curses_port1 = 5800
 cam_curses_port2 = 5801
 is_input_started = 5802
@@ -31,6 +33,8 @@ led_control_port = 5803
 file_s = "settings.json"
 file_lc = "led_control.json"
 max_v = 30
+
+
 
 all_errors = {
         "READ_ERROR" : "InputP ERROR: Dosya " + file_s+ " okunamıyor...",
@@ -44,13 +48,13 @@ all_errors = {
 class ArduinoFunctions:
     @staticmethod
     def old_led_write(led, ledi, st):
-        led.write(st/20)
+        led.write(st/50)
         st = 1 - st
         ledi.write(st)
         
     @staticmethod
     def led_write(led1, out1, st, gnd = True):
-        led1.write(st/20)
+        led1.write(st/50)
         if gnd == True:
             st = 1 - st
         out1.write(st)
@@ -82,115 +86,115 @@ class ArduinoFunctions:
 
     @staticmethod
     def map_x(value, min_v, max_v, min_wv, max_wv):
-        if value <= max_v and value >= min_v:
-            dvd = (max_wv - min_wv) + 1
-            i = min_wv
-            dvd2 = max_v / dvd
-            dvd3 = dvd2
+        if value is not None:
+            if value <= max_v and value >= min_v:
+                dvd = (max_wv - min_wv) + 1
+                i = min_wv
+                dvd2 = max_v / dvd
+                dvd3 = dvd2
 
-            while i < dvd:
+                while i < dvd:
+                    if value <= dvd2:
+                        return i
+                        break
+                    elif value > dvd2:
+                        dvd2 += dvd3
+                    i -= -1
+
                 if value <= dvd2:
-                    return i
-                    break
-                elif value > dvd2:
-                    dvd2 += dvd3
-                i -= -1
-
-            if value <= dvd2:
-                return max_wv
-
+                    return max_wv
+        else:
+            ### ERROR ###
+            print("InputP: Pyfirmata değer döndürme problemi, Arduino'yu yeniden bağlamayı deneyin")
+            return "ERROR"
+        
     @staticmethod
     def map_xi(value, min_v, max_v, min_wv, max_wv):
-        value = max_v - value
-        if value <= max_v and value >= min_v:
-            dvd = (max_wv - min_wv) + 1
-            i = min_wv
-            dvd2 = max_v / dvd
-            dvd3 = dvd2
+        if value is not None: 
+            value = max_v - value
+            if value <= max_v and value >= min_v:
+                dvd = (max_wv - min_wv) + 1
+                i = min_wv
+                dvd2 = max_v / dvd
+                dvd3 = dvd2
 
-            while i < dvd:
+                while i < dvd:
+                    if value <= dvd2:
+                        return i
+                        break
+                    elif value > dvd2:
+                        dvd2 += dvd3
+                    i -= -1
+
                 if value <= dvd2:
-                    return i
-                    break
-                elif value > dvd2:
-                    dvd2 += dvd3
-                i -= -1
-
-            if value <= dvd2:
-                return max_wv
-
-    @staticmethod
-    def key_get_with_recv(
-        digital_input1,
-        digital_input2,
-        switch_input,
-        analog_input1,
-        socket5802=None,
-        wait_time=0.11
-        ):
-
-        key = None
-        msg = None
-
-        but1 = None
-        but1_p = None
-
-        but2 = None
-        but2_p = None
-
-        swt1_p = switch_input.read()
-        swt1 = swt1_p
+                    return max_wv
+        else:
+            ### ERROR ###
+            print("InputP: Pyfirmata değer döndürme problemi, Arduino'yu yeniden bağlamayı deneyin")
+            return "ERROR"
         
-        pot1_p = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
-        pot1 = pot1_p
+ 
+def key_get(
+    digital_input1,
+    digital_input2,
+    analog_input1,
+    wait_time=0.11,
+    func=None,
+    *args
+    ):
+    
+    key = None
+    msg = None
 
-        while True:
+    but1 = None
+    but1_p = None
 
-            if (but1 != but1_p) and but1 > 0 and (not (but2 > 0)):
-                but1 = but1_p
-                key = "button0"
+    but2 = None
+    but2_p = None
+    
+    pot1_p = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
+    pot1 = pot1_p
 
-            elif (but2 != but2_p) and but2 > 0 and (not (but1 > 0)):
-                but2 = but2_p
-                key = "button1"
+    while True:
 
-            elif swt1 != swt1_p:
-                swt1 = swt1_p
-                if swt1 == 1.0:
-                    key = "switch on"
-                elif swt1 == 0.0:
-                    key = "switch off"
+        if (but1 != but1_p) and but2 > 0 and (not (but2 > 0)):
+            but1 = but1_p
+            key = "button0"
 
-            try:
-                if pot1_p != pot1:
-                    key = pot1
-            except:
-                pass
-            
-            
+        elif (but2 != but2_p) and but2 > 0 and (not (but1 > 0)):
+            but2 = but2_p
+            key = "button1"
+        
+        elif (pot1_p != pot1):
+            key = pot1
+        
+        if func is not None:
+            ##
             start_t = timeit.default_timer()
+            ##
             
-            if socket5802 is not None:
-                msg = ServerFunctions.recieve(socket5802, wait_time)
-            else:
-                msg = None
+            rv = func(*args)
             
+            ##
             elapsed = timeit.default_timer() - start_t
+            ##
             
-            
-            
-            if elapsed > 0.11:
+            if elapsed > wait_time:
                 pass
+            
             else:
                 time.sleep(wait_time - elapsed)
             
-            if key is not None:
-                return key, msg
+        else:
+            time.sleep(wait_time)
+            
+        if key is not None:
+            return key, rv
 
-            but1 = digital_input1.read()
-            but2 = digital_input2.read()
-            swt1 = switch_input.read()
-            pot1 = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
+        but1 = digital_input1.read()
+        but2 = digital_input2.read()
+        pot1 = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
+
 
 
     @staticmethod
