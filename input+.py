@@ -9,6 +9,7 @@ import time
 import zmq
 import os
 
+# region global
 global arduino_menu_value
 global camera_menu_value
 global main_menu_value
@@ -19,22 +20,50 @@ camera_menu_value = 3
 main_menu_value = 0
 ip_menu_value = 1
 
+global pc_test_mode
+global skip_cam_arg
+global skip_nt_arg
+global test_mode
+global pc_mode
+
+pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
+test_mode = InputPFunctions.find_arg("--test-mode", num=True)
+pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
+
+if pc_mode is not None:
+    skip_cam_arg = 1
+    skip_nt_arg = 1
+
+elif pc_test_mode is not None:
+    pc_mode = 1
+    skip_cam_arg = 1
+    skip_nt_arg = 1
+    test_mode = 1
+
+else:
+    skip_cam_arg = InputPFunctions.find_arg("--skip-camera-check", num=True)
+    skip_nt_arg = InputPFunctions.find_arg("--skip-network-check", num=True)
+
+# endregion
+
 # --skip-network-check : Bilgisayarlarda test icin ip adres kontrolunu kapatiyor
 # --skip-camera-check : Bilgisayarlarda test icin kamera kontrolunu kapatiyor
 # --pc-mode : tum kontrolleri kapatmak icin
 
 
 ####################### TODO ###########################
-# WRITE CURRENT SETTING RETURN TO MAIN MENU            #
-# Waiting periodu arduino ozele ekle                   #
-# JSON okuma-yazma fonksyonlari                        #
-# curses_functions ve eski isimlerin duzeltilmesi      #
-# Kayranin socketlerinin tamamlnamasi                  #
-# Mac menusunun hazirlanmasi                           #
+
+
+
+# if isError: kısımlarını hallet
+# WRITE CURRENT SETTING RETURN TO MAIN MENU
+# Match Mode hatasız bir şekilde başladıktan bir süre sonra panic mode a geçiyor
+
+
+
 ########################################################
 
-# deneme2
-# write_settings_on_txt() fonksiyounu kullanrak dosyaydaki her seyi alip tekrar yazmasi gerekiyor
+
 
 ###################### CURSES CALISMA MANTIGI ##################################################
 # ilk olarak get menu values functionlari bir array'a ekranda yazilacak her bir satiri atiyor. #
@@ -46,84 +75,124 @@ ip_menu_value = 1
 
 
 # DIKKAT
-# Match mode otonom yuzunden diger tum menulerden farkli bir print 
+# Match mode otonom yuzunden diger tum menulerden farkli bir print
 # fonksiyonuna ve getvalues'a ihtiyac duyuyor
 # match mode icin get menu values fonksiyonu
 
-def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
-    led_control = {}
-    # Ana yer
-    while True:        
-        #Dosyadan okumayi dene
-        try:
-            read = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor    
-        except:
-            # if read.startswith("InputP") or read == None or read == "":
-            #     ### ERROR HANDLE ###
-            pass
+def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None, PanicMenu=False, errmsg=None):
+    if not PanicMenu:
+        led_control = {}
+        # Ana yer
+        while True:
+            #Dosyadan okumayi dene
+            led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
+            handle_error(led_control, stdscr)
+           
+            
+            m_menu_elements = [] # Menu elementleri arrayi
+            m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
+
+            # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
+            if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]:
+                m_menu_elements.append(" ## LED CONTROL : " + str(led_control["status"]) + " ## ")
+
+
+            # Eger kapali yada acik alamazsa error veriyor.
+            else:
+                m_menu_elements.append(" ## LED CONTROL FAILED ## ")
+                led_control["status"] = True
+
+
+            # Menunun geri kalani, durum reporu veriyor.
+            m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
+            m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
+            m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
+            m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## ")
+
+
+            if led_control["status"] in ["True", True]:
+                ArduinoFunctions.led_write(led1, out1 , 1) # on
+
+            elif not (led_control["status"] in ["False", False]):
+                ArduinoFunctions.led_write(led1, out1, 0) # off
+
+            else:
+                ArduinoFunctions.led_write(led1, out1, 1) # on
+
+
+            print_menu_for_match(stdscr, m_menu_elements)
+
+
+            # Exit kodu
+            if (
+                ArduinoFunctions.map_xi(pot1.read(), 0, 1, 0, max_v) == max_v
+                and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == 0
+            ):
+                break
+   
+    ### KERNEL PANIC ###
+    else:
+        errortimer = threading.Timer(5, print_error, args=[stdscr, None])
+        errortimer.start()
+        print_error(stdscr, errmsg)
+        
+        settings = DbFunctions.get_setting(file_s)
+        led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
+        
+        if type(led_control) == str:
+            if str(led_control).startswith("InputP"):
+                led_control = {"status" : None}
         
         m_menu_elements = [] # Menu elementleri arrayi
-        m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
-            
+        m_menu_elements.append(" ## PANIC MODE STARTED ## ") # Title
+
         # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
-        if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]: 
+        if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]:
             m_menu_elements.append(" ## LED CONTROL : " + str(led_control["status"]) + " ## ")
-      
-      
+
+
         # Eger kapali yada acik alamazsa error veriyor.
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
-            led_control["satatus"] = True 
+            led_control["status"] = True
+            rv = DbFunctions.save_settings(led_control, file=file_lc) # Olmazsa yapacak bir şey yok
+            handle_error(rv, stdscr, PanicMenu=False)
+
+        if settings is not None:    
+            # Menunun geri kalani, durum reporu veriyor.
+            try:
+                m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
+                m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
+                m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
+                m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## ")
+            except:
+                pass
         
+        while True:
+            # if led1 is not None and out1 is not None:
+            #     rv = ArduinoFunctions.led_write(led1, out1 , 1) # on
+            #     handle_error(rv, stdscr, PanicMenu=False)
             
-        # Menunun geri kalani, durum reporu veriyor.
-        m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
-        m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
-        m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
-        m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## ")
-        
-        
-        if led_control["status"] in ["True", True]:
-            ArduinoFunctions.led_write(led1, out1 , 1) # on
-        
-        elif not (led_control["status"] in ["False", False]):
-            ArduinoFunctions.led_write(led1, out1, 0) # off
-        
-        else:
-            ArduinoFunctions.led_write(led1, out1, 1) # on
-
-        
-        print_menu_for_match(stdscr, m_menu_elements, cur_stat)
-        
-        
-        # Exit kodu
-        if (
-            ArduinoFunctions.map_xi(pot1.read(), 0, 1, 0, max_v) == max_v
-            and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == 0
-        ):
-            break    
+            print_menu_for_match(stdscr, m_menu_elements)
+            background_setup(stdscr, None, PanicMode=True)
+            time.sleep(30)
 
 
-def get_first_menu_values(): 
+def get_first_menu_values():
     ipaddr_func = InputPFunctions.get_ipaddr()
     check_cam_func = InputPFunctions.check_cam()
 
     mainmenu = []
     mainmenucheck = []
 
-    skip_nt_arg = InputPFunctions.find_arg("--skip-network-check", num=True)
-    skip_cam_arg = InputPFunctions.find_arg("--skip-camera-check", num=True)
-    pc_mode = InputPFunctions.find_arg("--pc_mode", num=True)
-    
-    
-    if skip_nt_arg is not None or pc_mode is not None:
+    if skip_nt_arg is not None:
         mainmenu.append("SKIPPED NETWORK CHECKING")
         mainmenucheck.append(True)
 
     elif ipaddr_func.startswith("127"):
         mainmenu.append("IP ADRESS: NOT CONNECTED")
         mainmenucheck.append(False) ## False
-            
+
     elif not ipaddr_func.startswith("10.78.39"):
         mainmenu.append("NOT CONNECTED TO RADIO")
         mainmenucheck.append(False) ## False
@@ -132,18 +201,18 @@ def get_first_menu_values():
         mainmenu.append("IP ADRESS: " + ipaddr_func)
         mainmenucheck.append(True)
 
-    
+
     mainmenu.append("ARDUINO CONFIG")
     mainmenucheck.append(True)
 
-    if skip_cam_arg is not None or pc_mode is not None:
+    if skip_cam_arg is not None:
         mainmenu.append("SKIPPED CAMERA CHECKING")
         mainmenucheck.append(True)
-    
+
     elif check_cam_func == "CAMERA.PY CONNECTED" or check_cam_func == "TRUE BECAUSE WINDOWS":
         mainmenu.append(check_cam_func)
         mainmenucheck.append(True)
-    
+
     else:
         mainmenu.append(str(check_cam_func))
         mainmenucheck.append(False) ## False
@@ -160,9 +229,7 @@ def get_first_menu_values():
 def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPFunctions.get_ipaddr()):
     mainmenu = []
     mainmenu_status = []
-    
-    skip_nt_arg = InputPFunctions.find_arg("--skip-network-check", num=True)
-    
+
     if skip_nt_arg is not None:
         mainmenu.append(" ## SKIPPED NETWORK CHECKING ## ")
         mainmenu_status.append(False)
@@ -198,7 +265,7 @@ def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPF
 def get_arduino_menu_values(settings):
     mainmenu = []
     mainmenu_status = []
-    
+
 
 
     # ROBOT LOCATION
@@ -277,8 +344,25 @@ def get_cam_menu_values(isCamOnline=InputPFunctions.check_cam()):
     return [mainmenu, mainmenu_status]
 
 
-def print_error(stdscr, cur_stat):
-    if cur_stat is not None:
+def print_info(stdscr, input_str, color=2, time=5):
+    errortimer = threading.Timer(time, print_error, args=[stdscr, None])
+    errortimer.start()
+    print_error(stdscr, input_str, color=color)
+
+
+def print_error(stdscr, cur_stat, color=2):
+    if type(cur_stat) == str:
+        errmsg = cur_stat
+        if errmsg is not None:
+            h, w = stdscr.getmaxyx()
+            x = w // 2 - (len(errmsg) + 1) // 2
+            y = h - 1
+            stdscr.attron(curses.color_pair(color))
+            stdscr.addstr(y, x, errmsg)
+            stdscr.attroff(curses.color_pair(color))
+            stdscr.refresh()
+
+    elif cur_stat is not None:
         errmsg = cur_stat["current_error"]
         if errmsg is not None:
             h, w = stdscr.getmaxyx()
@@ -287,15 +371,16 @@ def print_error(stdscr, cur_stat):
             stdscr.attron(curses.color_pair(2))
             stdscr.addstr(y, x, errmsg)
             stdscr.attroff(curses.color_pair(2))
-            screen.refresh()
-    if cur_stat is None:
+            stdscr.refresh()
+
+    elif cur_stat is None:
         h, w = stdscr.getmaxyx()
         x = (w // 2) - (1 // 2)
         y = h - 1
         stdscr.attron(curses.color_pair(2))
         stdscr.addstr(y, x, "")
         stdscr.attroff(curses.color_pair(2))
-        screen.refresh()
+        stdscr.refresh()
 
 
 def print_current_menu(stdscr, cur_stat):
@@ -329,14 +414,14 @@ def print_current_menu(stdscr, cur_stat):
             stdscr.attron(curses.color_pair(colornumber))
             stdscr.addstr(y, x, row)
             stdscr.attroff(curses.color_pair(colornumber))
-        
+
         if firsttime:
             firsty = y-1
-            firsttime = False   
+            firsttime = False
         elif not firsttime:
             pass
 
-    
+
     for i in cur_stat["all_menu_elements"][main_menu_value][1]:
         if i:
             match_message = " ## MATCH MODE CAN BE STARTED ## "
@@ -355,7 +440,7 @@ def print_current_menu(stdscr, cur_stat):
     stdscr.refresh()
 
 
-def print_menu_for_match(stdscr, m_menu_elements, cur_stat):
+def print_menu_for_match(stdscr, m_menu_elements):
     stdscr.clear()
     h, w = stdscr.getmaxyx()
 
@@ -366,7 +451,7 @@ def print_menu_for_match(stdscr, m_menu_elements, cur_stat):
         stdscr.attron(curses.color_pair(4))
         stdscr.addstr(y, x, row)
         stdscr.attroff(curses.color_pair(4))
-  
+
     stdscr.refresh()
 
 
@@ -392,18 +477,18 @@ def cursor_handler(key, cur_stat):
 
 def change_menu(key, cur_stat, led1, out1):
     if key == "button0" and cur_stat["current_menu"] == main_menu_value:
-        
+
         # IP MENU
         if cur_stat["current_row"] == 0:
             new_menu = ip_menu_value
             new_row = 0
 
-        
+
         # ARDUINO CONFIG MENU
         elif cur_stat["current_row"] == 1:
             new_menu = arduino_menu_value
             new_row = 0
-         
+
         # CAMERA MENU
         elif cur_stat["current_row"] == 2:
             new_menu = camera_menu_value
@@ -422,11 +507,11 @@ def change_menu(key, cur_stat, led1, out1):
             new_menu = cur_stat["current_menu"]
             new_row = cur_stat["current_row"]
             exit()
-        
+
     else:
         new_row = cur_stat["current_row"]
         new_menu = cur_stat["current_menu"]
-        
+
     return new_row, new_menu
 
 
@@ -443,8 +528,11 @@ def return_to_menu(key, cur_stat):
     return cur_stat["current_row"], cur_stat["current_menu"]
 
 
-def background_setup(stdscr, cur_stat):
-    if cur_stat["current_menu"] == 0:
+def background_setup(stdscr, cur_stat=None, PanicMode=False):
+    if PanicMode == True:
+        stdscr.bkgd(" ", curses.color_pair(2))
+        
+    elif cur_stat is not None and cur_stat["current_menu"] == 0:
         for i in cur_stat["current_menu_status"]:
             if i:
                 stdscr.bkgd(" ", curses.color_pair(3))
@@ -453,14 +541,13 @@ def background_setup(stdscr, cur_stat):
                 stdscr.bkgd(" ", curses.color_pair(2))
                 break
 
-    elif cur_stat["current_menu"] != 0:
+    elif cur_stat is not None and cur_stat["current_menu"] != 0:
         stdscr.bkgd(" ", curses.color_pair(4))
+    
 
-
-def refresh_screen(stdscr, cur_stat, key, ntmsg, settings):
+def refresh_screen(stdscr, cur_stat, settings):
     new_all_menu_elements = cur_stat["all_menu_elements"]
 
-    errmsg = cur_stat["current_error"]
 
     new_all_menu_elements[main_menu_value] = get_first_menu_values()
     new_all_menu_elements[ip_menu_value] = get_ip_menu_values(InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr())
@@ -479,61 +566,47 @@ def refresh_screen(stdscr, cur_stat, key, ntmsg, settings):
     return new_all_menu_elements
 
 
+def handle_error(variable, stdscr=None, PanicMenu=True):
+
+    if type(variable) == str:
+        if str(variable).startswith("InputP"):
+            background_setup(stdscr, None, PanicMode=True)
+            
+            if test_mode is not None:
+                raise Exception(str(variable))
+
+            else:
+                if PanicMenu:
+                    match_mode(stdscr, PanicMenu=True, errmsg=variable)
+                else:
+                    errortimer = threading.Timer(5, print_error, args=[stdscr, None])
+                    errortimer.start()
+                    print_error(stdscr, variable)
+                return True
+        else:
+            return False
+
+                # try:
+                #     match_mode()
+                # except:
+                #     ### NOT FINISHED ###
+                #     raise Exception(all_errors[MM_CANNOT_START_ERR])
+
+
 
 def not_main(stdscr):
-
-    
-    msg = None
-    key = None
-    # region arduino import
-
-    board = ArduinoFunctions.import_arduino()
-    # board = pyfirmata.ArduinoNano("COM4")
-    
-    swt1 = board.get_pin("a:1:i")
-    pot1 = board.get_pin("a:2:i")
-    inp1 = board.get_pin("a:6:i")
-    out1 = board.get_pin("d:10:p")
-    but1 = board.get_pin("d:2:i")
-    but2 = board.get_pin("d:7:i")
-    led1 = board.get_pin("d:11:p")
-    
-    iterator = pyfirmata.util.Iterator(board)
-    iterator.start()
-    time.sleep(0.2)
-
-
-    # endregion
-
-    
-    #region Settings okuma,,    
-    settings = DbFunctions.get_setting(file_s) 
-    
-    try:
-        if str(settings).startswith("InputP"):
-            print(settings)
-            exit()
-            # cur_stat["current_error"] = all_errors["READ_ERROR"]
-
-    except:
-        pass
-    
-    for setting_name in setting_names:
-        try:
-            settings[setting_name]
-        except KeyError:
-            ### ERROR ###
-            print("InputP: Setting not found on json file...")
-    
-    #endregion
-    
-    ArduinoFunctions.led_write(led1, out1, 1)
-
-
     # region while dongusune kadar olan gereksiz seyler
-    # Tum menu elemanlari all_menu_elemants adinda bir fonksiyon icinde duruyor
-    # Sebebini sormak sizin gercekten zeki oldugunuzu gosterir
-    # Neden oldugunu bilmiyorum, sadece boyle daha karmasik ve daha havali duruyor
+
+    #region Settings okuma
+
+    settings = DbFunctions.get_setting(file_s)
+    isError = handle_error(settings, stdscr)
+
+    # if isError:
+        # Set settings to default
+
+    #endregion
+
     all_menu_elements = []
     all_menu_elements.append(get_first_menu_values())
     all_menu_elements.append(get_ip_menu_values())
@@ -548,21 +621,15 @@ def not_main(stdscr):
     current_menu_elements = all_menu_elements[0][0]
     # Aktif olan menudeki elemanlarin renk degerleri
     current_menu_status = all_menu_elements[0][1]
-    
+
     cur_stat = {
         "current_row": current_row,
         "current_menu": current_menu,
         "current_menu_elements": current_menu_elements,
         "current_menu_status": current_menu_status,
-        "all_menu_elements": all_menu_elements,
-        "current_error" : None
+        "all_menu_elements": all_menu_elements
     }
-    
-    # Dosyaya kaydedilmis olmasi gereken degiskenlerin atanmasi
-    # camera_tolerance = DbFunctions.read_setting_on_txt("camera_tolerance", file)
-    # robot_location = DbFunctions.read_setting_on_txt("robot_location", file)
-    # waiting_period = DbFunctions.read_setting_on_txt("waiting_period", file)
-    
+
 
     # RENKLER
     # 2 = RED
@@ -582,25 +649,71 @@ def not_main(stdscr):
 
     # Kodun calisip calismadipini anlamak icin kullandigimiz port 5802
     # Ve ledin kapanip acma bilgisinin yazildigi port da 5803
-    
+
     #endregion
 
+    msg = None
+    key = None
+
+    refresh_screen(stdscr, cur_stat, settings)
+
+    # time.sleep(1)
+    # region arduino import
+
+    # board = pyfirmata.ArduinoNano("COM4")
+    print_error(stdscr, "InputP INFO: Importing Arduino", 3)
+
+    start_t = timeit.default_timer()
+    ###
+    board = ArduinoFunctions.import_arduino()
+    ###
+    elapsed = timeit.default_timer() - start_t
+    
+    if elapsed > 5:
+        pass
+    
+    else:
+        time.sleep(5 - elapsed)
+    
+    print_error(stdscr, None)
+    
+    
+    if type(board) == str:
+        handle_error(board, stdscr)
+    
+    else:
+        print_info(stdscr, "InputP INFO: SUCCESSFUL", color=3, time=3)
+
+    swt1 = board.get_pin("a:1:i")
+    pot1 = board.get_pin("a:2:i")
+    inp1 = board.get_pin("a:6:i")
+    out1 = board.get_pin("d:10:p")
+    but1 = board.get_pin("d:2:i")
+    but2 = board.get_pin("d:7:i")
+    led1 = board.get_pin("d:11:p")
+
+    iterator = pyfirmata.util.Iterator(board)
+    iterator.start()
+    time.sleep(0.2)
+
+
+    # endregion
+
+    rv = ArduinoFunctions.led_write(led1, out1, 1.0)
+    handle_error(rv, stdscr, PanicMenu=True)
+
+
     while True:
-        
+
         ##########
         # Ekran yenilenmesi
-        cur_stat["all_menu_elements"] = refresh_screen(stdscr, cur_stat, key, msg, settings=settings)
+        cur_stat["all_menu_elements"] = refresh_screen(stdscr, cur_stat, settings=settings)
 
-        # Error mesaji silinmesi
-        if cur_stat["current_error"] is not None:
-            errortimer = threading.Timer(5, print_error, args=[stdscr, None])
-            errortimer.start()
-        else:
-            print_error(stdscr, cur_stat)
+        key, _ = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key)
+        handle_error(key, stdscr, PanicMenu=True)
+        # handle_error(_, stdscr)
 
-        # Basilan key deger okundu
-        key, msg = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key)
-        
+
         # Imlec hareketleri degiskenlere yazildi
         cur_stat["current_row"] = cursor_handler(key, cur_stat)
 
@@ -608,22 +721,22 @@ def not_main(stdscr):
 
         for i in cur_stat["all_menu_elements"][main_menu_value][1]:
             if i:
-                kayra_tam_bir_gerizekali = True
+                canGoToMM = True
 
             elif not i:
-                kayra_tam_bir_gerizekali = False
+                canGoToMM = False
                 break
 
         # Mac Modu
         if (
-            kayra_tam_bir_gerizekali == True
+            canGoToMM == True
             and ArduinoFunctions.map_xi(pot1.read(), 0, 1, 0, max_v) == 0
             and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == max_v
             and cur_stat["current_menu"] == main_menu_value
-        ):               
+        ):
             # print("sex")
-            match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat)
-            
+            match_mode(stdscr, settings, led1, out1, swt1, pot1, cur_stat)
+
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2:
             if (
@@ -656,12 +769,13 @@ def not_main(stdscr):
                 key == "button0"
                 and cur_stat["current_row"] == 4
             ):
-                
-                DbFunctions.save_settings(settings, file_s)
+
+                rv = DbFunctions.save_settings(settings, file_s)
+                handle_error(rv, stdscr, PanicMenu=True)
                 
                 # if waiting_period is not None:
                 #     DbFunctions.write_setting_to_txt(waiting_period, file)
-                
+
             all_menu_elements[2] = get_arduino_menu_values(settings)
 
             cur_stat["current_menu_elements"] = all_menu_elements[2][0]

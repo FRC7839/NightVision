@@ -9,8 +9,6 @@ import cv2
 import sys  
 import os
 
-
-
 # region global
 global wait_time_for_get_key
 global setting_names
@@ -21,6 +19,7 @@ global max_v
 
 global INTERNAL_KEY_GET_FUNC_ERR
 global SERVER_ALREADY_STARTED_ERR
+global MM_CANNOT_START_ERR
 global INTERNAL_SYNTAX_ERR
 global ARDUINO_INPUT_ERR
 global CANT_CONNECT_ERR
@@ -31,6 +30,7 @@ global READ_ERR
 
 INTERNAL_KEY_GET_FUNC_ERR = "INTERNAL_KEY_GET_FUNCTION_ERROR"
 SERVER_ALREADY_STARTED_ERR = "SERVER_ALREADY_STARTED_ERROR"
+MM_CANNOT_START_ERR = "MM_CANNOT_START_ERROR"
 INTERNAL_SYNTAX_ERR = "INTERNAL_SYNTAX_ERROR"
 ARDUINO_INPUT_ERR = "ARDUINO_CONNECTION_ERROR"
 CANT_CONNECT_ERR = "CAN_NOT_CONNECT_TO_SERVER"
@@ -67,6 +67,7 @@ all_errors = {
     "SERVER_ALREADY_STARTED_ERROR" : "InputP ERROR: Sunucu daha once baslatildi.",
     "INTERNAL_KEY_GET_FUNC_ERROR": "InputP ERROR: Key_get fonksiyonuna girilen fonksiyonda bilinmeyen hata",
     "INTERNAL_SYNTAX_ERROR": "InputP ERROR: Tuna, kodunda hata var.",
+    "MM_CANNOT_START_ERROR": "InputP ERROR: Mac modu baslatilamiyor.",
     "ARDUINO_INPUT_ERROR": "InputP ERROR: Pyfirmata cevap vermiyor.",
     "CAN_NOT_CONNECT_TO_SERVER": "InputP ERROR: Sunucuya baglanilamiyor",
     "SERVER_NOT_STARTED": "InputP ERROR: Server baslatilamadi.",
@@ -701,7 +702,7 @@ class CameraFunctions:
 
 ### ALL ERROR PROOF ###
 class InputPFunctions:
-
+       
     ### ERROR PROOF ### (Raise)
     @staticmethod
     def get_ipaddr():
