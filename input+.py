@@ -19,6 +19,11 @@ camera_menu_value = 3
 main_menu_value = 0
 ip_menu_value = 1
 
+# --skip-network-check : Bilgisayarlarda test icin ip adres kontrolunu kapatiyor
+# --skip-camera-check : Bilgisayarlarda test icin kamera kontrolunu kapatiyor
+# --pc-mode : tum kontrolleri kapatmak icin
+
+
 ####################### TODO ###########################
 # WRITE CURRENT SETTING RETURN TO MAIN MENU            #
 # Waiting periodu arduino ozele ekle                   #
@@ -106,10 +111,19 @@ def get_first_menu_values():
     mainmenu = []
     mainmenucheck = []
 
-    if ipaddr_func.startswith("127"):
+    skip_nt_arg = InputPFunctions.find_arg("--skip-network-check", num=True)
+    skip_cam_arg = InputPFunctions.find_arg("--skip-camera-check", num=True)
+    pc_mode = InputPFunctions.find_arg("--pc_mode", num=True)
+    
+    
+    if skip_nt_arg is not None or pc_mode is not None:
+        mainmenu.append("SKIPPED NETWORK CHECKING")
+        mainmenucheck.append(True)
+
+    elif ipaddr_func.startswith("127"):
         mainmenu.append("IP ADRESS: NOT CONNECTED")
         mainmenucheck.append(False) ## False
-
+            
     elif not ipaddr_func.startswith("10.78.39"):
         mainmenu.append("NOT CONNECTED TO RADIO")
         mainmenucheck.append(False) ## False
@@ -118,12 +132,18 @@ def get_first_menu_values():
         mainmenu.append("IP ADRESS: " + ipaddr_func)
         mainmenucheck.append(True)
 
+    
     mainmenu.append("ARDUINO CONFIG")
     mainmenucheck.append(True)
 
-    if check_cam_func == "CAMERA.PY CONNECTED" or check_cam_func == "TRUE BECAUSE WINDOWS":
+    if skip_cam_arg is not None or pc_mode is not None:
+        mainmenu.append("SKIPPED CAMERA CHECKING")
+        mainmenucheck.append(True)
+    
+    elif check_cam_func == "CAMERA.PY CONNECTED" or check_cam_func == "TRUE BECAUSE WINDOWS":
         mainmenu.append(check_cam_func)
         mainmenucheck.append(True)
+    
     else:
         mainmenu.append(str(check_cam_func))
         mainmenucheck.append(False) ## False
@@ -132,7 +152,7 @@ def get_first_menu_values():
     mainmenucheck.append(True)
 
     mainmenu.append("EXIT")
-    mainmenucheck.append("Normal")
+    mainmenucheck.append(True)
 
     return [mainmenu, mainmenucheck]
 
@@ -140,6 +160,12 @@ def get_first_menu_values():
 def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPFunctions.get_ipaddr()):
     mainmenu = []
     mainmenu_status = []
+    
+    skip_nt_arg = InputPFunctions.find_arg("--skip-network-check", num=True)
+    
+    if skip_nt_arg is not None:
+        mainmenu.append(" ## SKIPPED NETWORK CHECKING ## ")
+        mainmenu_status.append(False)
 
     mainmenu.append("HOSTNAME: " + str(socket.gethostname()))
     mainmenu.append("SSID: " + str(ssid_func))
