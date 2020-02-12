@@ -8,7 +8,7 @@ import time
 import cv2
 import os
 
-# Test
+# Test2
 
 #region global
 global setting_names
