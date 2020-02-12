@@ -45,21 +45,18 @@ ip_menu_value = 1
 # Match mode otonom yuzunden diger tum menulerden farkli bir print 
 # fonksiyonuna ve getvalues'a ihtiyac duyuyor
 # match mode icin get menu values fonksiyonu
+
 def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
     led_control = {}
     # Ana yer
     while True:        
+        #Dosyadan okumayı dene
         try:
-            read = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
+            read = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor    
         except:
-            pass
-            ### ERROR HANDLE ###
+            if read.startswith("InputP") or read == None or read == "":
+                ### ERROR HANDLE ###
         
-        if not led_control == "ERROR":
-            led_control = read
-        else:
-            pass
-            ### ERROR HANDLE ###
         
         m_menu_elements = [] # Menu elementleri arrayi
         m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
@@ -104,8 +101,8 @@ def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
 
 
 def get_first_menu_values(): 
-    ipaddr_func = CheckFunctions.get_ipaddr()
-    check_cam_func = CheckFunctions.check_cam()
+    ipaddr_func = InputPFunctions.get_ipaddr()
+    check_cam_func = InputPFunctions.check_cam()
 
     mainmenu = []
     mainmenucheck = []
@@ -141,7 +138,7 @@ def get_first_menu_values():
     return [mainmenu, mainmenucheck]
 
 
-def get_ip_menu_values(ssid_func=CheckFunctions.get_ssid(), ipaddr_func=CheckFunctions.get_ipaddr()):
+def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPFunctions.get_ipaddr()):
     mainmenu = []
     mainmenu_status = []
 
@@ -224,7 +221,7 @@ def get_arduino_menu_values(settings):
     return [mainmenu, mainmenu_status]
 
 
-def get_cam_menu_values(isCamOnline=CheckFunctions.check_cam()):
+def get_cam_menu_values(isCamOnline=InputPFunctions.check_cam()):
     mainmenu = []
     mainmenu_status = []
 
@@ -441,7 +438,7 @@ def refresh_screen(stdscr, cur_stat, key, ntmsg, settings):
     errmsg = cur_stat["current_error"]
 
     new_all_menu_elements[main_menu_value] = get_first_menu_values()
-    new_all_menu_elements[ip_menu_value] = get_ip_menu_values(CheckFunctions.get_ssid(), CheckFunctions.get_ipaddr())
+    new_all_menu_elements[ip_menu_value] = get_ip_menu_values(InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr())
     new_all_menu_elements[arduino_menu_value] = get_arduino_menu_values(settings)
     new_all_menu_elements[camera_menu_value] = get_cam_menu_values()
 
@@ -460,7 +457,7 @@ def refresh_screen(stdscr, cur_stat, key, ntmsg, settings):
 
 def not_main(stdscr):
 
-    # Potansiyometreden okunan degerin kaca bolunecegi
+    
     msg = None
     key = None
     # region arduino import

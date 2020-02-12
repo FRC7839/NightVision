@@ -19,27 +19,37 @@ global max_v
 global wait_time_for_get_key
 
 
+# settings.json dosyasını kontrol edebilmek için arayüzde ayarlanacak ayarlar
 setting_names = ["isTunaPro", "Robot Location", "Camera Tolerance", "Waiting Period", "Autonomous Mode"]
+
+# Arduinodan değer aldıktan sonraki bekleme süresi
 wait_time_for_get_key = 0.11
+
+# Robot ayarlarının kaydedileceği dosya
 file_s = "settings.json"
+
+# Led kontrülünün yapılmasını sağlayacak dosya
 file_lc = "led_control.json"
+
+# Potansiyometreden okunan degerin kaca bolunecegi
 max_v = 30
 
-
+# Errorler
 all_errors = {
-        "READ_ERROR" : "InputP ERROR: JSON dosyası okunamıyor...",
-        "READ_ERROR_s" : "InputP ERROR: Dosya " + file_s + " okunamıyor...",
-        "READ_ERROR_lc" : "InputP ERROR: Dosya " + file_lc + " okunamıyor...",
-        "ARDUINO_CONNECTION_ERROR" : "InputP ERROR: Arduino'ya baglanilamiyor...",
-        "ARDUINO_INPUT_ERROR" : "InputP ERROR: Pyfirmta cevap vermiyor...",
-        "FILE_NOT_FOUND" : "InputP ERROR: JSON Dosyasi yok ve olusturulamiyor...",
-        "SERVER_NOT_STARTED" : "InputP ERROR: Server baslatilamadi...",     
-        "INTERNAL_SYNTAX_ERROR" : "InputP ERROR: Tuna, kodunda hata var..."  
+        "READ_ERROR" : "InputP ERROR: JSON dosyası okunamıyor.",
+        "READ_ERROR_s" : "InputP ERROR: Dosya " + file_s + " okunamıyor.",
+        "READ_ERROR_lc" : "InputP ERROR: Dosya " + file_lc + " okunamıyor.",
+        "ARDUINO_CONNECTION_ERROR" : "InputP ERROR: Arduino'ya baglanilamiyor.",
+        "ARDUINO_INPUT_ERROR" : "InputP ERROR: Pyfirmta cevap vermiyor.",
+        "FILE_NOT_FOUND" : "InputP ERROR: JSON Dosyasi yok ve olusturulamiyor.",
+        "SERVER_NOT_STARTED" : "InputP ERROR: Server baslatilamadi.",     
+        "INTERNAL_SYNTAX_ERROR" : "InputP ERROR: Tuna, kodunda hata var.",
+        "INTERNAL_KEY_GET_FUNCTION_ERROR" : "InputP ERROR: Key_get fonksiyonuna girilen fonksiyonda bilinmeyen hata"
     }
 #endregion
 
 
-## DONE
+### ALL ERROR PROOF ###
 class ArduinoFunctions:
     @staticmethod
     def led_write(led1, out1, st, gnd = True):
@@ -48,7 +58,8 @@ class ArduinoFunctions:
             st = 1 - st
         out1.write(st)
         
-        
+    
+    ### ERROR PROOF ### (Raise)
     @staticmethod
     def import_arduino(COM1="COM3", COM2="COM4"):
         if os.name == "nt":
@@ -77,6 +88,7 @@ class ArduinoFunctions:
         return board
 
 
+    ### ERROR PROOF ### (Raise)
     @staticmethod
     def map_x(value, min_v, max_v, min_wv, max_wv):
         if value is not None:
@@ -102,6 +114,7 @@ class ArduinoFunctions:
             return all_errors["ARD_INPUT_ERR"]
 
         
+    ### ERROR PROOF ### (Raise)
     @staticmethod
     def map_xi(value, min_v, max_v, min_wv, max_wv):
         if value is not None: 
@@ -127,7 +140,8 @@ class ArduinoFunctions:
             print(all_errors["ARD_INPUT_ERR"])
             return all_errors["ARD_INPUT_ERR"]
 
-        
+    
+    ### ERROR PROOF ### (Handle)
     @staticmethod
     def key_get(
         digital_input1,
@@ -147,18 +161,23 @@ class ArduinoFunctions:
         but2 = None
         but2_p = None
         
+        # Pyfirmata librarysi bazen arduinoyu basarili bir sekilde import etesine ragmen iterator hatasi verip input alamiyor
         pot1_p = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
         pot1 = pot1_p
         
-        if str(pot1_p).startswith("InputP"):
-            ### ERROR ###
-            print(pot1_p)
-            return None, pot1_p
 
     
         while True:
+            
+            # O yuzden burada okunan degerin None olup olmadigini kontrol etmem gerekiyor
+            ### GOT ERROR ###
+            if str(pot1_p).startswith("InputP"):
+                ### ERROR ###
+                pot1_p = str(pot1_p) + " :: FROM KEY_GET FUNCTION"
+                print(pot1_p)
+                return None, pot1_p
 
-            if (but1 != but1_p) and but2 > 0 and (not (but2 > 0)):
+            elif (but1 != but1_p) and but2 > 0 and (not (but2 > 0)):
                 but1 = but1_p
                 key = "button0"
 
@@ -173,7 +192,11 @@ class ArduinoFunctions:
                 #
                 start_t = timeit.default_timer()                
                 
-                rv = func(*args)
+                try:
+                    rv = func(*args)
+                except:
+                    rv = all_errors["INTERNAL_KEY_GET_FUNCTION_ERROR"]
+                
                 
                 elapsed = timeit.default_timer() - start_t
                 #
@@ -188,21 +211,25 @@ class ArduinoFunctions:
                 time.sleep(wait_time)
             
             if key is not None:
-                # if str(rv).startswith("InputP"): 
-                    ### ERROR ###
+                if rv.startswith("InputP"):
+                    rv = str(rv) + " :: FROM KEY_GET FUNCTION"
                 return key, rv
 
             but1 = digital_input1.read()
             but2 = digital_input2.read()
             pot1 = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
+            
 
-
+    ### ERROR PROOF ### (Handle)
     @staticmethod
     def get_robo_loc_from_inp(potan, max_v):
         i1 = ArduinoFunctions.map_x(potan, 0, max_v, 0, 2)
         
+        ### GOT ERROR ###
         if str(i1).startswith("InputP"):
             ### ERROR ###
+            i1 = str(i1) + " :: FROM GET_ROBO_LOC FUNCTION"
+            print(i1)
             return i1
     
         elif i1 == 0:
@@ -214,140 +241,185 @@ class ArduinoFunctions:
         elif i1 == 2:
             return "RIGHT"
 
- 
+### ALL ERROR PROOF ###
 class DbFunctions:
+    
+    ### ERROR PROOF ### (Raise)
     @staticmethod
     def write_settings_to_json(input_dictionary=None, file=file_s, reset=False):
-        if reset == True:
-            settings = {}
-            
-            if input_dictionary == None and file == file_s:
-                for setting_name in setting_names:
-                    settings[setting_name] = None  
-            
-            else:
-                settings = input_dictionary 
-            
-            try:
-                input_dictionary = settings 
-                with open(file, "w+") as p: 
-                    json.dump(settings, p, indent=4)    
-                    
-            except:
-                ### ERROR ###
-                print(all_errors["FILE_NOT_FOUND"])
-                return all_errors["FILE_NOT_FOUND"]
+        try:
+            if reset == True:
+                settings = {}
+                
+                if input_dictionary == None and file == file_s:
+                    for setting_name in setting_names:
+                        settings[setting_name] = None  
+                
+                else:
+                    settings = input_dictionary 
+                
+                try:
+                    input_dictionary = settings 
+                    with open(file, "w+") as p: 
+                        json.dump(settings, p, indent=4)    
+                        
+                except:
+                    ### ERROR ###
+                    output = all_errors["FILE_NOT_FOUND"]
+                    print(output)
+                    return output
+                
+                DbFunctions.write_settings_to_json(input_dictionary, file, reset=False)
+        
+            else:    
+                try:
+                    with open(file, "w+") as p: 
+                        json.dump(input_dictionary, p, indent=4)    
+                        
+                except:
+                    ### ERROR ###
+                    output = all_errors["FILE_NOT_FOUND"]
+                    print(output)
+                    return output
+        
+        except:
+            ### ERROR ###
+            output = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM WRITE_SETTINGS FUNCTION"
+            print(output)
+            return output
 
-            DbFunctions.write_settings_to_json(input_dictionary, file, reset=False)
-    
-        else:    
-            try:
-                with open(file, "w+") as p: 
-                    json.dump(input_dictionary, p, indent=4)    
-                    
-            except:
-                ### ERROR ###
-                print(all_errors["FILE_NOT_FOUND"])
-                return all_errors["FILE_NOT_FOUND"]
-
-
+    ### ERROR PROOF ### (Raise)
     @staticmethod
     def read_settings_on_json(wanted_setting=None, file=file_s):
         try:
-            with open(file, "r") as p: 
-                settings = json.load(p)
-        except:
-            ### ERROR ###
-            print(all_errors["READ_ERROR"])
-            return all_errors["READ_ERROR"]
-
-        if wanted_setting is not None:
             try:
-                output = settings[wanted_setting]
-            except:
-                return None
-        
-        else:
-            output = settings     
-            
-        return output
-
-
-    @staticmethod
-    def save_settings(settings, file=file_s):
-        c_s = DbFunctions.read_settings_on_json(file=file)
-      
-        if c_s is None or c_s == "" or c_s.startswith("InputP"):
-            rv = DbFunctions.write_setting_to_json(file=file, reset=True)            
-          
-            if rv.startswith("InputP"):
-                return rv
-            
-            
-        if settings is None:
-            settings = c_s
-        
-        for setting_name in setting_names:
-            try:
-                settings[setting_name]
-            except:
-                settings[setting_name] = None    
-        
-        rv = DbFunctions.write_settings_to_json(settings, file=file)
-        
-        if rv.startswith("InputP"):
-            return rv
-        
-
-    @staticmethod
-    def get_setting(file=file_s, setting_name=None):
-        if (not setting_name in setting_names) and file == file_s:
-            ### ERROR ###
-            print(all_errors["INTERNAL_SYNTAX_ERROR"])
-            return all_errors["INTERNAL_SYNTAX_ERROR"]
-            
-        c_s = DbFunctions.read_settings_on_json(file=file)
-        
-        if c_s is None or c_s.startswith("InputP") or c_s == "":
-            rv = DbFunctions.write_settings_to_json(file=file, reset=True)
-
-            if rv.startswith("InputP"):
-                return rv
-        
-        
-        else:
-            # eğer setting yoksa ekleniyor
-            if file == file_s:
-                for setting_name2 in setting_names:
-                    try:
-                        c_s[setting_name2]
-                    except KeyError:
-                        c_s[setting_name2] = None   
-            
-            
-            rv2 = DbFunctions.write_settings_to_json(c_s, file=file)
-        
-        
-        c_s = DbFunctions.read_settings_on_json(file=file)
-        if c_s.startswith("InputP"):
-            return c_s
-        
-        if setting_name is not None:
-            try:
-                output = c_s[setting_name]
+                with open(file, "r") as p: 
+                    settings = json.load(p)
             except:
                 ### ERROR ###
-                print("SETTING NOT FOUND IN THE JSON FILE")
-                return None
+                print(all_errors["READ_ERROR"])
+                return all_errors["READ_ERROR"]
 
-            output = c_s[setting_name]
-            return output    
+            if wanted_setting is not None:
+                try:
+                    output = settings[wanted_setting]
+                except:
+                    return None
+            
+            else:
+                output = settings     
+                
+            return output
         
-        else:
-            output = c_s
-            return output    
+        except:
+            ### ERROR ###
+            output = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM READ_SETTINGS FUNCTION"
+            print(output)
+            return output
 
+    ### ERROR PROOF ### (Handle)
+    @staticmethod
+    def save_settings(settings, file=file_s):
+        try:
+            c_s = DbFunctions.read_settings_on_json(file=file)
         
+            if c_s is None or c_s == "" or c_s.startswith("InputP"):
+                rv = DbFunctions.write_setting_to_json(file=file, reset=True)            
+                
+                if rv.startswith("InputP"):
+                    return rv
+                
+                
+            if settings is None:
+                settings = c_s
+            
+            for setting_name in setting_names:
+                try:
+                    settings[setting_name]
+                except:
+                    settings[setting_name] = None    
+            
+            rv = DbFunctions.write_settings_to_json(settings, file=file)
+            
+            if rv.startswith("InputP"):
+                return rv
+        except:
+            ### ERROR ###
+            output = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM SAVE_SETTINGS FUNCTION"
+            print(output)
+            return output
+        
+
+    ### ERROR PROOF ### (Handle)
+    @staticmethod
+    def get_setting(file=file_s, setting_name=None):
+        try:
+            if (not setting_name in setting_names) and file == file_s:
+                ### ERROR ###
+                output_e = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND) "
+                print(output_e)
+                return output_e
+                
+            c_s = DbFunctions.read_settings_on_json(file=file)
+            
+            if c_s is None or c_s.startswith("InputP") or c_s == "":
+                rv = DbFunctions.write_settings_to_json(file=file, reset=True)
+
+                if str(rv).startswith("InputP"):
+                    ### ERROR ###
+                    rv = str(rv) + " :: FROM GET_SETTING FUNCTION"
+                    print(rv)
+                    return rv
+            
+            
+            else:
+                # eğer setting yoksa ekleniyor
+                if file == file_s:
+                    for setting_name2 in setting_names:
+                        try:
+                            c_s[setting_name2]
+                        except KeyError:
+                            c_s[setting_name2] = None   
+                
+                
+                rv2 = DbFunctions.write_settings_to_json(c_s, file=file)
+                
+                if str(rv2).startswith("InputP"):
+                    ### ERROR ###
+                    output_e = str(rv2) + " :: FROM GET_SETTING FUNCTION"
+                    print(output_e)
+                    return output_e   
+            
+            
+            c_s = DbFunctions.read_settings_on_json(file=file)
+            
+            if c_s.startswith("InputP") or c_s == None or c_s == "":
+                ### ERROR ###
+                c_s = all_errors["READ_ERROR"] + " :: FROM GET_SETTING FUNCTION"
+                print(c_s)
+                return c_s
+            
+            if setting_name is not None:
+                try:
+                    output = c_s[setting_name]
+                except:
+                    ### ERROR ###
+                    output_e = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND)"
+                    print(output_e)
+                    return output_e
+                    
+                return output    
+            
+            else:
+                output = c_s
+                return output    
+        except:
+            ### ERROR ###
+            output_e = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM GET_SETTING FUNCTION"
+            print(output_e)
+            return output_e
+    
+    
 class ServerFunctions:
     @staticmethod
     def check_server(port):
@@ -551,47 +623,68 @@ class CameraFunctions:
         return True, y_error, distance
 
 
-class CheckFunctions:
+### ALL ERROR PROOF ###
+class InputPFunctions:
     
+    ### ERROR PROOF ### (Raise)
     @staticmethod
     def get_ipaddr():
-        if os.name == "nt":
-            return socket.gethostbyname(socket.gethostname())
+        try:
+            if os.name == "nt":
+                return socket.gethostbyname(socket.gethostname())
 
-        elif os.name == "posix":
-            ipaddress = os.popen(
-                "ifconfig wlan0 \
-                        | grep 'inet addr' \
-                        | awk -F: '{print $2}' \
-                        | awk '{print $1}'"
-            ).read()
+            elif os.name == "posix":
+                ipaddress = os.popen(
+                    "ifconfig wlan0 \
+                            | grep 'inet addr' \
+                            | awk -F: '{print $2}' \
+                            | awk '{print $1}'"
+                ).read()
 
-            return ipaddress
-
+                return ipaddress
+        except:
+            ### ERROR ###
+            output = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM GET_IPADDR FUNCTION"
+            print(output)
+            return output
+        
+    ### ERROR PROOF ### (Raise)
     @staticmethod
     def check_cam():
-        if os.name == "nt":
-            return "TRUE BECAUSE WINDOWS"
+        try:
+            if os.name == "nt":
+                return "TRUE BECAUSE WINDOWS"
 
-        elif os.name == "posix" and socket.gethostname() == "frcvision":
-            if os.path.exists("/dev/video0"):
-                return "CAMERA.PY CONNECTED"
+            elif os.name == "posix" and socket.gethostname() == "frcvision":
+                if os.path.exists("/dev/video0"):
+                    return "CAMERA.PY CONNECTED"
 
-            else:
-                return "CAMERA NOT FOUND"
-
+                else:
+                    return "CAMERA NOT FOUND"
+        except:
+            ### ERROR ###
+            output = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM CHECK_CAM FUNCTION"
+            print(output)
+            return output
+        
+    ### ERROR PROOF ### (Raise)    
     @staticmethod
     def get_ssid():
-        if os.name == "nt":
-            return "Tunapro1234 7/2/2020"
+        try:
+            if os.name == "nt":
+                return "Tunapro1234 7/2/2020"
 
-        if os.name == "posix":
-            ssid = os.popen(
-                "iwconfig wlan0 \
-                    | grep 'ESSID' \
-                    | awk '{print $4}' \
-                    | awk -F\\\" '{print $2}'"
-            ).read()
+            if os.name == "posix":
+                ssid = os.popen(
+                    "iwconfig wlan0 \
+                        | grep 'ESSID' \
+                        | awk '{print $4}' \
+                        | awk -F\\\" '{print $2}'"
+                ).read()
 
-            return ssid
-
+                return ssid
+        except:
+            ### ERROR ###
+            output = all_errors["INTERNAL_SYNTAX_ERROR"] + " :: FROM GET_SSID FUNCTION"
+            print(output)
+            return output

@@ -90,7 +90,12 @@ import json
 def main():
     while True:
         time.sleep(1)
-        
+        i = 5
+        i2 = "5"
+        try:
+            print(i2 + i)
+        except FileNotFoundError as e:
+            print(e)
         
         
         
