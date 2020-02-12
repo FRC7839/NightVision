@@ -11,7 +11,6 @@ global argc
 argv = sys.argv
 argc = len(argv)
 
-
 # region
 # BU KOD SAKAT TUNAPRONUN DENEMELERİ İÇİNDİR LÜTFEN İNCELEMEYİN
 
@@ -95,9 +94,10 @@ argc = len(argv)
 # endregion
 
 
-def main():
-    
 
+def main():
+    t = InputPFunctions.find_arg("--deneme", argv, None)
+    print(t)
         
         
         

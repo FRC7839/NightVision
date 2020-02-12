@@ -6,6 +6,7 @@ import math
 import json
 import time
 import cv2
+import sys
 import os
 
 
@@ -87,8 +88,8 @@ class ArduinoFunctions:
             out1.write(st)
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM LED_WRITE FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM LED_WRITE FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -124,8 +125,8 @@ class ArduinoFunctions:
 
         except:
             ### ERROR ###
-            output = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM IMPORT_ARDUINO FUNCTION"
-            print(output)
+            output = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output + " # FROM IMPORT_ARDUINO FUNCTION")
             return output
 
     ### ERROR PROOF ### (Raise)
@@ -156,8 +157,8 @@ class ArduinoFunctions:
                 return output_e
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM MAP_X FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM MAP_X FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -189,8 +190,8 @@ class ArduinoFunctions:
                 return output_e
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM MAP_XI FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM MAP_XI FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Handle and Raise)
@@ -218,8 +219,8 @@ class ArduinoFunctions:
                 ### GOT ERROR ###
                 if str(pot1_p).startswith("InputP"):
                     ### ERROR ###
-                    pot1 = str(pot1_p) + " :: FROM KEY_GET FUNCTION"
-                    print(pot1)
+                    pot1 = str(pot1_p)
+                    print(pot1 + " # FROM KEY_GET FUNCTION")
                     return pot1, None
 
                 elif (but1 != but1_p) and but1 > 0 and (not (but2 > 0)):
@@ -262,8 +263,8 @@ class ArduinoFunctions:
                     ### ERROR ###
                     try:
                         if str(rv).startswith("InputP"):
-                            rv = str(rv) + " :: FROM KEY_GET FUNCTION"
-                    
+                            rv = str(rv)
+                            print(rv + " # FROM KEY_GET FUNCTION")
                     except:
                         pass    
                     
@@ -274,8 +275,8 @@ class ArduinoFunctions:
                 pot1 = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM KEY_GET FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM KEY_GET FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Handle)
@@ -287,8 +288,8 @@ class ArduinoFunctions:
             ### GOT ERROR ###
             if str(i1).startswith("InputP"):
                 ### ERROR ###
-                i1 = str(i1) + " :: FROM GET_ROBO_LOC FUNCTION"
-                print(i1)
+                i1 = str(i1)
+                print(i1 + " # FROM GET_ROBO_LOC FUNCTION")
                 return i1
 
             elif i1 == 0:
@@ -302,8 +303,8 @@ class ArduinoFunctions:
 
         except:
             ### ERROR ###
-            output = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM GET_ROBO_LOC FUNCTION"
-            print(output)
+            output = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output + " # FROM GET_ROBO_LOC FUNCTION")
             return output
 
 
@@ -350,8 +351,8 @@ class DbFunctions:
 
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM WRITE_SETTINGS FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM WRITE_SETTINGS FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -380,8 +381,8 @@ class DbFunctions:
 
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM READ_SETTINGS FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM READ_SETTINGS FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Handle)
@@ -396,8 +397,8 @@ class DbFunctions:
 
                     if str(rv).startswith("InputP"):
                         ### ERROR ###
-                        rv += str(rv) + " :: FROM SAVE_SETTINGS FUNCTION"
-                        print(rv)
+                        rv += str(rv)
+                        print(rv + " # FROM SAVE_SETTINGS FUNCTION")
                         return rv
             except:
                 pass
@@ -423,8 +424,8 @@ class DbFunctions:
             
         except:
             ### ERROR ###
-            output = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM SAVE_SETTINGS FUNCTION"
-            print(output)
+            output = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output + " # FROM SAVE_SETTINGS FUNCTION")
             return output
 
     ### ERROR PROOF ### (Handle)
@@ -433,8 +434,8 @@ class DbFunctions:
         try:
             if not (setting_name in setting_names) and file == file_s and setting_name is not None:
                 ### ERROR ###
-                output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND) "
-                print(output_e)
+                output_e = all_errors[INTERNAL_SYNTAX_ERR]
+                print(output_e + " # FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND) ")
                 return output_e
 
             c_s = DbFunctions.read_settings_on_json(file=file)
@@ -445,8 +446,8 @@ class DbFunctions:
 
                     if str(rv).startswith("InputP"):
                         ### ERROR ###
-                        rv = str(rv) + " :: FROM GET_SETTING FUNCTION"
-                        print(rv)
+                        rv = str(rv)
+                        print(rv + " # FROM GET_SETTING FUNCTION")
                         return rv
             except:
                 pass
@@ -465,8 +466,8 @@ class DbFunctions:
                 try:
                     if str(rv2).startswith("InputP"):
                         ### ERROR ###
-                        output_e = str(rv2) + " :: FROM GET_SETTING FUNCTION"
-                        print(output_e)
+                        output_e = str(rv2)
+                        print(output_e + " # FROM GET_SETTING FUNCTION")
                         return output_e
 
                 except:
@@ -477,8 +478,8 @@ class DbFunctions:
             try:    
                 if c_s.startswith("InputP") or c_s == None or c_s == "":
                     ### ERROR ###
-                    c_s = all_errors[READ_ERR] + " :: FROM GET_SETTING FUNCTION"
-                    print(c_s)
+                    c_s = all_errors[READ_ERR]
+                    print(c_s + " # FROM GET_SETTING FUNCTION")
                     return c_s
 
             except:
@@ -490,8 +491,8 @@ class DbFunctions:
                     output = c_s[setting_name]
                 except:
                     ### ERROR ###
-                    output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND)"
-                    print(output_e)
+                    output_e = all_errors[INTERNAL_SYNTAX_ERR]
+                    print(output_e + " # FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND)")
                     return output_e
 
                 return output
@@ -501,8 +502,8 @@ class DbFunctions:
                 return output
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM GET_SETTING FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM GET_SETTING FUNCTION")
             return output_e
 
 
@@ -557,8 +558,8 @@ class ServerFunctions:
                 message = message[2:-1]
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: RECEIVE FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM RECEIVE FUNCTION")
             return output_e
                         
 
@@ -571,8 +572,8 @@ class ServerFunctions:
             return s
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: CONNECT_TO_SERVER FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM CONNECT_TO_SERVER FUNCTION")
             return output_e
 
     ### OK ###
@@ -582,8 +583,8 @@ class ServerFunctions:
             s.send(str.encode(str(message)))
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: SEND FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM SEND FUNCTION")
             return output_e
 
 
@@ -719,8 +720,8 @@ class InputPFunctions:
                 return ipaddress
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM GET_IPADDR FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM GET_IPADDR FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -738,8 +739,8 @@ class InputPFunctions:
                     return "CAMERA NOT FOUND"
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM CHECK_CAM FUNCTION"
-            print(output_e)
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM CHECK_CAM FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -760,6 +761,40 @@ class InputPFunctions:
                 return ssid
         except:
             ### ERROR ###
-            output = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM GET_SSID FUNCTION"
-            print(output_e)
+            output = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM GET_SSID FUNCTION")
             return output_e
+
+    
+    @staticmethod    
+    def find_arg(wanted_setting, input_array=sys.argv, num=False):
+        try:
+            wanted_setting_value = None
+            
+            if wanted_setting in input_array:
+                
+                for s in range(len(input_array)):
+                    
+                    if input_array[s] == wanted_setting:
+                        wanted_setting_index = s
+                
+                        if (s+1) < len(input_array):
+                            wanted_setting_value = input_array[s+1]
+                
+                if num:
+                    return wanted_setting_index
+                    
+                elif num is None:
+                    return (wanted_setting_index+1)
+                    
+                else:
+                    return wanted_setting_value
+                    
+            else:
+                return None
+        
+        except:
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e  + " # FROM FIND_ARG FUNCTION")
+            return output_e
+        
