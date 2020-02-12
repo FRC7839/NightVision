@@ -419,7 +419,7 @@ class DbFunctions:
             print(output_e)
             return output_e
     
-    
+
 class ServerFunctions:
     @staticmethod
     def check_server(port):

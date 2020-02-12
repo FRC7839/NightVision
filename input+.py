@@ -54,9 +54,9 @@ def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
         try:
             read = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor    
         except:
-            if read.startswith("InputP") or read == None or read == "":
-                ### ERROR HANDLE ###
-        
+            # if read.startswith("InputP") or read == None or read == "":
+            #     ### ERROR HANDLE ###
+            pass
         
         m_menu_elements = [] # Menu elementleri arrayi
         m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
