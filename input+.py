@@ -30,6 +30,9 @@ pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
 test_mode = InputPFunctions.find_arg("--test-mode", num=True)
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 
+if os.name == "nt":
+    pc_mode = 1
+    
 if pc_mode is not None:
     skip_cam_arg = 1
     skip_nt_arg = 1
@@ -131,11 +134,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 break
    
     ### KERNEL PANIC ###
-    else:
-        errortimer = threading.Timer(5, print_error, args=[stdscr, None])
-        errortimer.start()
-        print_error(stdscr, errmsg)
-        
+    else:        
         settings = DbFunctions.get_setting(file_s)
         led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
         
@@ -168,12 +167,18 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
             except:
                 pass
         
-        while True:
-            # if led1 is not None and out1 is not None:
-            #     rv = ArduinoFunctions.led_write(led1, out1 , 1) # on
-            #     handle_error(rv, stdscr, PanicMenu=False)
-            
+        errortimer = threading.Timer(5, print_error, args=[stdscr, None])
+        errortimer.start()
+        print_error(stdscr, errmsg)
+
+        while True:    
             print_menu_for_match(stdscr, m_menu_elements)
+            
+            if type(errmsg) == str and errmsg.startswith("InputP"):
+                print_info(stdscr, errmsg, color=2, time=5)
+                errmsg = None
+                
+                
             background_setup(stdscr, None, PanicMode=True)
             time.sleep(30)
 
@@ -579,18 +584,10 @@ def handle_error(variable, stdscr=None, PanicMenu=True):
                 if PanicMenu:
                     match_mode(stdscr, PanicMenu=True, errmsg=variable)
                 else:
-                    errortimer = threading.Timer(5, print_error, args=[stdscr, None])
-                    errortimer.start()
-                    print_error(stdscr, variable)
+                    print_info(stdscr, variable, color=2, time=5)
                 return True
         else:
             return False
-
-                # try:
-                #     match_mode()
-                # except:
-                #     ### NOT FINISHED ###
-                #     raise Exception(all_errors[MM_CANNOT_START_ERR])
 
 
 
@@ -735,7 +732,7 @@ def not_main(stdscr):
             and cur_stat["current_menu"] == main_menu_value
         ):
             # print("sex")
-            match_mode(stdscr, settings, led1, out1, swt1, pot1, cur_stat)
+            match_mode(stdscr, settings, led1, out1, swt1, pot1)
 
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2:
