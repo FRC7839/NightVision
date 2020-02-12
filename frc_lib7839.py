@@ -8,7 +8,7 @@ import time
 import cv2
 import os
 
-# Siyo dc gesl nf
+# Test
 
 #region global
 global setting_names
