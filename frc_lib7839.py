@@ -202,11 +202,11 @@ class ArduinoFunctions:
             key = None
             rv = None
 
-            but1 = None
-            but1_p = None
+            but1 = digital_input1.read()
+            but1_p = False
 
-            but2 = None
-            but2_p = None
+            but2 = digital_input2.read()
+            but2_p = False
 
             # Pyfirmata librarysi bazen arduinoyu basarili bir sekilde import etesine ragmen iterator hatasi verip input alamiyor
             pot1_p = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
@@ -222,7 +222,7 @@ class ArduinoFunctions:
                     print(pot1)
                     return pot1, None
 
-                elif (but1 != but1_p) and but2 > 0 and (not (but2 > 0)):
+                elif (but1 != but1_p) and but1 > 0 and (not (but2 > 0)):
                     but1 = but1_p
                     key = "button0"
 
@@ -260,9 +260,13 @@ class ArduinoFunctions:
 
                 if key is not None:
                     ### ERROR ###
-                    if str(rv).startswith("InputP"):
-                        rv = str(rv) + " :: FROM KEY_GET FUNCTION"
-
+                    try:
+                        if str(rv).startswith("InputP"):
+                            rv = str(rv) + " :: FROM KEY_GET FUNCTION"
+                    
+                    except:
+                        pass    
+                    
                     return key, rv
 
                 but1 = digital_input1.read()
@@ -385,16 +389,19 @@ class DbFunctions:
     def save_settings(settings, file=file_s):
         try:
             c_s = DbFunctions.read_settings_on_json(file=file)
+            
+            try:
+                if c_s is None or c_s == "" or c_s.startswith("InputP"):
+                    rv = DbFunctions.write_setting_to_json(file=file, reset=True)
 
-            if c_s is None or c_s == "" or c_s.startswith("InputP"):
-                rv = DbFunctions.write_setting_to_json(file=file, reset=True)
-
-                if str(rv).startswith("InputP"):
-                    ### ERROR ###
-                    rv += str(rv) + " :: FROM SAVE_SETTINGS FUNCTION"
-                    print(rv)
-                    return rv
-
+                    if str(rv).startswith("InputP"):
+                        ### ERROR ###
+                        rv += str(rv) + " :: FROM SAVE_SETTINGS FUNCTION"
+                        print(rv)
+                        return rv
+            except:
+                pass
+            
             if settings is None:
                 settings = c_s
 
@@ -406,8 +413,14 @@ class DbFunctions:
 
             rv = DbFunctions.write_settings_to_json(settings, file=file)
 
-            if rv.startswith("InputP"):
-                return rv
+            try:    
+                if rv.startswith("InputP"):
+                    return rv
+
+            except:
+                pass
+    
+            
         except:
             ### ERROR ###
             output = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM SAVE_SETTINGS FUNCTION"
@@ -418,23 +431,26 @@ class DbFunctions:
     @staticmethod
     def get_setting(file=file_s, setting_name=None):
         try:
-            if (not setting_name in setting_names) and file == file_s:
+            if not (setting_name in setting_names) and file == file_s and setting_name is not None:
                 ### ERROR ###
                 output_e = all_errors[INTERNAL_SYNTAX_ERR] + " :: FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND) "
                 print(output_e)
                 return output_e
 
             c_s = DbFunctions.read_settings_on_json(file=file)
+           
+            try:
+                if c_s is None or str(c_s).startswith("InputP") or c_s == "":
+                    rv = DbFunctions.write_settings_to_json(file=file, reset=True)
 
-            if c_s is None or c_s.startswith("InputP") or c_s == "":
-                rv = DbFunctions.write_settings_to_json(file=file, reset=True)
-
-                if str(rv).startswith("InputP"):
-                    ### ERROR ###
-                    rv = str(rv) + " :: FROM GET_SETTING FUNCTION"
-                    print(rv)
-                    return rv
-
+                    if str(rv).startswith("InputP"):
+                        ### ERROR ###
+                        rv = str(rv) + " :: FROM GET_SETTING FUNCTION"
+                        print(rv)
+                        return rv
+            except:
+                pass
+            
             else:
                 # eger setting yoksa ekleniyor
                 if file == file_s:
@@ -445,21 +461,30 @@ class DbFunctions:
                             c_s[setting_name2] = None
 
                 rv2 = DbFunctions.write_settings_to_json(c_s, file=file)
+                
+                try:
+                    if str(rv2).startswith("InputP"):
+                        ### ERROR ###
+                        output_e = str(rv2) + " :: FROM GET_SETTING FUNCTION"
+                        print(output_e)
+                        return output_e
 
-                if str(rv2).startswith("InputP"):
-                    ### ERROR ###
-                    output_e = str(rv2) + " :: FROM GET_SETTING FUNCTION"
-                    print(output_e)
-                    return output_e
-
+                except:
+                    pass
+                
             c_s = DbFunctions.read_settings_on_json(file=file)
+            
+            try:    
+                if c_s.startswith("InputP") or c_s == None or c_s == "":
+                    ### ERROR ###
+                    c_s = all_errors[READ_ERR] + " :: FROM GET_SETTING FUNCTION"
+                    print(c_s)
+                    return c_s
 
-            if c_s.startswith("InputP") or c_s == None or c_s == "":
-                ### ERROR ###
-                c_s = all_errors[READ_ERR] + " :: FROM GET_SETTING FUNCTION"
-                print(c_s)
-                return c_s
-
+            except:
+                pass
+            
+            
             if setting_name is not None:
                 try:
                     output = c_s[setting_name]

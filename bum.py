@@ -3,6 +3,14 @@ import pyfirmata
 import socket 
 import time
 import json
+import sys
+
+global argv
+global argc
+
+argv = sys.argv
+argc = len(argv)
+
 
 # region
 # BU KOD SAKAT TUNAPRONUN DENEMELERİ İÇİNDİR LÜTFEN İNCELEMEYİN
@@ -88,14 +96,8 @@ import json
 
 
 def main():
-    while True:
-        time.sleep(1)
-        i = 5
-        i2 = "5"
-        try:
-            print(i2 + i)
-        except FileNotFoundError as e:
-            print(e)
+    
+
         
         
         

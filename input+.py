@@ -481,11 +481,17 @@ def not_main(stdscr):
 
     
     #region Settings okuma,,    
-    settings = DbFunctions.get_setting(file=file_s) 
+    settings = DbFunctions.get_setting(file_s) 
     
-    if settings == "ERROR":
-        cur_stat["current_error"] = all_errors["READ_ERROR"]
+    try:
+        if str(settings).startswith("InputP"):
+            print(settings)
+            exit()
+            # cur_stat["current_error"] = all_errors["READ_ERROR"]
 
+    except:
+        pass
+    
     for setting_name in setting_names:
         try:
             settings[setting_name]
@@ -567,7 +573,7 @@ def not_main(stdscr):
             print_error(stdscr, cur_stat)
 
         # Basilan key deger okundu
-        key, msg = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_to_get_key)
+        key, msg = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key)
         
         # Imlec hareketleri degiskenlere yazildi
         cur_stat["current_row"] = cursor_handler(key, cur_stat)
