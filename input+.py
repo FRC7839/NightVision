@@ -12,7 +12,6 @@ import os
 global arduino_menu_value
 global camera_menu_value
 global main_menu_value
-global robot_settings
 global ip_menu_value
 
 arduino_menu_value = 2
@@ -22,15 +21,15 @@ ip_menu_value = 1
 
 ####################### TODO ###########################
 # WRITE CURRENT SETTING RETURN TO MAIN MENU            #
-# Waiting periodu arduino özele ekle                   #
-# JSON okuma-yazma fonksyonları                        #
-# curses_functions ve eski isimlerin düzeltilmesi      #
-# Kayranın socketlerinin tamamlnaması                  #
-# Maç menüsünün hazırlanması                           #
+# Waiting periodu arduino ozele ekle                   #
+# JSON okuma-yazma fonksyonlari                        #
+# curses_functions ve eski isimlerin duzeltilmesi      #
+# Kayranin socketlerinin tamamlnamasi                  #
+# Mac menusunun hazirlanmasi                           #
 ########################################################
 
 # deneme2
-# write_settings_on_txt() fonksiyounu kullanrak dosyaydaki her şeyi alıp tekrar yazması gerekiyor
+# write_settings_on_txt() fonksiyounu kullanrak dosyaydaki her seyi alip tekrar yazmasi gerekiyor
 
 ###################### CURSES CALISMA MANTIGI ##################################################
 # ilk olarak get menu values functionlari bir array'a ekranda yazilacak her bir satiri atiyor. #
@@ -50,7 +49,7 @@ def match_mode(stdscr, settings, led1, out1, but1, but2, swt1, pot1, cur_stat):
     led_control = {}
     # Ana yer
     while True:        
-        #Dosyadan okumayı dene
+        #Dosyadan okumayi dene
         try:
             read = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor    
         except:
@@ -527,7 +526,7 @@ def not_main(stdscr):
         "current_error" : None
     }
     
-    # Dosyaya kaydedilmiş olması gereken değişkenlerin atanması
+    # Dosyaya kaydedilmis olmasi gereken degiskenlerin atanmasi
     # camera_tolerance = DbFunctions.read_setting_on_txt("camera_tolerance", file)
     # robot_location = DbFunctions.read_setting_on_txt("robot_location", file)
     # waiting_period = DbFunctions.read_setting_on_txt("waiting_period", file)
@@ -549,8 +548,8 @@ def not_main(stdscr):
 
     # endregion
 
-    # Kodun çalışıp çalışmadıpını anlamak için kullandığımız port 5802
-    # Ve ledin kapanıp açma bilgisinin yazıldığı port da 5803
+    # Kodun calisip calismadipini anlamak icin kullandigimiz port 5802
+    # Ve ledin kapanip acma bilgisinin yazildigi port da 5803
     
     #endregion
 
@@ -620,7 +619,7 @@ def not_main(stdscr):
             ):
                 settings["Autonomous Mode"] = str(ArduinoFunctions.map_x(key, 0, max_v, 0, 5))
 
-            # Send tuşu
+            # Send tusu
             if (
                 key == "button0"
                 and cur_stat["current_row"] == 4
@@ -641,7 +640,7 @@ def not_main(stdscr):
         # endregion
 
 
-        # Menü değiştirme olayları
+        # Menu degistirme olaylari
         cur_stat["current_row"], cur_stat["current_menu"] = change_menu(key, cur_stat, led1, out1)
         cur_stat["current_row"], cur_stat["current_menu"] = return_to_menu(key, cur_stat)
 
