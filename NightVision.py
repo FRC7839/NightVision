@@ -1,12 +1,63 @@
 #########################################################################################################
-"""VERSION 5                                                                                             
-        TO DO
-            **ADD PC TEST MODE (TUNAPRO1234)
-            ADD LED CONTROLLING SYSTEM (TUNAPRO1234)
-            ADD NETWORK TABLES SENDING SYSTEM FOR AUTONOMOUS (BLACKSHADOW)
-            
-            
-                                                                                                      """ 
+###
+### WRITTEN BY:
+### 
+### ColonelKai - Kayra Acar
+### TUNAPRO1234 - Tuna Gul
+### BLACKSHADOW - Siyabend Urun
+### 
+### NightFury#7839 (Adımız şu an farklı olabilir tartışmalar hala devam ediyor)
+### 
+### FRC 2020 - NightVision - Target Detection Algorithm 
+### 
+#########################################################################################################
+
+#########################################################################################################
+## NightVision Usage:
+##
+##      Öncelikle bu kod frcvision kurulmuş bir Raspberry pi üzerine kurulmalıdır, kodun ayarlarını yapabilmek için,
+##  "InputPlus.py" adlı python scriptini /home/pi klasörüne atmalısınız. settings.json dosyası iki script (hem arayüz 
+##  hem de algoritma) için de ortak database dosyasıdır. Her ne kadar okuma ve yazma fonksiyonlarının hata vermemesi 
+##  için çalışsam da gözden kaçırdığım yerler olabilir, o yüzden lütfen acil bir durum olmadıkça dosyalar içinde
+##  değişiklik yapmayın. 
+##  
+##      Kod, çalışmak için FRC_LIB7839.py dosyasına ihtiyaç duymaktadır. FRC_LIB7839.py kodu da arayüz kodu
+##  ile aynı dizinde (/home/pi) bulunmalıdır. Eğer bilgisayar üzerinde test yapmak amacıyla indiriyorsanız        
+##  (ki geliştirme dışında pek bir amaç görmüyorum) aynı klasörde olması yeterli. 
+##  
+##      Frcvision kod her hata verdikten 5 saniye sonra kodu baştan başlatıyor, ayrıca kodların çoğunu Siyabend 
+##  internetten çaldı. Bu nedenler yüzünden hata engelleme konusuna arayüzde olduğu kadar çok çalışamadım. 
+##   
+##      Bu kod FRC'nin 2020, (INFINITE RECHARGE) sezonu için hazırlanmış olsa da arayüz (InputPlus.py), her yıl için    
+##  küçük bir düzenleme ile kullanıma hazır olabilir. Her ne kadar seneye çok katılmak istesem de muhtemelen               
+##  katılamayacağımız gerçeği beni üzüyor. Belki kod 40-50'den fazla kez indirilirse seneye düzenlemeleri çok
+##  daha erken yapabilirim.
+##              
+##      
+## Bilgisayar Testleri İçin:
+##           
+##      Yukarda yazdığım gibi bilgisayarda test yapmak için tüm dosyaların aynı klasörde olması gerekmektedir.
+##  
+##  Bilgisayarlarda kamera ile kullanbilmek için: python NightVision.py --pc-mode <camera_numarası>
+##      Laptop kullanıyorsanız, laptopun builtin kamerasının numarası 0 olacaktır. Eğer FRC'nin yolladığı kamerayı 
+##      taktıysanız 1, eğer dünyanın en basit arayüzünü kullanamadıysanız ip adresini girebilirsiniz
+##     
+##  Bilgisayarlarda örnek görüntü ile test yapmak için: python NightVision --pc-test-image <image\location>
+##      Bunu okuyorsan Siyabend sakattır
+##  
+##  Raspberry pi üzerine örnek görüntü ile test yapmak içim python NightVision --test-image <image\location>
+##      Muhtemelen çalışmaz daha önce denemedim ve ihtiyaç da duymadım
+##
+#########################################################################################################
+
+
+#########################################################################################################
+#VERSION 5                                                                                             
+#   TO DO
+#       **ADD PC TEST MODE (TUNAPRO1234)
+#       ADD LED CONTROLLING SYSTEM (TUNAPRO1234)
+#       ADD NETWORK TABLES SENDING SYSTEM FOR AUTONOMOUS (BLACKSHADOW)
+#                                                                                                       
 #########################################################################################################
 
 from FRC_LIB7839 import *
