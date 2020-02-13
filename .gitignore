@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 .vscode
 .old_codes
 .__pycache__
 .bum.py
 .image_examples
+=======
+.vscode/settings.json
+.vscode
+.__pycache__
+.settings.json
+.led_control.json
+>>>>>>> d027c1d1b21136ddc78d10e06754efcd0e9cc5a6
