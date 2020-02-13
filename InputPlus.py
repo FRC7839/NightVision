@@ -12,36 +12,47 @@
 ### 
 #########################################################################################################
 
-####################### TODO ###########################
+"""#####################################################################################################################"TODO"
+                                                                                                                        
 
 
+
+### TAKIM NUMARASINA GÖRE AYAR YAPIMI ###
 
 # Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
-# FRC7839-NightVision yazısını sağ veya sol köşeye yaz
+# FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz
 
-# Improve PANIC MODE                                            < 
-# Panic mode içinde arduino bağlanama çalışması (TUNAPRO1234)   <
+# Improve PANIC MODE                                            
+# Panic mode içinde arduino bağlanama çalışması 
 
 # WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
-# SET UP LED CONTROLLING SYSTEM (TUNAPRO1234)
+# SET UP LED CONTROLLING SYSTEM 
 
 # Arduino led ring pin kontrolü
 # Pyfirmata knob 28 kodu editlenmesi
 
- 
+# Kodda görününecek şekilde araya bir iki easter egg ekle
+# INFO menüsü (Yazanlar - Tarih - Takım - vs)
 
 
-########################################################
 
-#########################################################################################################
+                                                                                                                        
+"TODO"########################################################################################################################"""
+
+###############################################################################################################################
+## 
+##
 ## Eğer https://github.com/FRC7839/NightVision'deki ReadMe.md dosyasını okuduysanız muhtemelen burayı okumanıza
 ## gerek kalmayacaktır. Kodu istediğiniz gibi kullanın sadece isim vermemeniz beni cidden üzerdi.
+##
 ##  
 ##  InputPlus.py Nedir Ne İşe Yarar Bu Yazılımı Kullanmak İçin Sebepler Nelerdir:
+##
 ##
 ##      Öncelikle eğer bu yazılımı FRC2020 için almayı düşünüyorsanız cidden gecikme için çooook özür diliyorum.
 ##  Ama tatilde algoritmayı geliştirmesi için biraz Siyabendi bekledim ve robot olmadığı için servoyla farklı bir
 ##  prototip tasarlamam filan gerekti her neyse.
+##
 ##
 ##      InputPlus.py sadece arayüz olması sebebiyle her sene tekrar kullanılabilecek bir koddur. Sadece algoritmayı
 ##  yenilemek sizin için yeterli olacaktır. Kodu biraz incelersiniz hata vermemesi için elimizden gelen her şeyi 
@@ -49,12 +60,23 @@
 ##  ve ledin kapanmasını önleyip ayarları dosyaya yazmaya çalışır. Algoritmayla kod sadece bir JSON dosyası üzerinden 
 ##  iletişim kurudukları için herhangi bir yazılımın çökmesi diğerinin de çökmesine sebep olmaz. 
 ##
+##
 ##      Programı yönetbilmek için github sayfamızda açıklanan şekilde bağlanmış bir adet arduino, bir adet potansiyometre,
 ##  iki  adet regular push button ve ledlerin ve arduinonun girişi için dişi headerlar kullanılabilir. Ayrıca bir adet 
 ##  Raspberry pi, rpi için ekran kullanmalısınız (kap kullanmanızı öneririm).
 ##
+##
 ##      Github sayfasını FRC 2020 Bosphorus Regional'dan sonra herkesin düzenlemesi için public hale getirmeye çalışacağım.
 ##
+##
+#########################################################################################################
+##                                                                                                     ##                 
+##  --skip-camera-check     : camera kontorlünü atlıyor (Zaten windowsta kamera kontrolü yok)          ##                                               
+##  --skip-network-check    : ip adres kontrolünü atlıyor (NOT CONNECTED TO RADIO Hatası kapnıyor)     ##                                                   
+##  --pc-mode               : skip camera ve skip networkün birleşimi                                  ##                       
+##  --test-mode             : verilen hatalar programı durdurur (FRC esnasında önermiyorum)            ##                                           
+##  --pc-test-mode          : pc ve test modunun birleşimi                                             ##           
+##                                                                                                     ##         
 #########################################################################################################
 
 
@@ -68,10 +90,7 @@
 ################################################################################################
 
 
-# DIKKAT
-# Match mode otonom yuzunden diger tum menulerden farkli bir print
-# fonksiyonuna ve getvalues'a ihtiyac duyuyor
-# match mode icin get menu values fonksiyonu
+
 from threading import Thread
 from FRC_LIB7839 import *
 import threading
@@ -123,10 +142,10 @@ else:
 
 # endregion
 
-# --skip-network-check : Bilgisayarlarda test icin ip adres kontrolunu kapatiyor
-# --skip-camera-check : Bilgisayarlarda test icin kamera kontrolunu kapatiyor
-# --pc-mode : tum kontrolleri kapatmak icin
-
+# DIKKAT
+# Match mode otonom yuzunden diger tum menulerden farkli bir print
+# fonksiyonuna ve getvalues'a ihtiyac duyuyor
+# match mode icin get menu values fonksiyonu
 
 def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None, PanicMenu=False, errmsg=None):
     if not PanicMenu:
