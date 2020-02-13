@@ -1,5 +1,5 @@
 from threading import Thread
-from frc_lib7839 import *
+from FRC_LIB7839 import *
 import threading
 import pyfirmata
 import curses
@@ -58,9 +58,10 @@ else:
 
 
 
-# WRITE CURRENT SETTING RETURN TO MAIN MENU
-# Panic mode içinde arduino bağlanama çalışması 
-
+# Panic mode içinde arduino bağlanama çalışması (TUNAPRO1234)
+# WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
+# SET UP LED CONTROLLING SYSTEM (TUNAPRO1234)
+ 
 
 
 ########################################################

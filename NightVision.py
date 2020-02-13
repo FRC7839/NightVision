@@ -1,14 +1,15 @@
 #########################################################################################################
 """VERSION 5                                                                                             
         TO DO
-            **ADD PC TEST MODE
-
-
-
+            **ADD PC TEST MODE (TUNAPRO1234)
+            ADD LED CONTROLLING SYSTEM (TUNAPRO1234)
+            ADD NETWORK TABLES SENDING SYSTEM FOR AUTONOMOUS (BLACKSHADOW)
+            
+            
                                                                                                       """ 
 #########################################################################################################
 
-from frc_lib7839 import *
+from FRC_LIB7839 import *
 import numpy as np
 import socket
 import math

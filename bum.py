@@ -11,8 +11,9 @@ global argc
 argv = sys.argv
 argc = len(argv)
 
-# region
 # BU KOD SAKAT TUNAPRONUN DENEMELERİ İÇİNDİR LÜTFEN İNCELEMEYİN
+
+# region
 
 # board = ArduinoFunctions.import_arduino()
 # # board = pyfirmata.ArduinoNano("COM4")
