@@ -24,7 +24,10 @@
 
 # WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
 # SET UP LED CONTROLLING SYSTEM (TUNAPRO1234)
- 
+
+# Arduino led ring pin kontrolü
+# Pyfirmata knob 28 kodu editlenmesi
+
  
 
 
