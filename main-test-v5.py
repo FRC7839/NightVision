@@ -1,9 +1,11 @@
 #########################################################################################################
-# VERSION 5                                                                                             #
-# TCP PORT 5800- kullanim disi                                                                          #
-# TCP PORT 5801 - kullanim disi                                                                         #
-# TCP PORT 5802 - Programın acik olup olmadigini gormek icin                                            #
-# TCP PORT 5803 - Led kontrol                                                                           #
+"""VERSION 5                                                                                             
+        TO DO
+            **ADD PC TEST MODE
+
+
+
+                                                                                                      """ 
 #########################################################################################################
 
 from cscore import CameraServer, VideoSource
@@ -12,45 +14,103 @@ import numpy as np
 import socket
 import math
 import time
+import sys
 import cv2
+
+global pc_test_mode
+global test_mode
+global pc_mode
+global cam_num
+
+
+pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
+test_mode = InputPFunctions.find_arg("--test-mode", num=True)
+pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
+cam_num = InputPFunctions.find_arg("--pc-mode")
+
+
+if os.name == "nt":
+    pc_mode = 1
+    
+elif pc_test_mode is not None:
+    pc_mode = 1
+    test_mode = 1 
+
+def handle_error_lite(errmsg):
+    if type(errmsg) == str:
+        if str(errmsg).startswith("InputP"):
+            if test_mode is not None:
+                raise Exception(str(errmsg))
+            else:
+                return True
+        else:
+            return False
 
 def main():
     functions = CameraFunctions()
     
     print("Started")
     
-    cam_tol = int(settings["Camera Tolerance"])
     settings = DbFunctions.get_setting(file_s)
-    ip_addr = ServerFunctions.get_ipaddr()
+    
+    if handle_error_lite(settings) == True:
+        settings = {}
+        settings[setting_names[0]] = str(True)
+        settings[setting_names[1]] = str("MIDDLE")
+        settings[setting_names[2]] = str("15")
+        settings[setting_names[3]] = str("0")
+        settings[setting_names[4]] = str("1")        
+    
+
+    cam_tol = int(settings["Camera Tolerance"])
     robo_loc = settings["Robot Location"]
-    ip_addr = "127.0.0.1"
-    isNtStarted = True
+    
+    ip_addr = ServerFunctions.get_ipaddr()
+    
+    isNtStarted = None
+    isConntedtoRadio = None
     y_error = None
     
     if ip_addr.startswith("10.78.39") and os.name == "posix" and str(socket.gethostname()) == "frcvision":
         isConntedtoRadio = True
         try:
-            NetworkTables.initialize()
-            print("Network Tables initialize")
+            if pc_mode is None:                
+                NetworkTables.initialize()
+            else:
+                isNtStarted = False
         except:
-            ### ERROR 001-main_version###
-            print("NT NOT STARTED")
+            ### ERROR ###
+            print(" ### NT NOT STARTED ### ")
+            isNtStarted = False 
+            
         else:
+            print("Network Tables initialize")
             isNtStarted = True
+            
     else:
         isConntedtoRadio = False
 
-    cs = CameraServer.getInstance()
-    cs.enableLogging()
-    
 
-    camera = cs.startAutomaticCapture()  
-    camera.setResolution(640, 480)
+    if pc_mode is not None:    
+        cap = cv2.VideoCapture(cam_num)
+        cap.set(3, 480)
+        cap.set(4, 640)
+        cap.set(cv2.CAP_PROP_EXPOSURE, -9)
+   
+    else:
+        cs = CameraServer.getInstance()
+        cs.enableLogging()
 
-    cvSink = cs.getVideo()
-    
+        camera = cs.startAutomaticCapture()  
+        camera.setResolution(640, 480)
+
+        cvSink = cs.getVideo()
+        
+        
+        
     if isNtStarted:
         outputStream = cs.putVideo("LQimg", 120, 90)
+        print("outputStream = cs.putVideo('LQimg', 120, 90)")
 
     imgHQ = np.zeros(shape=(640, 360, 3), dtype=np.uint8)
     imgLQ = np.zeros(shape=(120, 90, 3), dtype=np.uint8)
