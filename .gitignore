@@ -1,1 +1,5 @@
-.vscode/settings.json
+.vscode
+.old_codes
+.__pycache__
+.bum.py
+.image_examples

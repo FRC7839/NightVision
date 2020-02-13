@@ -8,7 +8,6 @@
                                                                                                       """ 
 #########################################################################################################
 
-from cscore import CameraServer, VideoSource
 from frc_lib7839 import *
 import numpy as np
 import socket
@@ -16,33 +15,60 @@ import math
 import time
 import sys
 import cv2
+import os
 
+
+# region global
+global success
 global pc_test_mode
 global test_mode
 global pc_mode
 global cam_num
 
 
-pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
-test_mode = InputPFunctions.find_arg("--test-mode", num=True)
+pc_test_image = InputPFunctions.find_arg("--pc-test-image", num=True)
+
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 cam_num = InputPFunctions.find_arg("--pc-mode")
 
+image_mode = InputPFunctions.find_arg("--test-image", num=True)
+
+
+if pc_test_image is not None:
+    pc_mode = 1
+    image_mode = 1
 
 if os.name == "nt":
     pc_mode = 1
+
+if image_mode is not None:
+    test_image = InputPFunctions.find_arg("--pc-mode")
     
-elif pc_test_mode is not None:
-    pc_mode = 1
-    test_mode = 1 
+    if test_image is None:
+        test_image = InputPFunctions.find_arg("--pc-test-image")
+    
+    if not os.path.exists(test_image):
+        test_image = None
+        image_mode = None
+
+if cam_num is not None:
+    cam_num = int(cam_num)
+
+else:
+    cam_num = 0
+
+if pc_mode is None:
+    from cscore import CameraServer, VideoSource
+
+# endregion
 
 def handle_error_lite(errmsg):
     if type(errmsg) == str:
         if str(errmsg).startswith("InputP"):
-            if test_mode is not None:
-                raise Exception(str(errmsg))
-            else:
-                return True
+            # if test_mode is not None:
+            #     raise Exception(str(errmsg))
+            # else:
+            return True
         else:
             return False
 
@@ -55,47 +81,59 @@ def main():
     
     if handle_error_lite(settings) == True:
         settings = {}
-        settings[setting_names[0]] = str(True)
-        settings[setting_names[1]] = str("MIDDLE")
-        settings[setting_names[2]] = str("15")
-        settings[setting_names[3]] = str("0")
-        settings[setting_names[4]] = str("1")        
+        settings[setting_names[0]] = setting_defaults[0]
+        settings[setting_names[1]] = setting_defaults[1]
+        settings[setting_names[2]] = setting_defaults[2]
+        settings[setting_names[3]] = setting_defaults[3]
+        settings[setting_names[4]] = setting_defaults[4]
     
 
-    cam_tol = int(settings["Camera Tolerance"])
-    robo_loc = settings["Robot Location"]
-    
-    ip_addr = ServerFunctions.get_ipaddr()
+    cam_tol = int(DbFunctions.get_setting(file_s, "Camera Tolerance"))
+    robo_loc = DbFunctions.get_setting(file_s, "Robot Location")
     
     isNtStarted = None
     isConntedtoRadio = None
     y_error = None
     
-    if ip_addr.startswith("10.78.39") and os.name == "posix" and str(socket.gethostname()) == "frcvision":
-        isConntedtoRadio = True
-        try:
-            if pc_mode is None:                
-                NetworkTables.initialize()
-            else:
-                isNtStarted = False
-        except:
-            ### ERROR ###
-            print(" ### NT NOT STARTED ### ")
-            isNtStarted = False 
-            
-        else:
-            print("Network Tables initialize")
-            isNtStarted = True
-            
+    ip_addr = InputPFunctions.get_ipaddr()
+    
+    if handle_error_lite(ip_addr) and pc_mode is None:
+        ip_addr = "127.0.1.1"
+    
+    elif handle_error_lite(ip_addr) and pc_mode is not None:
+        ip_addr = "127.0.0.1"
+    
+    
+    if ip_addr.startswith("10.78.39"):
+        print(" ## NETWORK TABLES INIT ## ")
     else:
         isConntedtoRadio = False
+    
+    if pc_mode is None:
+        if isConntedtoRadio and os.name == "posix" and str(socket.gethostname()) == "frcvision":
+            try:
+                print(" ## NETWORK TABLES INIT ## ")
+                NetworkTables.initialize()
+                
+            except:
+                ### ERROR ###
+                print(" ### NETWORK TABLES INIT FAILED ### ")
+                isNtStarted = False 
+                
+            else:
+                isNtStarted = True
+                
+    
+    
+    if image_mode is not None:
+        cap = cv2.imread(test_image) 
 
-
-    if pc_mode is not None:    
+    elif pc_mode is not None:    
         cap = cv2.VideoCapture(cam_num)
         cap.set(3, 480)
         cap.set(4, 640)
         cap.set(cv2.CAP_PROP_EXPOSURE, -9)
+   
    
     else:
         cs = CameraServer.getInstance()
@@ -120,15 +158,24 @@ def main():
 
     while True:
         ok_contours = []
-        global success
+        
         success = False
-        time, processingImg = cvSink.grabFrame(imgHQ)
+        
+        if image_mode is not None:
+            processingImg = cv2.imread(test_image) 
 
-        if time == 0:
-            if isNtStarted:
-                outputStream.notifyError(cvSink.getError())
+        elif pc_mode is not None:
+            time, frame = cap.read()
+            processingImg = frame
+        
+        else:
+            time, processingImg = cvSink.grabFrame(imgHQ)
+            if time == 0:
+                if isNtStarted:
+                    outputStream.notifyError(cvSink.getError())
             # logging.debug(cvSink.getError())
             continue
+        
 
         contours = functions.detect_targets(processingImg)
         
@@ -142,7 +189,9 @@ def main():
             pass
 
         final_result = processingImg
-        gen_frames(final_result, True)
+        
+        # gen_frames(final_result, True)
+        
         if len(ok_contours) >= 1:
             final_result = functions.draw_rectangle(processingImg, ok_contours)
             cv2.putText(
@@ -150,29 +199,22 @@ def main():
             )
             _, y_error, distance = functions.calculate_errors(ok_contours)
         
-
-        
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
-
         imgLQ = cv2.resize(final_result, (120, 90))
         
-        try: # Hedefin yarısı görüldüğünde success değişkeni true değerini almasına rağmen hedef kenarlara değdiği için y_error değeri almıyor (Siyabendin müthiş çözümleri)
-            if (success == True and y_error == None): # Success true olunca tarama modu duruyor ve kamera y_errora göre hareket etmeye başlıyor 
-                print("Bunu okuyorsan siyabend gerizekalıdır") # Ama bizim y_error köşe olayı yüzünden olmadığı için kamera hareketsiz kalıyordu
-      
-        except UnboundLocalError:
-            if (success == True):
-                success = False
-            
-        check_ip(isNtStarted, "10.78.39")
-        
-        isServerStarted = ServerFunctions.check_server(check_cam_port)
-        if not isServerStarted:        
-            ServerFunctions.start_server(check_cam_port)
-            
-        try:
+        if pc_mode is not None:
+            cv2.imshow("FRC Vision", final_result)
 
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+        
+        if success == True and y_error is None: # Hedefin yarısı görüldüğünde success değişkeni true değerini almasına rağmen hedef kenarlara değdiği için y_error değeri almıyor (Siyabendin müthiş çözümleri)
+            success = False                     #  
+        # Success true olunca tarama modu duruyor ve kamera y_errora göre hareket etmeye başlıyor         
+        # Ama bizim y_error köşe olayı yüzünden olmadığı için kamera hareketsiz kalıyordu
+        
+                
+        if y_error is not None and success == True and pc_mode is None:
+            
             if ((success == True) and (y_error < (-1 * cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
                 print(
                     "Success: " + str(success),
@@ -180,7 +222,7 @@ def main():
                     "Distance: " + str(distance),
                     "Robot location: " + robo_loc,
                     "Camera Tolerance: " + str(cam_tol),      
-                    "Network Tables " + str(isNtStarted)              
+                    "Network Tables " + str(isNtStarted),              
                     "Hedef sağda",
                     sep="  --  ",
                 )
@@ -194,7 +236,7 @@ def main():
                     "Distance: " + str(distance),
                     "Robot location: " + robo_loc,
                     "Camera Tolerance: " + str(cam_tol),
-                    "Network Tables " + str(isNtStarted)
+                    "Network Tables " + str(isNtStarted),
                     "Hedef solda",
                     sep="  --  ",
                 )
@@ -207,7 +249,7 @@ def main():
                     "Distance: " + str(distance),
                     "Robot location: " + robo_loc,
                     "Camera Tolerance: " + str(cam_tol),
-                    "Network Tables " + str(isNtStarted)
+                    "Network Tables " + str(isNtStarted),
                     "Hedef ortada",
                     sep="  --  ",
                 )        
@@ -219,39 +261,66 @@ def main():
                     "Distance: " + str(distance),                    
                     "Robot location: " + robo_loc,
                     "Camera Tolerance: " + str(cam_tol),
-                    "Network Tables " + str(isNtStarted)
+                    "Network Tables " + str(isNtStarted),
                     "Hedef bulunamadı",
                     sep="  --  ",
                 )      
-                   
-        except UnboundLocalError:
-            pass
-
-    cap.release()
-    cv2.destroyAllWindows()
             
-class Setting:  
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-        
-    def return_list(self):
-        return [self.name, self.value]
+                
+        elif y_error is not None and success == True and pc_mode is not None:
+            
+            if ((success == True) and (y_error < (-1 * cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
+                print(
+                    "Success: " + str(success),
+                    "Error: " + str(y_error),
+                    "Distance: " + str(distance),
+                    "Robot location: " + robo_loc,
+                    "Camera Tolerance: " + str(cam_tol),      
+                    "Hedef sağda",
+                    sep="  --  ",
+                )
+                # go_right()
+                                
+                                
+            elif ((success == True) and (y_error > cam_tol)): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın solunda kalıyorsa ve servo en solda değilse
+                print(
+                    "Success: " + str(success),
+                    "Error: " + str(y_error),
+                    "Distance: " + str(distance),
+                    "Robot location: " + robo_loc,
+                    "Camera Tolerance: " + str(cam_tol),
+                    "Hedef solda",
+                    sep="  --  ",
+                )
+                # go_left()                
 
+            elif ((success == True) and (y_error < cam_tol) and (y_error > (-1 * cam_tol))):
+                print(
+                    "Success: " + str(success),
+                    "Error: " + str(y_error),
+                    "Distance: " + str(distance),
+                    "Robot location: " + robo_loc,
+                    "Camera Tolerance: " + str(cam_tol),
+                    "Hedef ortada",
+                    sep="  --  ",
+                )        
 
-    if os.name == "nt":     
-        ipaddress = socket.gethostbyname(socket.gethostname())
+            else:
+                print(
+                    "Success: " + str(success),
+                    "Error: " + str(y_error),
+                    "Distance: " + str(distance),                    
+                    "Robot location: " + robo_loc,
+                    "Camera Tolerance: " + str(cam_tol),
+                    "Hedef bulunamadı",
+                    sep="  --  ",
+                )                      
+                
+    if image_mode is None:
+        cap.release()
     
-    elif os.name == "posix":
-        ipaddress = os.popen("ifconfig wlan0 \
-                     | grep 'inet addr' \
-                     | awk -F: '{print $2}' \
-                     | awk '{print $1}'").read()
-
-    if str(ipaddress).startswith(ipStartswith) and isNtStarted == False:
-        return True
-    else: 
-        return False
+    cv2.destroyAllWindows()
+    exit()
 
 if __name__ == "__main__":
     main()

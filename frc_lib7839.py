@@ -11,6 +11,7 @@ import os
 
 # region global
 global wait_time_for_get_key
+global setting_defaults
 global setting_names
 global all_errors
 global file_lc
@@ -45,8 +46,17 @@ setting_names = [
     "Robot Location",
     "Camera Tolerance",
     "Waiting Period",
-    "Autonomous Mode",
+    "Autonomous Mode"
 ]
+
+setting_defaults = [
+    True,
+    "MIDDLE",
+    "15",
+    "0",
+    "1"
+]
+
 
 # Arduinodan deger aldiktan sonraki bekleme suresi
 wait_time_for_get_key = 0.11
@@ -319,9 +329,13 @@ class DbFunctions:
             if reset == True:
                 settings = {}
 
-                if input_dictionary == None and file == file_s:
-                    for setting_name in setting_names:
-                        settings[setting_name] = None
+                if input_dictionary is None and file == file_s:
+                    settings = {}
+                    settings[setting_names[0]] = setting_defaults[0]
+                    settings[setting_names[1]] = setting_defaults[1]
+                    settings[setting_names[2]] = setting_defaults[2]
+                    settings[setting_names[3]] = setting_defaults[3]
+                    settings[setting_names[4]] = setting_defaults[4]
 
                 else:
                     settings = input_dictionary
@@ -429,7 +443,7 @@ class DbFunctions:
             print(output + " # FROM SAVE_SETTINGS FUNCTION")
             return output
 
-    ### ERROR PROOF ### (Handle)
+    
     @staticmethod
     def get_setting(file=file_s, setting_name=None):
         try:
@@ -441,50 +455,50 @@ class DbFunctions:
 
             c_s = DbFunctions.read_settings_on_json(file=file)
            
-            try:
-                if c_s is None or str(c_s).startswith("InputP") or c_s == "":
-                    rv = DbFunctions.write_settings_to_json(file=file, reset=True)
 
-                    if str(rv).startswith("InputP"):
-                        ### ERROR ###
-                        rv = str(rv)
-                        print(rv + " # FROM GET_SETTING FUNCTION")
-                        return rv
-            except:
-                pass
+            if c_s is None or (type(c_s) == str and str(c_s).startswith("InputP")) or c_s == "":
+                rv = DbFunctions.write_settings_to_json(file=file, reset=True)
+
+                if str(rv).startswith("InputP"):
+                    ### ERROR ###
+                    rv = str(rv)
+                    print(rv + " # FROM GET_SETTING FUNCTION")
+                    return rv
+
             
             else:
                 # eger setting yoksa ekleniyor
                 if file == file_s:
-                    for setting_name2 in setting_names:
-                        try:
-                            c_s[setting_name2]
-                        except KeyError:
-                            c_s[setting_name2] = None
+                    settings = {}
+                    settings[setting_names[0]] = setting_defaults[0]
+                    settings[setting_names[1]] = setting_defaults[1]
+                    settings[setting_names[2]] = setting_defaults[2]
+                    settings[setting_names[3]] = setting_defaults[3]
+                    settings[setting_names[4]] = setting_defaults[4]
 
+                    # for setting_name2 in setting_names:
+                    #     try:
+                    #         c_s[setting_name2]
+                    #     except KeyError:
+                    #         c_s[setting_name2] = None
+                    
                 rv2 = DbFunctions.write_settings_to_json(c_s, file=file)
-                
-                try:
-                    if str(rv2).startswith("InputP"):
-                        ### ERROR ###
-                        output_e = str(rv2)
-                        print(output_e + " # FROM GET_SETTING FUNCTION")
-                        return output_e
+                                
+                if type(rv2) == str and str(rv2).startswith("InputP"):
+                    ### ERROR ###
+                    output_e = str(rv2)
+                    print(output_e + " # FROM GET_SETTING FUNCTION")
+                    return output_e
 
-                except:
-                    pass
-                
+
             c_s = DbFunctions.read_settings_on_json(file=file)
             
-            try:    
-                if c_s.startswith("InputP") or c_s == None or c_s == "":
-                    ### ERROR ###
-                    c_s = all_errors[READ_ERR]
-                    print(c_s + " # FROM GET_SETTING FUNCTION")
-                    return c_s
+            if type(c_s) == str and str(c_s).startswith("InputP") or c_s == None or c_s == "":
+                ### ERROR ###
+                c_s = all_errors[READ_ERR]
+                print(c_s + " # FROM GET_SETTING FUNCTION")
+                return c_s
 
-            except:
-                pass
             
             
             if setting_name is not None:
@@ -722,8 +736,8 @@ class InputPFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM GET_IPADDR FUNCTION")
             return output_e
+            print(output_e + " # FROM GET_IPADDR FUNCTION")
 
     ### ERROR PROOF ### (Raise)
     @staticmethod
