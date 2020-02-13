@@ -30,8 +30,8 @@ pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
 test_mode = InputPFunctions.find_arg("--test-mode", num=True)
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 
-if os.name == "nt":
-    pc_mode = 1
+# if os.name == "nt":
+#     pc_mode = 1
     
 if pc_mode is not None:
     skip_cam_arg = 1
@@ -58,9 +58,8 @@ else:
 
 
 
-# if isError: kısımlarını hallet
 # WRITE CURRENT SETTING RETURN TO MAIN MENU
-# Match Mode hatasız bir şekilde başladıktan bir süre sonra panic mode a geçiyor
+# Panic mode içinde arduino bağlanama çalışması 
 
 
 
@@ -178,9 +177,10 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 print_info(stdscr, errmsg, color=2, time=5)
                 errmsg = None
                 
-                
             background_setup(stdscr, None, PanicMode=True)
             time.sleep(30)
+            
+            
 
 
 def get_first_menu_values():
@@ -312,8 +312,8 @@ def get_arduino_menu_values(settings):
     mainmenu.append("WRITE CURRENT SETTINGS TO FILE")
     mainmenu_status.append("Normal")
 
-    mainmenu.append("CANCEL")
-    mainmenu_status.append("Normal")
+    mainmenu.append("RETURN TO MAIN MENU")
+    mainmenu_status.append(False)
 
     return [mainmenu, mainmenu_status]
 
