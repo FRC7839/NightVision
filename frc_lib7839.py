@@ -29,6 +29,11 @@ global FILE_NOT_FOUND_ERR
 global ARDUINO_CONN_ERR
 global READ_ERR
 
+global arduino_menu_value
+global camera_menu_value
+global main_menu_value
+global ip_menu_value
+
 INTERNAL_KEY_GET_FUNC_ERR = "INTERNAL_KEY_GET_FUNCTION_ERROR"
 SERVER_ALREADY_STARTED_ERR = "SERVER_ALREADY_STARTED_ERROR"
 MM_CANNOT_START_ERR = "MM_CANNOT_START_ERROR"
@@ -59,7 +64,7 @@ setting_defaults = [
 
 
 # Arduinodan deger aldiktan sonraki bekleme suresi
-wait_time_for_get_key = 0.11
+wait_time_for_get_key = 0.115
 
 # Robot ayarlarinin kaydedilecegi dosya
 file_s = "settings.json"
@@ -85,6 +90,12 @@ all_errors = {
     "ARDUINO_CONNECTION_ERROR": "InputP ERROR: Arduino'ya baglanilamiyor.",
     "READ_ERROR": "InputP ERROR: JSON dosyasi okunamiyor.",
 }
+
+arduino_menu_value = 2
+camera_menu_value = 3
+main_menu_value = 0
+ip_menu_value = 1
+
 # endregion
 
 
@@ -813,3 +824,45 @@ class InputPFunctions:
             print(output_e  + " # FROM FIND_ARG FUNCTION")
             return output_e
         
+    @staticmethod        
+    def change_menu(key, cur_stat, led1, out1):
+        if key == "button0" and cur_stat["current_menu"] == main_menu_value:
+
+            # IP MENU
+            if cur_stat["current_row"] == 0:
+                new_menu = ip_menu_value
+                new_row = 0
+
+
+            # ARDUINO CONFIG MENU
+            elif cur_stat["current_row"] == 1:
+                new_menu = arduino_menu_value
+                new_row = 0
+                
+
+            # CAMERA MENU
+            elif cur_stat["current_row"] == 2:
+                new_menu = camera_menu_value
+                new_row = 0
+                
+
+            # LED TEST
+            elif cur_stat["current_row"] == 3:
+                ArduinoFunctions.led_write(led1, out1, 0)
+                time.sleep(1)
+                ArduinoFunctions.led_write(led1, out1, 1)
+                new_menu = cur_stat["current_menu"]
+                new_row = cur_stat["current_row"]
+                
+
+            #EXIT
+            elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 1:
+                new_menu = cur_stat["current_menu"]
+                new_row = cur_stat["current_row"]
+                exit()
+
+        else:
+            new_row = cur_stat["current_row"]
+            new_menu = cur_stat["current_menu"]
+
+        return new_row, new_menu

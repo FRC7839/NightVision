@@ -90,6 +90,23 @@ global pc_test_mode
 global test_mode
 global pc_mode
 global cam_num
+global team_ip1
+
+
+
+
+team_number = InputPFunctions.find_arg("--team-number", num=True)
+
+if team_number is None:
+    team_ip1 = "78.39"
+    
+else:
+    team_ip1 = str(InputPFunctions.find_arg("--team-number"))    
+    if len(team_ip1) == 3:
+        team_ip1 = "0" + team_ip1[0] + "." + team_ip1[1:]
+
+    elif len(team_ip1) == 4:
+        team_ip1 = team_ip1[0:2] + "." + team_ip1[2:]
 
 
 pc_test_image = InputPFunctions.find_arg("--pc-test-image", num=True)
@@ -170,7 +187,7 @@ def main():
         ip_addr = "127.0.0.1"
     
     
-    if ip_addr.startswith("10.78.39"):
+    if ip_addr.startswith("10." + team_ip1):
         print(" ## NETWORK TABLES INIT ## ")
     else:
         isConntedtoRadio = False

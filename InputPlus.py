@@ -14,19 +14,16 @@
 
 """#####################################################################################################################"TODO"
                                                                                                                         
-
-
-
 ### TAKIM NUMARASINA GÖRE AYAR YAPIMI ###
 
-# Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
-# FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz
+# FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz (COLONELKAI)
+# WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
 
 # Improve PANIC MODE                                            
-# Panic mode içinde arduino bağlanama çalışması 
+# Panic mode içinde tekrar arduinoyu takmayı dene 
 
-# WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
 # SET UP LED CONTROLLING SYSTEM 
+# Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
 
 # Arduino led ring pin kontrolü
 # Pyfirmata knob 28 kodu editlenmesi
@@ -38,8 +35,9 @@
 # check_arduino() oluştur ve key get içine koy
 
 # ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden)
-# 
+# Led dosyasına is locked ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
+# Led kontrol içine robot ayarları yazılıyor
                                                                                                                         
 "TODO"########################################################################################################################"""
 
@@ -99,36 +97,44 @@ from threading import Thread
 from FRC_LIB7839 import *
 import threading
 import pyfirmata
-import curses
 # import socket
+import curses
+# import zmq
 import json
 import time
-# import zmq
 import os
 
 # region global
-global arduino_menu_value
-global camera_menu_value
-global main_menu_value
-global ip_menu_value
-
-arduino_menu_value = 2
-camera_menu_value = 3
-main_menu_value = 0
-ip_menu_value = 1
 
 global pc_test_mode
 global skip_cam_arg
 global skip_nt_arg
 global test_mode
 global pc_mode
+global team_ip2
+
+
+team_number = InputPFunctions.find_arg("--team-number", num=True)
+
+if team_number is None:
+    team_ip2 = "78.39"
+    
+else:
+    team_ip2 = str(InputPFunctions.find_arg("--team-number"))    
+    
+    if len(team_ip2) == 3:
+        team_ip2 = "0" + team_ip2[0] + "." + team_ip2[1:]
+
+    elif len(team_ip2) == 4:
+        team_ip2 = team_ip2[0:2] + "." + team_ip2[2:]
+
 
 pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
 test_mode = InputPFunctions.find_arg("--test-mode", num=True)
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 
-# if os.name == "nt":
-#     pc_mode = 1
+if os.name == "nt":
+    pc_mode = 1
     
 if pc_mode is not None:
     skip_cam_arg = 1
@@ -158,7 +164,8 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         while True:
             #Dosyadan okumayi dene
             led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
-            handle_error(led_control, stdscr)
+            if type(led_control) == str and handle_error(led_control, stdscr, PanicMenu=False):
+                led_control["status"] = True
            
             
             m_menu_elements = [] # Menu elementleri arrayi
@@ -185,7 +192,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
             if led_control["status"] in ["True", True]:
                 ArduinoFunctions.led_write(led1, out1 , 1) # on
 
-            elif not (led_control["status"] in ["False", False]):
+            elif (led_control["status"] in ["False", False]):
                 ArduinoFunctions.led_write(led1, out1, 0) # off
 
             else:
@@ -200,6 +207,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 ArduinoFunctions.map_xi(pot1.read(), 0, 1, 0, max_v) == max_v
                 and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == 0
             ):
+                ArduinoFunctions.led_write(led1, out1 , 1) # on
                 break
    
     ### KERNEL PANIC ###
@@ -324,13 +332,13 @@ def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPF
         mainmenu_status.append(False)
         mainmenu[2] = "IP ADRESS: NOT CONNECTED"
 
-    elif ipaddr_func.startswith("10.78.39"):
+    elif not ipaddr_func.startswith("10." + team_ip):
         mainmenu_status.append(False)
         mainmenu_status.append(False)
 
     else:
-        mainmenu_status.append("Normal")
-        mainmenu_status.append("Normal")
+        mainmenu_status.append(True)
+        mainmenu_status.append(True)
 
     mainmenu_status.append("Normal")
 
@@ -550,44 +558,13 @@ def cursor_handler(key, cur_stat):
     return current_row
 
 
-def change_menu(key, cur_stat, led1, out1):
-    if key == "button0" and cur_stat["current_menu"] == main_menu_value:
-
-        # IP MENU
-        if cur_stat["current_row"] == 0:
-            new_menu = ip_menu_value
-            new_row = 0
-
-
-        # ARDUINO CONFIG MENU
-        elif cur_stat["current_row"] == 1:
-            new_menu = arduino_menu_value
-            new_row = 0
-
-        # CAMERA MENU
-        elif cur_stat["current_row"] == 2:
-            new_menu = camera_menu_value
-            new_row = 0
-
-        # LED TEST
-        elif cur_stat["current_row"] == 3:
-            ArduinoFunctions.led_write(led1, out1, 0)
-            time.sleep(1)
-            ArduinoFunctions.led_write(led1, out1, 1)
-            new_menu = cur_stat["current_menu"]
-            new_row = cur_stat["current_row"]
-
-        #EXIT
-        elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 1:
-            new_menu = cur_stat["current_menu"]
-            new_row = cur_stat["current_row"]
-            exit()
-
-    else:
-        new_row = cur_stat["current_row"]
-        new_menu = cur_stat["current_menu"]
-
-    return new_row, new_menu
+def set_current_menu(cur_stat, all_menu_elements):
+    cur_menu = int(cur_stat["current_menu"])
+    
+    cur_stat["current_menu_elements"] = all_menu_elements[cur_menu][0]
+    cur_stat["current_menu_status"] = all_menu_elements[cur_menu][1]
+    
+    return cur_stat["current_menu_elements"], cur_stat["current_menu_status"]
 
 
 def return_to_menu(key, cur_stat):
@@ -735,8 +712,7 @@ def not_main(stdscr):
         time.sleep(5 - elapsed)
 
     print_error(stdscr, None)
-    
-    
+        
     if type(board) == str:
         handle_error(board, stdscr)
     
@@ -793,9 +769,11 @@ def not_main(stdscr):
             and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == max_v
             and cur_stat["current_menu"] == main_menu_value
         ):
-            # print("sex")
             match_mode(stdscr, settings, led1, out1, swt1, pot1)
 
+        
+        
+        
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2:
             if (
@@ -840,30 +818,13 @@ def not_main(stdscr):
             cur_stat["current_menu_elements"] = all_menu_elements[2][0]
             cur_stat["current_menu_status"] = all_menu_elements[2][1]
 
-        # Eger Arduino menusunden cikilirsa Server tekrar kontrol edilecek
-
         # endregion
 
 
         # Menu degistirme olaylari
-        cur_stat["current_row"], cur_stat["current_menu"] = change_menu(key, cur_stat, led1, out1)
+        cur_stat["current_row"], cur_stat["current_menu"] = InputPFunctions.change_menu(key, cur_stat, led1, out1)
         cur_stat["current_row"], cur_stat["current_menu"] = return_to_menu(key, cur_stat)
-
-        if cur_stat["current_menu"] == 0:
-            cur_stat["current_menu_elements"] = all_menu_elements[0][0]
-            cur_stat["current_menu_status"] = all_menu_elements[0][1]
-
-        elif cur_stat["current_menu"] == 1:
-            cur_stat["current_menu_elements"] = all_menu_elements[1][0]
-            cur_stat["current_menu_status"] = all_menu_elements[1][1]
-
-        elif cur_stat["current_menu"] == 2:
-            cur_stat["current_menu_elements"] = all_menu_elements[2][0]
-            cur_stat["current_menu_status"] = all_menu_elements[2][1]
-
-        elif cur_stat["current_menu"] == 3:
-            cur_stat["current_menu_elements"] = all_menu_elements[3][0]
-            cur_stat["current_menu_status"] = all_menu_elements[3][1]
+        cur_stat["current_menu_elements"], cur_stat["current_menu_status"] = set_current_menu(cur_stat, all_menu_elements)
 
 
 curses.wrapper(not_main)
