@@ -12,6 +12,13 @@
 ### 
 #########################################################################################################
 
+
+#                                                                  -->> . <<--NOKTAYI SİLME KOD BOZULUYOR
+#                                                                      /\   HERKES LORD NOKTA KARSISINDA EGILSIN
+#                                                                      |    TANRIMIZ NOKTA 
+#                                                                      |
+#                                               if you look to your above, you can see programmers going nuts
+
 """#####################################################################################################################"TODO"
                                                                                                                         
                                                                             14/2 TAKIM NUMARASINA GÖRE AYAR YAPIMI (OK)
@@ -19,21 +26,15 @@
                                                                             14/2 Led kontrol içine robot ayarları yazılma hatasını düzelt
                                                                             14/2 FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz (COLONELKAI)
                                                                             14/2 WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
-
-
-# check_arduino() oluştur ve key get içine koy
-
-# Tuna biliyorum zor olacaka ama tüm fonksiyonlara args eklemelisin.
-
+                                                                            14/2 INFO menüsü (Yazanlar - Tarih - Takım - vs) (COLONELKAI)
+                                                                            14/2 check_arduino() oluştur ve key get içine koy
 # Panic mode içinde tekrar arduinoyu takmayı dene 
 
 # Save ve get_settings için handle_error()
 
-
-# Led dosyasına is locked ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
+# Led dosyasına is mm started ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
 # ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
-# INFO menüsü (Yazanlar - Tarih - Takım - vs) (COLONELKAI)
                                                                                                                         
 # Pyfirmata knob 28 kodu editlenmesi
 
@@ -93,7 +94,7 @@
 
 
 from threading import Thread
-from frc_lib7839 import *
+from FRC_LIB7839 import *
 import threading
 import pyfirmata
 # import socket
@@ -223,11 +224,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
             settings[setting_names[1]] = setting_defaults[1]
             settings[setting_names[2]] = setting_defaults[2]
             settings[setting_names[3]] = setting_defaults[3]
-            settings[setting_names[4]] = setting_defaults[4]
-                    
-                
-                
-            
+            settings[setting_names[4]] = setting_defaults[4]          
         
         m_menu_elements = [] # Menu elementleri arrayi
         m_menu_elements.append(" ## PANIC MODE STARTED ## ") # Title
@@ -241,7 +238,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
             led_control["status"] = True
-            rv = DbFunctions.save_settings(led_control, file=file_lc) # Olmazsa yapacak bir şey yok
+            rv = DbFunctions.save_settings(file=file_lc, led_control) # Olmazsa yapacak bir şey yok
             handle_error(rv, stdscr, PanicMenu=False)
 
         if settings is not None:    
@@ -311,6 +308,9 @@ def get_first_menu_values():
         mainmenucheck.append(False) ## False
 
     mainmenu.append("LED TEST")
+    mainmenucheck.append(True)
+
+    mainmenu.append("INFO")
     mainmenucheck.append(True)
 
     mainmenu.append("EXIT")
@@ -435,6 +435,28 @@ def get_cam_menu_values(isCamOnline=InputPFunctions.check_cam()):
     mainmenu_status.append("Normal")
 
     return [mainmenu, mainmenu_status]
+
+
+def get_info_menu_values(teamnumber)
+    menu = []
+    menucheck = []
+
+    menu.append("MADE FOR FRC 2020 SEASON")
+    menucheck.append(True)
+
+    menu.append("Made by:")
+    menucheck.append(True)
+
+    menu.append("TUNAPRO123")
+    menucheck.append(True)
+
+    menu.append("ColonelKai")
+    menucheck.append(True)
+
+    menu.append("BlackShadow")
+    menucheck.append(False)
+
+    return [menu, menucheck]
 
 
 def print_info(stdscr, input_str, color=2, time=5):
@@ -646,8 +668,26 @@ def refresh_screen(stdscr, cur_stat, settings):
     return new_all_menu_elements
 
 
-def handle_error(variable, stdscr=None, PanicMenu=True):
+def handle_errors(stdscr=None, PanicMenu=True, *args):
+    for variable in args:    
+        if type(variable) == str:
+            if str(variable).startswith("InputP"):
+                background_setup(stdscr, None, PanicMode=True)
+                
+                if test_mode is not None:
+                    raise Exception(str(variable))
 
+                else:
+                    if PanicMenu:
+                        match_mode(stdscr, PanicMenu=True, errmsg=variable)
+                    else:
+                        print_info(stdscr, variable, color=2, time=5)
+                    return True
+            else:
+                return False
+
+
+def handle_error(variable, stdscr=None, PanicMenu=True):  
     if type(variable) == str:
         if str(variable).startswith("InputP"):
             background_setup(stdscr, None, PanicMode=True)
@@ -666,6 +706,8 @@ def handle_error(variable, stdscr=None, PanicMenu=True):
 
 
 
+
+
 def not_main(stdscr):
     # region while dongusune kadar olan gereksiz seyler
 
@@ -679,6 +721,7 @@ def not_main(stdscr):
     all_menu_elements.append(get_ip_menu_values())
     all_menu_elements.append(get_arduino_menu_values(settings))
     all_menu_elements.append(get_cam_menu_values(None))
+    all_menu_elements.append(get_info_menu_values(None))
 
     # Imlec konumu
     current_row = 0
@@ -844,7 +887,7 @@ def not_main(stdscr):
                 and cur_stat["current_row"] == 4
             ):
 
-                rv = DbFunctions.save_settings(settings, file_s)
+                rv = DbFunctions.save_settings(file_s, settings)
                 handle_error(rv, stdscr, PanicMenu=True)
                 
                 # if waiting_period is not None:

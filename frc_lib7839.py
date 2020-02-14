@@ -25,18 +25,19 @@ global max_v
 
 global INTERNAL_KEY_GET_FUNC_ERR
 global SERVER_ALREADY_STARTED_ERR
+global SERVER_NOT_STARTED_ERR
 global MM_CANNOT_START_ERR
 global INTERNAL_SYNTAX_ERR
-global ARDUINO_INPUT_ERR
-global CANT_CONNECT_ERR
-global SERVER_NOT_STARTED_ERR
 global FILE_NOT_FOUND_ERR
+global ARDUINO_INPUT_ERR
 global ARDUINO_CONN_ERR
+global CANT_CONNECT_ERR
 global READ_ERR
 
 global arduino_menu_value
 global camera_menu_value
 global main_menu_value
+global info_menu_value
 global ip_menu_value
 
 INTERNAL_KEY_GET_FUNC_ERR = "INTERNAL_KEY_GET_FUNCTION_ERROR"
@@ -107,6 +108,7 @@ arduino_menu_value = 2
 camera_menu_value = 3
 main_menu_value = 0
 ip_menu_value = 1
+info_menu_value = 4
 
 # endregion
 
@@ -478,12 +480,12 @@ class DbFunctions:
 
     ### ERROR PROOF ### (Handle)
     @staticmethod
-    def save_settings(settings, file=file_s):
+    def save_settings(file=file_s, *args):
         try:
-            c_s = DbFunctions.read_settings_on_json(file=file)
-            
-            try:
-                if c_s is None or c_s == "" or c_s.startswith("InputP"):
+            for settings in args:
+                c_s = DbFunctions.read_settings_on_json(file=file)
+                
+                if type(c_s) == str and c_s is None or c_s == "" or c_s.startswith("InputP"):
                     rv = DbFunctions.write_setting_to_json(file=file, reset=True)
 
                     if str(rv).startswith("InputP"):
@@ -491,28 +493,25 @@ class DbFunctions:
                         rv += str(rv)
                         print(rv + " # FROM SAVE_SETTINGS FUNCTION")
                         return rv
-            except:
-                pass
             
-            if settings is None:
-                settings = c_s
+                if settings is None:
+                    settings = c_s
 
-            for setting_name in setting_names:
-                try:
-                    settings[setting_name]
+                for setting_name in setting_names:
+                    try:
+                        settings[setting_name]
+                    except:
+                        settings[setting_name] = None
+
+                rv = DbFunctions.write_settings_to_json(settings, file=file)
+
+                try:    
+                    if rv.startswith("InputP"):
+                        return rv
+
                 except:
-                    settings[setting_name] = None
-
-            rv = DbFunctions.write_settings_to_json(settings, file=file)
-
-            try:    
-                if rv.startswith("InputP"):
-                    return rv
-
-            except:
-                pass
-    
-            
+                    pass
+        
         except:
             ### ERROR ###
             output = all_errors[INTERNAL_SYNTAX_ERR]
@@ -902,19 +901,19 @@ class InputPFunctions:
         if key == "button0" and cur_stat["current_menu"] == main_menu_value:
 
             # IP MENU
-            if cur_stat["current_row"] == 0:
+            if cur_stat["current_row"] == (ip_menu_value-1):
                 new_menu = ip_menu_value
                 new_row = 0
 
 
             # ARDUINO CONFIG MENU
-            elif cur_stat["current_row"] == 1:
+            elif cur_stat["current_row"] == (arduino_menu_value-1):
                 new_menu = arduino_menu_value
                 new_row = 0
                 
 
             # CAMERA MENU
-            elif cur_stat["current_row"] == 2:
+            elif cur_stat["current_row"] == (camera_menu_value-1):
                 new_menu = camera_menu_value
                 new_row = 0
                 
@@ -927,6 +926,9 @@ class InputPFunctions:
                 new_menu = cur_stat["current_menu"]
                 new_row = cur_stat["current_row"]
                 
+            elif cur_stat["current_row"] == (info_menu_value-1):
+                new_menu = info_menu_value
+                new_row = 0
 
             #EXIT
             elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 1:
