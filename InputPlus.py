@@ -17,6 +17,8 @@
                                                                             14/2 TAKIM NUMARASINA GÖRE AYAR YAPIMI (OK)
                                                                             14/2 SET UP LED CONTROLLING SYSTEM (For Interface)
                                                                             14/2 Led kontrol içine robot ayarları yazılma hatasını düzelt
+                                                                            14/2 FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz (COLONELKAI)
+                                                                            14/2 WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
 
 
 # check_arduino() oluştur ve key get içine koy
@@ -29,9 +31,7 @@
 # Led dosyasına is locked ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
 # ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
-# FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz (COLONELKAI)
 # INFO menüsü (Yazanlar - Tarih - Takım - vs) (COLONELKAI)
-# WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
                                                                                                                         
 # Pyfirmata knob 28 kodu editlenmesi
 
@@ -71,7 +71,7 @@
 #########################################################################################################
 ##                                                                                                     ##                 
 ##  --skip-camera-check     : camera kontorlünü atlıyor (Zaten windowsta kamera kontrolü yok)          ##                                               
-##  --skip-network-check    : ip adres kontrolünü atlıyor (NOT CONNECTED TO RADIO Hatası kapnıyor)     ##                                                   
+##  --skip-network-check    : ip adres kontrolünü atlıyor (NOT CONNECTED TO RADIO Hatası kapanıyor)     ##                                                   
 ##  --pc-mode               : skip camera ve skip networkün birleşimi                                  ##                       
 ##  --test-mode             : verilen hatalar programı durdurur (FRC esnasında önermiyorum)            ##                                           
 ##  --pc-test-mode          : pc ve test modunun birleşimi                                             ##           
@@ -91,7 +91,7 @@
 
 
 from threading import Thread
-from FRC_LIB7839 import *
+from frc_lib7839 import *
 import threading
 import pyfirmata
 # import socket
@@ -528,6 +528,14 @@ def print_current_menu(stdscr, cur_stat):
     stdscr.addstr(firsty - 1, firstx, match_message)
     stdscr.attroff(curses.color_pair(match_message_color))
 
+    teamname = "FRC7839 "
+    namex = w - len(teamname)
+    namey = 0
+
+    stdscr.attron(curses.color_pair(3))
+    stdscr.addstr(namey, namex, teamname)
+    stdscr.attroff(curses.color_pair(3))
+
     stdscr.refresh()
 
 
@@ -584,6 +592,16 @@ def return_to_menu(key, cur_stat):
     ):
         cur_stat["current_row"] = 0
         cur_stat["current_menu"] = 0
+
+    # Save settings icin
+    if (
+        (key == "button0")
+        and cur_stat["current_menu"] == arduino_menu_value
+        and cur_stat["current_row"] == (len(cur_stat["current_menu_elements"]) - 2)
+    ):
+        cur_stat["current_row"] = 0
+        cur_stat["current_menu"] = 0
+    
 
     return cur_stat["current_row"], cur_stat["current_menu"]
 
