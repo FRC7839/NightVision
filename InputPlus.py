@@ -6,39 +6,37 @@
 ### TUNAPRO1234 - Tuna Gul
 ### BLACKSHADOW - Siyabend Urun
 ### 
-### NightFury#7839 (Adımız şu an farklı olabilir tartışmalar hala devam ediyor)
-### 
 ### FRC 2020 - NightVision - Target Detection Algorithm 
+### 
+### NightFury#7839 (Adımız şu an farklı olabilir tartışmalar hala devam ediyor)
 ### 
 #########################################################################################################
 
 """#####################################################################################################################"TODO"
                                                                                                                         
-### TAKIM NUMARASINA GÖRE AYAR YAPIMI ###
+                                                                                        TAKIM NUMARASINA GÖRE AYAR YAPIMI (OK)
+                                                                                        SET UP LED CONTROLLING SYSTEM (For Interface)
+# Led kontrol içine robot ayarları yazılma hatasını düzelt
 
-# FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz (COLONELKAI)
-# WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
 
-# Improve PANIC MODE                                            
 # Panic mode içinde tekrar arduinoyu takmayı dene 
 
-# SET UP LED CONTROLLING SYSTEM 
-# Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
-
-# Arduino led ring pin kontrolü
 # Pyfirmata knob 28 kodu editlenmesi
 
-# Kodda görününecek şekilde araya bir iki easter egg ekle
-# INFO menüsü (Yazanlar - Tarih - Takım - vs)
-
 # Save ve get_settings için handle_error()
+
 # check_arduino() oluştur ve key get içine koy
 
 # ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden)
+
 # Led dosyasına is locked ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
-# Led kontrol içine robot ayarları yazılıyor
+# FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz (COLONELKAI)
+# INFO menüsü (Yazanlar - Tarih - Takım - vs) (COLONELKAI)
+# WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
                                                                                                                         
+
+# Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
 "TODO"########################################################################################################################"""
 
 ###############################################################################################################################
@@ -164,7 +162,8 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         while True:
             #Dosyadan okumayi dene
             led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
-            if type(led_control) == str and handle_error(led_control, stdscr, PanicMenu=False):
+            if handle_error(led_control, stdscr, PanicMenu=False):
+                led_control = {}
                 led_control["status"] = True
            
             
@@ -215,9 +214,20 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         settings = DbFunctions.get_setting(file_s)
         led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
         
-        if type(led_control) == str:
-            if str(led_control).startswith("InputP"):
-                led_control = {"status" : None}
+        if handle_error(led_control, stdscr, PanicMenu=False) or handle_error(settings, stdscr, PanicMenu=False):
+            led_control = {}
+            led_control["status"] = True
+            
+            settings = {}
+            settings[setting_names[0]] = setting_defaults[0]
+            settings[setting_names[1]] = setting_defaults[1]
+            settings[setting_names[2]] = setting_defaults[2]
+            settings[setting_names[3]] = setting_defaults[3]
+            settings[setting_names[4]] = setting_defaults[4]
+                    
+                
+                
+            
         
         m_menu_elements = [] # Menu elementleri arrayi
         m_menu_elements.append(" ## PANIC MODE STARTED ## ") # Title
@@ -276,7 +286,7 @@ def get_first_menu_values():
         mainmenu.append("IP ADRESS: NOT CONNECTED")
         mainmenucheck.append(False) ## False
 
-    elif not ipaddr_func.startswith("10.78.39"):
+    elif not ipaddr_func.startswith("10." + team_ip2):
         mainmenu.append("NOT CONNECTED TO RADIO")
         mainmenucheck.append(False) ## False
 
@@ -332,7 +342,7 @@ def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPF
         mainmenu_status.append(False)
         mainmenu[2] = "IP ADRESS: NOT CONNECTED"
 
-    elif not ipaddr_func.startswith("10." + team_ip):
+    elif not ipaddr_func.startswith("10." + team_ip2):
         mainmenu_status.append(False)
         mainmenu_status.append(False)
 
@@ -801,7 +811,7 @@ def not_main(stdscr):
             ):
                 settings["Autonomous Mode"] = str(ArduinoFunctions.map_x(key, 0, max_v, 0, 5))
 
-            # Send tusu
+            # Write tusu
             if (
                 key == "button0"
                 and cur_stat["current_row"] == 4

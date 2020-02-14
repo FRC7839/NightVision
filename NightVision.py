@@ -6,9 +6,9 @@
 ### TUNAPRO1234 - Tuna Gul
 ### BLACKSHADOW - Siyabend Urun
 ### 
-### NightFury#7839 (Adımız şu an farklı olabilir tartışmalar hala devam ediyor)
-### 
 ### FRC 2020 - NightVision - Target Detection Algorithm 
+### 
+### NightFury#7839 (Adımız şu an farklı olabilir tartışmalar hala devam ediyor)
 ### 
 #########################################################################################################
 
