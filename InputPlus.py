@@ -23,6 +23,8 @@
 
 # check_arduino() oluştur ve key get içine koy
 
+# Tuna biliyorum zor olacaka ama tüm fonksiyonlara args eklemelisin.
+
 # Panic mode içinde tekrar arduinoyu takmayı dene 
 
 # Save ve get_settings için handle_error()
@@ -778,10 +780,11 @@ def not_main(stdscr):
         # Ekran yenilenmesi
         cur_stat["all_menu_elements"] = refresh_screen(stdscr, cur_stat, settings=settings)
 
-        key, _ = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key)
+        key, ports = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key, ArduinoFunctions.check_ports)
         handle_error(key, stdscr, PanicMenu=True)
-        # handle_error(_, stdscr)
+        handle_error(ports, stdscr, PanicMenu=True)
 
+        if ports, 
 
         # Imlec hareketleri degiskenlere yazildi
         cur_stat["current_row"] = cursor_handler(key, cur_stat)
