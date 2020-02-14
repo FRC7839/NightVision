@@ -9,11 +9,16 @@ import cv2
 import sys  
 import os
 
+if str(sys.platform).startswith("win"):
+    import serial.tools.list_ports
+
 # region global
 global wait_time_for_get_key
 global setting_defaults
 global setting_names
+global lc_defaults
 global all_errors
+global lc_names
 global file_lc
 global file_s
 global max_v
@@ -62,6 +67,13 @@ setting_defaults = [
     "1"
 ]
 
+lc_names = [
+    "status"
+]
+
+lc_defaults = [
+    True
+]
 
 # Arduinodan deger aldiktan sonraki bekleme suresi
 wait_time_for_get_key = 0.115
@@ -102,6 +114,38 @@ ip_menu_value = 1
 ### ALL ERROR PROOF ###
 class ArduinoFunctions:
     @staticmethod
+    def check_ports():
+        try:
+            if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
+                dev = os.popen("ls /dev/tty* | grep USB").read()
+                if dev == "":
+                    return False
+                else:
+                    dev = dev.split("\n")
+                    # for i in range(len(dev)):
+                    #     COMS[i] = COMS[i].split(":")[0]
+                    return dev    
+                
+            elif str(sys.platform).startswith("win"):
+                ports = serial.tools.list_ports.comports()
+
+                COMS = []
+
+                for port, desc, hwid in sorted(ports):
+                    COMS.append("{}: {} [{}]".format(port, desc, hwid))
+
+                for i in range(len(COMS)):
+                    COMS[i] = COMS[i].split(":")[0]
+                    
+                return COMS
+        
+        except:
+            ### ERROR ###
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM LED_WRITE FUNCTION")
+            return output_e
+    
+    @staticmethod
     def led_write(led1, out1, st, gnd=True):
         try:
             led1.write(st / 50)
@@ -116,40 +160,49 @@ class ArduinoFunctions:
 
     ### ERROR PROOF ### (Raise)
     @staticmethod
-    def import_arduino(COM1="COM3", COM2="COM4"):
+    def import_arduino(com_ports):
         try:
-            if os.name == "nt":
-                try:
+            if type(com_ports) == list:
+                for i in range(len(com_ports)):
                     try:
-                        board = pyfirmata.ArduinoNano(COM1)
-                    except:
-                        board = pyfirmata.ArduinoNano(COM2)
-                except:
-                    ### ERROR ###
-                    output_e = all_errors[ARDUINO_CONN_ERR]
-                    print(output_e)
-                    return output_e
+                        board = pyfirmata.ArduinoNano(str(com_ports[i]))
 
-            elif os.name == "posix":
+                    except:
+                        pass
+                    
+                    else:
+                        return board
+            
+            elif type(com_ports) == str:
                 try:
-                    try:
-                        board = pyfirmata.ArduinoNano("/dev/ttyUSB0")
-                    except:
-                        board = pyfirmata.ArduinoNano("/dev/ttyUSB1")
-
+                    board = pyfirmata.ArduinoNano(str(com_ports[i]))
+                    
                 except:
-                    ### ERROR ###
-                    output_e = all_errors[ARDUINO_CONN_ERR]
-                    print(output_e)
-                    return output_e
-
-            return board
+                    pass                
+                
+                else:
+                    return board
+                
+            else:
+                ### ERROR ###
+                output_e = all_errors[INTERNAL_SYNTAX_ERR]
+                print(output_e + " # FROM IMPORT_ARDUINO FUNCTION")
+                return output_e                
+    
+            ### ERROR ###
+            output_e = all_errors[ARDUINO_CONN_ERR]
+            print(output_e)
+            return output_e
 
         except:
             ### ERROR ###
             output = all_errors[INTERNAL_SYNTAX_ERR]
             print(output + " # FROM IMPORT_ARDUINO FUNCTION")
             return output
+
+
+
+
 
     ### ERROR PROOF ### (Raise)
     @staticmethod
@@ -338,15 +391,27 @@ class DbFunctions:
     def write_settings_to_json(input_dictionary=None, file=file_s, reset=False):
         try:
             if reset == True:
-                settings = {}
+                
 
                 if input_dictionary is None and file == file_s:
                     settings = {}
-                    settings[setting_names[0]] = setting_defaults[0]
-                    settings[setting_names[1]] = setting_defaults[1]
-                    settings[setting_names[2]] = setting_defaults[2]
-                    settings[setting_names[3]] = setting_defaults[3]
-                    settings[setting_names[4]] = setting_defaults[4]
+                    
+                    for i in range(len(setting_names)):
+                        try:
+                            settings[setting_names[i]]
+                        except KeyError:
+                            settings[setting_names[i]] = setting_defaults[i]
+                
+                elif input_dictionary is None and file == file_lc:
+                    lc_set = {} 
+                    
+                    for i in range(len(lc_names)):
+                        try:
+                            lc_set[lc_names[i]]
+                        except KeyError:
+                            lc_set[lc_names[i]] = lc_defaults[i]
+                            
+                    settings = lc_set
 
                 else:
                     settings = input_dictionary
@@ -468,8 +533,10 @@ class DbFunctions:
            
 
             if c_s is None or (type(c_s) == str and str(c_s).startswith("InputP")) or c_s == "":
+                
                 rv = DbFunctions.write_settings_to_json(file=file, reset=True)
-
+                DbFunctions.get_setting(file=file, setting_name=setting_name)
+                
                 if str(rv).startswith("InputP"):
                     ### ERROR ###
                     rv = str(rv)
@@ -478,21 +545,27 @@ class DbFunctions:
 
             
             else:
+                
                 # eger setting yoksa ekleniyor
                 if file == file_s:
                     settings = {}
-                    settings[setting_names[0]] = setting_defaults[0]
-                    settings[setting_names[1]] = setting_defaults[1]
-                    settings[setting_names[2]] = setting_defaults[2]
-                    settings[setting_names[3]] = setting_defaults[3]
-                    settings[setting_names[4]] = setting_defaults[4]
-
-                    # for setting_name2 in setting_names:
-                    #     try:
-                    #         c_s[setting_name2]
-                    #     except KeyError:
-                    #         c_s[setting_name2] = None
                     
+                    for i in range(len(setting_names)):
+                        try:
+                            c_s[setting_names[i]]
+                        except KeyError:
+                            c_s[setting_names[i]] = setting_defaults[i]
+                
+                elif file == file_lc:
+                    lc_set = {} 
+                    
+                    for i in range(len(lc_names)):
+                        try:
+                            c_s[lc_names[i]]
+                        except KeyError:
+                            c_s[lc_names[i]] = lc_defaults[i]
+                    
+                            
                 rv2 = DbFunctions.write_settings_to_json(c_s, file=file)
                                 
                 if type(rv2) == str and str(rv2).startswith("InputP"):
@@ -732,10 +805,10 @@ class InputPFunctions:
     @staticmethod
     def get_ipaddr():
         try:
-            if os.name == "nt":
+            if str(sys.platform).startswith("win"):
                 return socket.gethostbyname(socket.gethostname())
 
-            elif os.name == "posix":
+            elif str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
                 ipaddress = os.popen(
                     "ifconfig wlan0 \
                             | grep 'inet addr' \
@@ -754,10 +827,10 @@ class InputPFunctions:
     @staticmethod
     def check_cam():
         try:
-            if os.name == "nt":
+            if str(sys.platform).startswith("win"):
                 return "TRUE BECAUSE WINDOWS"
 
-            elif os.name == "posix" and socket.gethostname() == "frcvision":
+            elif str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin") and socket.gethostname() == "frcvision":
                 if os.path.exists("/dev/video0"):
                     return "CAMERA.PY CONNECTED"
 
@@ -773,10 +846,10 @@ class InputPFunctions:
     @staticmethod
     def get_ssid():
         try:
-            if os.name == "nt":
+            if str(sys.platform).startswith("win"):
                 return "Tunapro1234 7/2/2020"
 
-            if os.name == "posix":
+            if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
                 ssid = os.popen(
                     "iwconfig wlan0 \
                         | grep 'ESSID' \

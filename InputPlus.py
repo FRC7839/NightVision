@@ -14,27 +14,26 @@
 
 """#####################################################################################################################"TODO"
                                                                                                                         
-                                                                                        TAKIM NUMARASINA GÖRE AYAR YAPIMI (OK)
-                                                                                        SET UP LED CONTROLLING SYSTEM (For Interface)
-# Led kontrol içine robot ayarları yazılma hatasını düzelt
+                                                                            14/2 TAKIM NUMARASINA GÖRE AYAR YAPIMI (OK)
+                                                                            14/2 SET UP LED CONTROLLING SYSTEM (For Interface)
+                                                                            14/2 Led kontrol içine robot ayarları yazılma hatasını düzelt
 
-
-# Panic mode içinde tekrar arduinoyu takmayı dene 
-
-# Pyfirmata knob 28 kodu editlenmesi
-
-# Save ve get_settings için handle_error()
 
 # check_arduino() oluştur ve key get içine koy
 
-# ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden)
+# Panic mode içinde tekrar arduinoyu takmayı dene 
+
+# Save ve get_settings için handle_error()
+
 
 # Led dosyasına is locked ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
+# ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
 # FRC7839-NightVision yazısını yukarı sağ veya sol köşeye yaz (COLONELKAI)
 # INFO menüsü (Yazanlar - Tarih - Takım - vs) (COLONELKAI)
 # WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
                                                                                                                         
+# Pyfirmata knob 28 kodu editlenmesi
 
 # Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
 "TODO"########################################################################################################################"""
@@ -166,7 +165,6 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 led_control = {}
                 led_control["status"] = True
            
-            
             m_menu_elements = [] # Menu elementleri arrayi
             m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
 
@@ -714,7 +712,15 @@ def not_main(stdscr):
 
     start_t = timeit.default_timer()
     ###
-    board = ArduinoFunctions.import_arduino()
+
+    com_ports = ArduinoFunctions.check_ports()
+    
+    if type(com_ports) == list:
+        board = ArduinoFunctions.import_arduino(com_ports)
+    
+    else:
+        board = all_errors[ARDUINO_CONN_ERR]
+        
     ###
     elapsed = timeit.default_timer() - start_t
     

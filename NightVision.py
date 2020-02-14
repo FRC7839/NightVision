@@ -142,6 +142,7 @@ else:
 
 if pc_mode is None:
     from cscore import CameraServer, VideoSource
+    from networktables import NetworkTables
 
 # endregion
 
@@ -227,7 +228,7 @@ def main():
 
         cvSink = cs.getVideo()
         
-        
+        procTable = NetworkTables.getTable("imgProc")
         
     if isNtStarted:
         outputStream = cs.putVideo("LQimg", 120, 90)
@@ -282,6 +283,14 @@ def main():
             )
             _, y_error, distance = functions.calculate_errors(ok_contours)
         
+            if pc_mode is None:
+                if success and y_error is not None:
+                    procTable.putString('Robot Location', robo_loc)
+                    procTable.putString('Camera Tolerance', cam_tol)
+                    procTable.putString('Waiting Period', wait_per)
+                    procTable.putString('Autonomous Mode', auto_mode)
+                    procTable.putString('Y Error', y_error)
+                
         imgLQ = cv2.resize(final_result, (120, 90))
         
         if pc_mode is not None:
@@ -347,9 +356,13 @@ def main():
                     "Network Tables " + str(isNtStarted),
                     "Hedef bulunamadı",
                     sep="  --  ",
-                )      
+                )         
+
             
-                
+
+
+
+
         elif y_error is not None and success == True and pc_mode is not None:
             
             if ((success == True) and (y_error < (-1 * cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
@@ -397,7 +410,8 @@ def main():
                     "Camera Tolerance: " + str(cam_tol),
                     "Hedef bulunamadı",
                     sep="  --  ",
-                )                      
+                )         
+                 
                 
     if image_mode is None:
         cap.release()
