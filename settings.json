@@ -1,0 +1,7 @@
+{
+    "isTunaPro": true,
+    "Robot Location": "LEFT",
+    "Camera Tolerance": "15",
+    "Waiting Period": "0",
+    "Autonomous Mode": "1"
+}

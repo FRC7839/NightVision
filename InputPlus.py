@@ -34,7 +34,11 @@
 # Kodda görününecek şekilde araya bir iki easter egg ekle
 # INFO menüsü (Yazanlar - Tarih - Takım - vs)
 
+# Save ve get_settings için handle_error()
+# check_arduino() oluştur ve key get içine koy
 
+# ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden)
+# 
 
                                                                                                                         
 "TODO"########################################################################################################################"""
@@ -96,10 +100,10 @@ from FRC_LIB7839 import *
 import threading
 import pyfirmata
 import curses
-import socket
+# import socket
 import json
 import time
-import zmq
+# import zmq
 import os
 
 # region global
@@ -661,13 +665,8 @@ def not_main(stdscr):
     # region while dongusune kadar olan gereksiz seyler
 
     #region Settings okuma
-
     settings = DbFunctions.get_setting(file_s)
-    isError = handle_error(settings, stdscr)
-
-    # if isError:
-        # Set settings to default
-
+    handle_error(settings, stdscr)
     #endregion
 
     all_menu_elements = []
@@ -732,12 +731,9 @@ def not_main(stdscr):
     ###
     elapsed = timeit.default_timer() - start_t
     
-    if elapsed > 5:
-        pass
-    
-    else:
+    if elapsed < 5:
         time.sleep(5 - elapsed)
-    
+
     print_error(stdscr, None)
     
     

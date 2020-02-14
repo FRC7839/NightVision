@@ -60,7 +60,7 @@
 ##      **ADD PC TEST MODE (TUNAPRO1234)
 ##      ADD LED CONTROLLING SYSTEM (TUNAPRO1234)
 ##      ADD NETWORK TABLES SENDING SYSTEM FOR AUTONOMOUS (BLACKSHADOW)
-##      
+##      Sürekli JSON Database'inden okuma ve handle_error_lite'lar
 ##
 ##
 ##
