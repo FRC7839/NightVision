@@ -42,6 +42,7 @@ global ip_menu_value
 
 INTERNAL_KEY_GET_FUNC_ERR = "INTERNAL_KEY_GET_FUNCTION_ERROR"
 SERVER_ALREADY_STARTED_ERR = "SERVER_ALREADY_STARTED_ERROR"
+ARDUINO_CONN_LOST = "ARDUINO_CONNECTION_LOST"
 MM_CANNOT_START_ERR = "MM_CANNOT_START_ERROR"
 INTERNAL_SYNTAX_ERR = "INTERNAL_SYNTAX_ERROR"
 ARDUINO_INPUT_ERR = "ARDUINO_CONNECTION_ERROR"
@@ -102,6 +103,7 @@ all_errors = {
     "FILE_NOT_FOUND_ERROR": "InputP ERROR: JSON Dosyasi yok ve olusturulamiyor.",
     "ARDUINO_CONNECTION_ERROR": "InputP ERROR: Arduino'ya baglanilamiyor.",
     "READ_ERROR": "InputP ERROR: JSON dosyasi okunamiyor.",
+    "ARDUINO_CONNECTION_LOST": "InputP ERROR: Arduino çıkarıldı"
 }
 
 arduino_menu_value = 2
@@ -121,7 +123,8 @@ class ArduinoFunctions:
             if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
                 dev = os.popen("ls /dev/tty* | grep USB").read()
                 if dev == "":
-                    return False
+                    return all_errors[ARDUINO_CONN_LOST]
+                
                 else:
                     dev = dev.split("\n")
                     # for i in range(len(dev)):
@@ -138,9 +141,13 @@ class ArduinoFunctions:
 
                 for i in range(len(COMS)):
                     COMS[i] = COMS[i].split(":")[0]
-                    
-                return COMS
-        
+                
+                if len(COMS) > 0:
+                    return COMS
+
+                else:
+                    return all_errors[ARDUINO_CONN_LOST]
+                
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
@@ -323,7 +330,12 @@ class ArduinoFunctions:
                         rv = all_errors[INTERNAL_KEY_GET_FUNC_ERR]
                         print(rv)
                         return rv
-
+                    
+                    else:
+                        if type(rv) == str and rv.startswith("InputP"):
+                            key = None
+                            return key, rv
+                    
                     elapsed = timeit.default_timer() - start_t
                     #
 

@@ -30,6 +30,8 @@
                                                                             14/2 check_arduino() oluştur ve key get içine koy
 # Panic mode içinde tekrar arduinoyu takmayı dene 
 
+# Panic Mode içinde de error aynı sebeple kısa duruyor, ona bak (COLONELKAI)
+
 # Save ve get_settings için handle_error()
 
 # Led dosyasına is mm started ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
@@ -212,6 +214,13 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
    
     ### KERNEL PANIC ###
     else:        
+        f_err = False
+        ard_err = False
+        
+        rv = ArduinoFunctions.check_ports()        
+        if handle_error(rv, stdscr, PanicMenu=False):
+            ard_err = True    
+        
         settings = DbFunctions.get_setting(file_s)
         led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
         
@@ -225,7 +234,8 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
             settings[setting_names[2]] = setting_defaults[2]
             settings[setting_names[3]] = setting_defaults[3]
             settings[setting_names[4]] = setting_defaults[4]          
-        
+            f_err = True
+            
         m_menu_elements = [] # Menu elementleri arrayi
         m_menu_elements.append(" ## PANIC MODE STARTED ## ") # Title
 
@@ -233,10 +243,10 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]:
             m_menu_elements.append(" ## LED CONTROL : " + str(led_control["status"]) + " ## ")
 
-
         # Eger kapali yada acik alamazsa error veriyor.
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
+
             led_control["status"] = True
             rv = DbFunctions.save_settings(file_lc, led_control) # Olmazsa yapacak bir şey yok
             handle_error(rv, stdscr, PanicMenu=False)
@@ -263,10 +273,12 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 errmsg = None
                 
             background_setup(stdscr, None, PanicMode=True)
-            time.sleep(30)
+            time.sleep(1)
             
-            
-
+            if ard_err and not f_err: 
+                rv2 = ArduinoFunctions.check_ports()
+                if not handle_error(rv2, stdscr, PanicMenu=False):
+                    not_main(stdscr)
 
 def get_first_menu_values():
     ipaddr_func = InputPFunctions.get_ipaddr()
@@ -824,10 +836,15 @@ def not_main(stdscr):
         cur_stat["all_menu_elements"] = refresh_screen(stdscr, cur_stat, settings=settings)
 
         key, ports = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key, ArduinoFunctions.check_ports)
-        handle_error(key, stdscr, PanicMenu=True)
+        
         handle_error(ports, stdscr, PanicMenu=True)
+        
+        if key is None:
+            continue
+        
+        handle_error(key, stdscr, PanicMenu=True)
+        
 
-        if ports, 
 
         # Imlec hareketleri degiskenlere yazildi
         cur_stat["current_row"] = cursor_handler(key, cur_stat)
