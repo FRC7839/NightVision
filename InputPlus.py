@@ -238,7 +238,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
             led_control["status"] = True
-            rv = DbFunctions.save_settings(file=file_lc, led_control) # Olmazsa yapacak bir şey yok
+            rv = DbFunctions.save_settings(file_lc, led_control) # Olmazsa yapacak bir şey yok
             handle_error(rv, stdscr, PanicMenu=False)
 
         if settings is not None:    
@@ -437,7 +437,7 @@ def get_cam_menu_values(isCamOnline=InputPFunctions.check_cam()):
     return [mainmenu, mainmenu_status]
 
 
-def get_info_menu_values(teamnumber)
+def get_info_menu_values(teamnumber):
     menu = []
     menucheck = []
 
