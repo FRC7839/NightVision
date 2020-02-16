@@ -28,19 +28,25 @@
                                                                             14/2 WRITE CURRENT SETTING RETURN TO MAIN MENU (COLONELKAI)
                                                                             14/2 INFO menüsü (Yazanlar - Tarih - Takım - vs) (COLONELKAI)
                                                                             14/2 check_arduino() oluştur ve key get içine koy
-# Panic mode içinde tekrar arduinoyu takmayı dene 
-
-# Panic Mode içinde de error aynı sebeple kısa duruyor, ona bak (COLONELKAI)
-
-# Save ve get_settings için handle_error()
+                                                                            16/2 Panic mode içinde tekrar arduinoyu takmayı dene 
+                                                                            16/2 Save ve get_setting için handle_error()
+                                                                            16/2 handle_error mm modeunun kernel panicine errorleri yollasın (yarım ama iş görür)
 
 # Led dosyasına is mm started ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
-# ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
-                                                                                                                        
+# TAKIM NUMARASI EKLEMEK İÇİN ARDUINO CONFIGE AYAR EKLE (TUNAPRO1234 ve COLONELKAI)
+    (button0'a her basıldığında sonraki rakama geçecek)
+
+# Settings dosyasına takım numarasını ekle
+
 # Pyfirmata knob 28 kodu editlenmesi
 
+# Panic Mode içinde de error aynı sebeple kısa duruyor, ona bak (COLONELKAI)
+
+# ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
+                                                                                                                        
 # Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
+
 "TODO"########################################################################################################################"""
 
 ###############################################################################################################################
@@ -159,17 +165,15 @@ else:
 # fonksiyonuna ve getvalues'a ihtiyac duyuyor
 # match mode icin get menu values fonksiyonu
 
-def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None, PanicMenu=False, errmsg=None):
+def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None, PanicMenu=False, errmsg=None, err_type=None):
     if not PanicMenu:
         led_control = {}
         # Ana yer
         while True:
             #Dosyadan okumayi dene
             led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
-            if handle_error(led_control, stdscr, PanicMenu=False):
-                led_control = {}
-                led_control["status"] = True
-           
+            handle_error(led_control, stdscr, PanicMenu=True)
+
             m_menu_elements = [] # Menu elementleri arrayi
             m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
 
@@ -213,14 +217,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 break
    
     ### KERNEL PANIC ###
-    else:        
-        f_err = False
-        ard_err = False
-        
-        rv = ArduinoFunctions.check_ports()        
-        if handle_error(rv, stdscr, PanicMenu=False):
-            ard_err = True    
-        
+    else:                        
         settings = DbFunctions.get_setting(file_s)
         led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
         
@@ -258,6 +255,8 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
                 m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
                 m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## ")
+                if not err_type is None:
+                    m_menu_elements.append(" ## ERROR : " + err_type + " ## ")
             except:
                 pass
         
@@ -275,7 +274,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
             background_setup(stdscr, None, PanicMode=True)
             time.sleep(1)
             
-            if ard_err and not f_err: 
+            if type(err_type) == str and err_type == "ARDUINO": 
                 rv2 = ArduinoFunctions.check_ports()
                 if not handle_error(rv2, stdscr, PanicMenu=False):
                     not_main(stdscr)
@@ -680,44 +679,52 @@ def refresh_screen(stdscr, cur_stat, settings):
     return new_all_menu_elements
 
 
-def handle_errors(stdscr=None, PanicMenu=True, *args):
-    for variable in args:    
-        if type(variable) == str:
-            if str(variable).startswith("InputP"):
-                background_setup(stdscr, None, PanicMode=True)
+# def handle_errors(stdscr=None, PanicMenu=True, *args):
+#     for variable in args:    
+#         if type(variable) == str:
+#             if str(variable).startswith("InputP"):
+#                 background_setup(stdscr, None, PanicMode=True)
                 
-                if test_mode is not None:
-                    raise Exception(str(variable))
+#                 if test_mode is not None:
+#                     raise Exception(str(variable))
 
-                else:
-                    if PanicMenu:
-                        match_mode(stdscr, PanicMenu=True, errmsg=variable)
-                    else:
-                        print_info(stdscr, variable, color=2, time=5)
-                    return True
-            else:
-                return False
+#                 else:
+#                     if PanicMenu:
+#                         match_mode(stdscr, PanicMenu=True, errmsg=variable)
+#                     else:
+#                         print_info(stdscr, variable, color=2, time=5)
+#                     return True
+#             else:
+#                 return False
 
 
-def handle_error(variable, stdscr=None, PanicMenu=True):  
-    if type(variable) == str:
-        if str(variable).startswith("InputP"):
+def handle_error(err_msg, stdscr=None, PanicMenu=True):  
+    if type(err_msg) == str:
+        if str(err_msg).startswith("InputP"):
+            err_type = None
+            
+            if err_msg in [all_errors[READ_ERR], all_errors[WRITE_ERR]]:
+                err_type = "FILE"
+            
+            elif err_msg in [all_errors[ARDUINO_CONN_ERR], all_errors[ARDUINO_CONN_LOST], all_errors[ARDUINO_INPUT_ERR]]: #
+                err_type = "ARDUINO"
+                    
             background_setup(stdscr, None, PanicMode=True)
             
             if test_mode is not None:
-                raise Exception(str(variable))
-
+                raise Exception(str(err_msg))
+            
             else:
                 if PanicMenu:
-                    match_mode(stdscr, PanicMenu=True, errmsg=variable)
+                    match_mode(stdscr, PanicMenu=True, errmsg=err_msg, err_type=err_type)
+
                 else:
-                    print_info(stdscr, variable, color=2, time=5)
+                    print_info(stdscr, err_msg, color=2, time=5)
+
                 return True
+
         else:
             return False
-
-
-
 
 
 def not_main(stdscr):
@@ -725,7 +732,7 @@ def not_main(stdscr):
 
     #region Settings okuma
     settings = DbFunctions.get_setting(file_s)
-    handle_error(settings, stdscr)
+    handle_error(settings, stdscr, PanicMenu=True)
     #endregion
 
     all_menu_elements = []

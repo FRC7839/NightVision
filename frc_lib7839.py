@@ -28,7 +28,7 @@ global SERVER_ALREADY_STARTED_ERR
 global SERVER_NOT_STARTED_ERR
 global MM_CANNOT_START_ERR
 global INTERNAL_SYNTAX_ERR
-global FILE_NOT_FOUND_ERR
+global WRITE_ERR
 global ARDUINO_INPUT_ERR
 global ARDUINO_CONN_ERR
 global CANT_CONNECT_ERR
@@ -48,8 +48,8 @@ INTERNAL_SYNTAX_ERR = "INTERNAL_SYNTAX_ERROR"
 ARDUINO_INPUT_ERR = "ARDUINO_CONNECTION_ERROR"
 CANT_CONNECT_ERR = "CAN_NOT_CONNECT_TO_SERVER"
 SERVER_NOT_STARTED_ERR = "SERVER_NOT_STARTED"
-FILE_NOT_FOUND_ERR = "FILE_NOT_FOUND_ERROR"
 ARDUINO_CONN_ERR = "ARDUINO_INPUT_ERROR"
+WRITE_ERR = "FILE_NOT_FOUND_ERROR"
 READ_ERR = "READ_ERROR"
 
 # settings.json dosyasini kontrol edebilmek icin arayuzde ayarlanacak ayarlar
@@ -94,15 +94,15 @@ max_v = 30
 # Errorler
 all_errors = {
     "SERVER_ALREADY_STARTED_ERROR" : "InputP ERROR: Sunucu daha once baslatildi.",
+    "SERVER_NOT_STARTED": "InputP ERROR: Server baslatilamadi.",
+    "CAN_NOT_CONNECT_TO_SERVER": "InputP ERROR: Sunucuya baglanilamiyor",
     "INTERNAL_KEY_GET_FUNC_ERROR": "InputP ERROR: Key_get fonksiyonuna girilen fonksiyonda bilinmeyen hata",
     "INTERNAL_SYNTAX_ERROR": "InputP ERROR: Tuna, kodunda hata var.",
     "MM_CANNOT_START_ERROR": "InputP ERROR: Mac modu baslatilamiyor.",
     "ARDUINO_INPUT_ERROR": "InputP ERROR: Pyfirmata cevap vermiyor.",
-    "CAN_NOT_CONNECT_TO_SERVER": "InputP ERROR: Sunucuya baglanilamiyor",
-    "SERVER_NOT_STARTED": "InputP ERROR: Server baslatilamadi.",
     "FILE_NOT_FOUND_ERROR": "InputP ERROR: JSON Dosyasi yok ve olusturulamiyor.",
-    "ARDUINO_CONNECTION_ERROR": "InputP ERROR: Arduino'ya baglanilamiyor.",
     "READ_ERROR": "InputP ERROR: JSON dosyasi okunamiyor.",
+    "ARDUINO_CONNECTION_ERROR": "InputP ERROR: Arduino'ya baglanilamiyor.",
     "ARDUINO_CONNECTION_LOST": "InputP ERROR: Arduino çıkarıldı"
 }
 
@@ -437,7 +437,7 @@ class DbFunctions:
 
                 except:
                     ### ERROR ###
-                    output_e = all_errors[FILE_NOT_FOUND_ERR]
+                    output_e = all_errors[WRITE_ERR]
                     print(output_e)
                     return output_e
 
@@ -450,7 +450,7 @@ class DbFunctions:
 
                 except:
                     ### ERROR ###
-                    output_e = all_errors[FILE_NOT_FOUND_ERR]
+                    output_e = all_errors[WRITE_ERR]
                     print(output_e)
                     return output_e
 
