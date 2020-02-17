@@ -40,6 +40,8 @@
                                                                             17-18/2 INFO MENuSu cALIsMIYOR
                                                                             (YALAN) Settings write error (TUNAPRO1234)     
 
+# Arduino takılı olduğunda ama değer okuyamadoğımızda loopa giriyoruz
+
 # Panic Mode icinde de error ayni sebeple kisa duruyor, ona bak (COLONELKAI)
 
 # ARDUINO IMPORT SUCCESS Mesaji ekranda kalmiyor (refresh yuzunden) (COLONELKAI)
