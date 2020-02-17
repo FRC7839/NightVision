@@ -12,7 +12,7 @@
 ### 
 #########################################################################################################
 
-
+                                                                        
 #                                                                  -->> . <<--NOKTAYI SİLME KOD BOZULUYOR
 #                                                                      /\   HERKES LORD NOKTA KARSISINDA EGILSIN
 #                                                                      |    TANRIMIZ NOKTA 
@@ -44,6 +44,8 @@
 # Panic Mode içinde de error aynı sebeple kısa duruyor, ona bak (COLONELKAI)
 
 # ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
+
+# Settings write error (TUNAPRO1234)
                                                                                                                         
 # Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
 
@@ -102,7 +104,7 @@
 
 
 from threading import Thread
-from FRC_LIB7839 import *
+from frc_lib7839 import *
 import threading
 import pyfirmata
 # import socket
@@ -279,6 +281,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 if not handle_error(rv2, stdscr, PanicMenu=False):
                     not_main(stdscr)
 
+
 def get_first_menu_values():
     ipaddr_func = InputPFunctions.get_ipaddr()
     check_cam_func = InputPFunctions.check_cam()
@@ -303,7 +306,7 @@ def get_first_menu_values():
         mainmenucheck.append(True)
 
 
-    mainmenu.append("ARDUINO CONFIG")
+    mainmenu.append("SETTINGS")
     mainmenucheck.append(True)
 
     if skip_cam_arg is not None:
@@ -407,6 +410,9 @@ def get_arduino_menu_values(settings):
         mainmenu.append("AUTONOMOUS MODE: " + settings["Autonomous Mode"])
         mainmenu_status.append("Normal")
 
+    mainmenu.append("")
+    mainmenu_status.append(True)
+
     # WRITE CURRENT SETTINGS AND OK BUTTONS
     mainmenu.append("WRITE CURRENT SETTINGS TO FILE")
     mainmenu_status.append("Normal")
@@ -508,6 +514,67 @@ def print_error(stdscr, cur_stat, color=2):
         stdscr.attroff(curses.color_pair(2))
         stdscr.refresh()
 
+
+def print_team_no_edit(stdscr, settings, team_no_select, cur_stat):
+    if team_no_select is not None:
+        h, w = stdscr.getmaxyx()
+        for idx, i in enumerate(settings["Team Number"]):
+            y = h // 2
+            x = w // 2 
+            
+            if cur_stat["current_menu"] == arduino_menu_value:
+
+                if idx == 0:
+                    x = x + 4
+                    if team_no_select == 0:
+                        stdscr.attron(curses.color_pair(1))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(1))
+                    else:
+                        stdscr.attron(curses.color_pair(3))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(3))
+
+                if idx == 1:
+                    x = x + 5
+                    if team_no_select == 1:
+                        stdscr.attron(curses.color_pair(1))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(1))
+                    else:
+                        stdscr.attron(curses.color_pair(3))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(3))
+
+                if idx == 2:
+                    x = x + 6
+                    if team_no_select == 2:
+                        stdscr.attron(curses.color_pair(1))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(1))
+                    else:
+                        stdscr.attron(curses.color_pair(3))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(3))
+
+                if idx == 3:
+                    x = x + 7
+                    if team_no_select == 3:
+                        stdscr.attron(curses.color_pair(1))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(1))
+                    else:
+                        stdscr.attron(curses.color_pair(3))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(3))
+
+                x = w // 2
+                x = x - 9
+                stdscr.attron(curses.color_pair(3))
+                stdscr.addstr(y, x, "TEAM NUMBER: ")
+                stdscr.attroff(curses.color_pair(3))
+
+                stdscr.refresh()
 
 def print_current_menu(stdscr, cur_stat):
     firsttime = True
@@ -658,7 +725,7 @@ def background_setup(stdscr, cur_stat=None, PanicMode=False):
         stdscr.bkgd(" ", curses.color_pair(4))
     
 
-def refresh_screen(stdscr, cur_stat, settings):
+def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings):
     new_all_menu_elements = cur_stat["all_menu_elements"]
 
 
@@ -675,6 +742,8 @@ def refresh_screen(stdscr, cur_stat, settings):
 
     # Background ayarlandiktan sonra menu yazdirildi
     print_current_menu(stdscr, cur_stat)
+
+    print_team_no_edit(stdscr, settings, team_no_pos, cur_stat)
 
     return new_all_menu_elements
 
@@ -781,10 +850,11 @@ def not_main(stdscr):
 
     #endregion
 
+    team_no_pos = 9
     msg = None
     key = None
 
-    refresh_screen(stdscr, cur_stat, settings)
+    refresh_screen(stdscr, key, team_no_pos, cur_stat, settings)
 
     # time.sleep(1)
     # region arduino import
@@ -840,10 +910,10 @@ def not_main(stdscr):
 
         ##########
         # Ekran yenilenmesi
-        cur_stat["all_menu_elements"] = refresh_screen(stdscr, cur_stat, settings=settings)
+        cur_stat["all_menu_elements"] = refresh_screen(stdscr, key, team_no_pos, cur_stat, settings=settings)
 
         key, ports = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key, ArduinoFunctions.check_ports)
-        
+
         handle_error(ports, stdscr, PanicMenu=True)
         
         if key is None:
@@ -905,10 +975,27 @@ def not_main(stdscr):
             ):
                 settings["Autonomous Mode"] = str(ArduinoFunctions.map_x(key, 0, max_v, 0, 5))
 
-            # Write tusu
+
+            if(cur_stat["current_row"] == 4 and team_no_pos == 9):
+                team_no_pos = 0
+            # Team değiştirme şeysi
             if (
                 key == "button0"
                 and cur_stat["current_row"] == 4
+            ):
+                if team_no_pos < 4:
+                    team_no_pos += 1
+                
+                if team_no_pos == 4 or team_no_pos == 5:
+                    team_no_pos = 0
+
+            if (cur_stat["current_row"] != 4):
+                team_no_pos = 9 # 9 sadece 0 ile 3 arasında olmayan bir değer olarak
+
+            # Write tusu
+            if (
+                key == "button0"
+                and cur_stat["current_row"] == 5
             ):
 
                 rv = DbFunctions.save_settings(file_s, settings)

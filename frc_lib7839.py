@@ -58,7 +58,8 @@ setting_names = [
     "Robot Location",
     "Camera Tolerance",
     "Waiting Period",
-    "Autonomous Mode"
+    "Autonomous Mode",
+    "Team Number"
 ]
 
 setting_defaults = [
@@ -66,7 +67,8 @@ setting_defaults = [
     "MIDDLE",
     "15",
     "0",
-    "1"
+    "1",
+    "7839"
 ]
 
 lc_names = [
