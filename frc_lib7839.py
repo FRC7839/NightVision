@@ -18,6 +18,7 @@ global setting_defaults
 global setting_names
 global lc_defaults
 global all_errors
+global all_infos
 global lc_names
 global file_lc
 global file_s
@@ -33,6 +34,9 @@ global ARDUINO_INPUT_ERR
 global ARDUINO_CONN_ERR
 global CANT_CONNECT_ERR
 global READ_ERR
+
+global ARDUINO_CONNECTION_SUCCESS
+global ARDUINO_CONNECTING
 
 global arduino_menu_value
 global camera_menu_value
@@ -51,6 +55,9 @@ SERVER_NOT_STARTED_ERR = "SERVER_NOT_STARTED"
 ARDUINO_CONN_ERR = "ARDUINO_INPUT_ERROR"
 WRITE_ERR = "FILE_NOT_FOUND_ERROR"
 READ_ERR = "READ_ERROR"
+
+ARDUINO_CONNECTION_SUCCESS = "ARD_CONN_SUCCESS"
+ARDUINO_CONNECTING = "ARD_CONNECTING"
 
 # settings.json dosyasini kontrol edebilmek icin arayuzde ayarlanacak ayarlar
 setting_names = [
@@ -108,6 +115,11 @@ all_errors = {
     "READ_ERROR": "InputP ERROR: JSON dosyasi okunamiyor.",
     "ARDUINO_CONNECTION_ERROR": "InputP ERROR: Arduino'ya baglanilamiyor.",
     "ARDUINO_CONNECTION_LOST": "InputP ERROR: Arduino çıkarıldı"
+}
+
+all_infos = {
+    "ARD_CONN_SUCCESS" : "InputP INFO: SUCCESSFUL", 
+    "ARD_CONNECTING" : "InputP INFO: Importing Arduino"
 }
 
 arduino_menu_value = 2
