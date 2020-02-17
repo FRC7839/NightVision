@@ -72,11 +72,13 @@ setting_defaults = [
 ]
 
 lc_names = [
-    "status"
+    "Led Status",
+    "Match Mode Status"
 ]
 
 lc_defaults = [
-    True
+    True,
+    False
 ]
 
 # Arduinodan deger aldiktan sonraki bekleme suresi
@@ -111,8 +113,8 @@ all_errors = {
 arduino_menu_value = 2
 camera_menu_value = 3
 main_menu_value = 0
-ip_menu_value = 1
 info_menu_value = 4
+ip_menu_value = 1
 
 # endregion
 
@@ -938,7 +940,7 @@ class InputPFunctions:
                 new_menu = cur_stat["current_menu"]
                 new_row = cur_stat["current_row"]
                 
-            elif cur_stat["current_row"] == (info_menu_value-1):
+            elif cur_stat["current_row"] == (info_menu_value):
                 new_menu = info_menu_value
                 new_row = 0
 

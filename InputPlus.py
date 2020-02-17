@@ -31,26 +31,22 @@
                                                                             16/2 Panic mode içinde tekrar arduinoyu takmayı dene 
                                                                             16/2 Save ve get_setting için handle_error()
                                                                             16/2 handle_error mm modeunun kernel panicine errorleri yollasın (yarım ama iş görür)
-                                                                            17/2 (IN_PROG) TAKIM NUMARASI EKLEMEK İÇİN ARDUINO CONFIGE AYAR EKLE (TUNAPRO1234 ve COLONELKAI)
+                                                                            17/2 TAKIM NUMARASI EKLEMEK İÇİN ARDUINO CONFIGE AYAR EKLE (TUNAPRO1234 ve COLONELKAI)
                                                                                 (button0'a her basıldığında sonraki rakama geçecek)
                                                                             17/2 SETTINGS MENUSUNE ANLIK DOSYA RESFRESHI 
                                                                             17/2 Settings dosyasına takım numarasını ekle 
+                                                                            17-18/2 TEAM NUMBER YAZISI DA BEYAZ YANMALI
+                                                                            17-18/2 Led dosyasına is mm started ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
 # INFO MENÜSÜ ÇALIŞMIYOR
-
-# Settings write error (TUNAPRO1234) (Yalan)
-
-# TEAM NUMBER YAZISI DA BEYAZ YANSIN KÖLE (COLONELKAI")
-
-# Led dosyasına is mm started ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
 
 # Panic Mode içinde de error aynı sebeple kısa duruyor, ona bak (COLONELKAI)
 
 # ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
 
-# Pyfirmata knob 28 kodu editlenmesi
-                                                                                                                        
 # Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
+                                                                                                                        
+# Settings write error (TUNAPRO1234) (Yalan)
 
 "TODO"########################################################################################################################"""
 
@@ -163,32 +159,36 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
             led_control = DbFunctions.get_setting(file_lc) # led control dosyasindan ayari cekiyor
             handle_error(led_control, stdscr, PanicMenu=True)
 
+            led_control["Match Mode Status"] = True
+
             m_menu_elements = [] # Menu elementleri arrayi
             m_menu_elements.append(" ## MATCH MODE STARTED ## ") # Title
 
             # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
-            if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]:
-                m_menu_elements.append(" ## LED CONTROL : " + str(led_control["status"]) + " ## ")
+            if led_control["Led Status"] is not None and led_control["Led Status"] in [True, False, "True", "False"]:
+                m_menu_elements.append(" ## LED CONTROL : " + str(led_control["Led Status"]) + " ## ")
 
 
             # Eger kapali yada acik alamazsa error veriyor.
             else:
                 m_menu_elements.append(" ## LED CONTROL FAILED ## ")
-                led_control["status"] = True
+                led_control["Led Status"] = True
 
+            try:    
+                # Menunun geri kalani, durum reporu veriyor.
+                m_menu_elements.append(" ## TEAM_NUMBER : " + str(settings["Team Number"]) + " ## ")
+                m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
+                m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
+                m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
+                m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## ")
 
-            # Menunun geri kalani, durum reporu veriyor.
-            m_menu_elements.append(" ## TEAM_NUMBER : " + str(settings["Team Number"]) + " ## ")
-            m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
-            m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
-            m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
-            m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## ")
+            except:
+                handle_error(all_errors[READ_ERR], stdscr, PanicMenu=True)
 
-
-            if led_control["status"] in ["True", True]:
+            if led_control["Led Status"] in ["True", True]:
                 ArduinoFunctions.led_write(led1, out1 , 1) # on
 
-            elif (led_control["status"] in ["False", False]):
+            elif (led_control["Led Status"] in ["False", False]):
                 ArduinoFunctions.led_write(led1, out1, 0) # off
 
             else:
@@ -204,6 +204,12 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                 and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == 0
             ):
                 ArduinoFunctions.led_write(led1, out1 , 1) # on
+                
+                led_control["Match Mode Status"] = False
+                
+                rv = DbFunctions.save_settings(file_lc, led_control["Match Mode Status"])
+                handle_error(rv, stdscr, PanicMenu=True)
+                
                 break
    
     ### KERNEL PANIC ###
@@ -221,25 +227,20 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
             for i in range(len(setting_names)):
                 settings[setting_names[i]] = setting_defaults[i]
             
-            # settings[setting_names[0]] = setting_defaults[0]
-            # settings[setting_names[1]] = setting_defaults[1]
-            # settings[setting_names[2]] = setting_defaults[2]
-            # settings[setting_names[3]] = setting_defaults[3]
-            # settings[setting_names[4]] = setting_defaults[4]          
             f_err = True
             
         m_menu_elements = [] # Menu elementleri arrayi
         m_menu_elements.append(" ## PANIC MODE STARTED ## ") # Title
 
         # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
-        if led_control["status"] is not None and led_control["status"] in [True, False, "True", "False"]:
-            m_menu_elements.append(" ## LED CONTROL : " + str(led_control["status"]) + " ## ")
+        if led_control["Led Status"] is not None and led_control["Led Status"] in [True, False, "True", "False"]:
+            m_menu_elements.append(" ## LED CONTROL : " + str(led_control["Led Status"]) + " ## ")
 
         # Eger kapali yada acik alamazsa error veriyor.
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
 
-            led_control["status"] = True
+            led_control["Led Status"] = True
             rv = DbFunctions.save_settings(file_lc, led_control) # Olmazsa yapacak bir şey yok
             handle_error(rv, stdscr, PanicMenu=False)
 
@@ -406,8 +407,9 @@ def get_arduino_menu_values(settings):
     else:
         mainmenu.append("AUTONOMOUS MODE: " + settings["Autonomous Mode"])
         mainmenu_status.append("Normal")
-
-    mainmenu.append("")
+    
+    # mainmenu.append("")
+    mainmenu.append("TEAM NUMBER:     ")
     mainmenu_status.append(True)
 
     # WRITE CURRENT SETTINGS AND OK BUTTONS
@@ -458,9 +460,6 @@ def get_info_menu_values(teamnumber):
     menu.append("MADE FOR FRC 2020 SEASON")
     menucheck.append(True)
 
-    menu.append("Made by:")
-    menucheck.append(True)
-
     menu.append("TUNAPRO123")
     menucheck.append(True)
 
@@ -469,6 +468,9 @@ def get_info_menu_values(teamnumber):
 
     menu.append("BlackShadow")
     menucheck.append(False)
+
+    menu.append("NICE")
+    menucheck.append(True)
 
     return [menu, menucheck]
 
@@ -568,7 +570,7 @@ def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
                 x = w // 2
                 x = x - 9
                 stdscr.attron(curses.color_pair(3))
-                stdscr.addstr(y, x, "TEAM NUMBER: ")
+                # stdscr.addstr(y, x, "TEAM NUMBER: ")
                 stdscr.attroff(curses.color_pair(3))
 
                 stdscr.refresh()
