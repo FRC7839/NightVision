@@ -499,33 +499,31 @@ class DbFunctions:
             for settings in args:
                 c_s = DbFunctions.read_settings_on_json(file=file)
                 
-                if type(c_s) == str and c_s is None or c_s == "" or c_s.startswith("InputP"):
-                    rv = DbFunctions.write_setting_to_json(file=file, reset=True)
+                if type(c_s) == str:
+                    if c_s is None or c_s == "" or c_s.startswith("InputP"):
+                        rv = DbFunctions.write_setting_to_json(file=file, reset=True)
 
-                    if str(rv).startswith("InputP"):
-                        ### ERROR ###
-                        rv += str(rv)
-                        print(rv + " # FROM SAVE_SETTINGS FUNCTION")
-                        return rv
-            
+                        if str(rv).startswith("InputP"):
+                            ### ERROR ###
+                            rv += str(rv)
+                            print(rv + " # FROM SAVE_SETTINGS FUNCTION")
+                            return rv
+                
                 if settings is None:
                     settings = c_s
 
-                for setting_name in setting_names:
+                for i in range(len(setting_names)):
                     try:
-                        settings[setting_name]
+                        settings[setting_names[i]]
                     except:
-                        settings[setting_name] = None
+                        settings[setting_names[i]] = setting_defaults[i]
 
                 rv = DbFunctions.write_settings_to_json(settings, file=file)
 
-                try:    
+                if type(rv) == str:                
                     if rv.startswith("InputP"):
                         return rv
 
-                except:
-                    pass
-        
         except:
             ### ERROR ###
             output = all_errors[INTERNAL_SYNTAX_ERR]

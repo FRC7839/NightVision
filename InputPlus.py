@@ -31,21 +31,24 @@
                                                                             16/2 Panic mode içinde tekrar arduinoyu takmayı dene 
                                                                             16/2 Save ve get_setting için handle_error()
                                                                             16/2 handle_error mm modeunun kernel panicine errorleri yollasın (yarım ama iş görür)
+                                                                            17/2 (IN_PROG) TAKIM NUMARASI EKLEMEK İÇİN ARDUINO CONFIGE AYAR EKLE (TUNAPRO1234 ve COLONELKAI)
+                                                                                (button0'a her basıldığında sonraki rakama geçecek)
+                                                                            17/2 SETTINGS MENUSUNE ANLIK DOSYA RESFRESHI 
+                                                                            17/2 Settings dosyasına takım numarasını ekle 
+
+# INFO MENÜSÜ ÇALIŞMIYOR
+
+# Settings write error (TUNAPRO1234) (Yalan)
+
+# TEAM NUMBER YAZISI DA BEYAZ YANSIN KÖLE (COLONELKAI")
 
 # Led dosyasına is mm started ayarını ekle (Kamera algoritmasının okuyup okumaması gerektiğini söylemek için)
-
-# TAKIM NUMARASI EKLEMEK İÇİN ARDUINO CONFIGE AYAR EKLE (TUNAPRO1234 ve COLONELKAI)
-    (button0'a her basıldığında sonraki rakama geçecek)
-
-# Settings dosyasına takım numarasını ekle
-
-# Pyfirmata knob 28 kodu editlenmesi
 
 # Panic Mode içinde de error aynı sebeple kısa duruyor, ona bak (COLONELKAI)
 
 # ARDUINO IMPORT SUCCESS Mesajı ekranda kalmıyor (refresh yüzünden) (COLONELKAI)
 
-# Settings write error (TUNAPRO1234)
+# Pyfirmata knob 28 kodu editlenmesi
                                                                                                                         
 # Yazılar üzerindeki türkçe karakterleri kaldır (ç, ı, İ, ö, ş, ü)
 
@@ -121,23 +124,7 @@ global skip_cam_arg
 global skip_nt_arg
 global test_mode
 global pc_mode
-global team_ip2
-
-
-team_number = InputPFunctions.find_arg("--team-number", num=True)
-
-if team_number is None:
-    team_ip2 = "78.39"
     
-else:
-    team_ip2 = str(InputPFunctions.find_arg("--team-number"))    
-    
-    if len(team_ip2) == 3:
-        team_ip2 = "0" + team_ip2[0] + "." + team_ip2[1:]
-
-    elif len(team_ip2) == 4:
-        team_ip2 = team_ip2[0:2] + "." + team_ip2[2:]
-
 
 pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
 test_mode = InputPFunctions.find_arg("--test-mode", num=True)
@@ -191,6 +178,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
 
 
             # Menunun geri kalani, durum reporu veriyor.
+            m_menu_elements.append(" ## TEAM_NUMBER : " + str(settings["Team Number"]) + " ## ")
             m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
             m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
             m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
@@ -225,14 +213,19 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         
         if handle_error(led_control, stdscr, PanicMenu=False) or handle_error(settings, stdscr, PanicMenu=False):
             led_control = {}
-            led_control["status"] = True
-            
             settings = {}
-            settings[setting_names[0]] = setting_defaults[0]
-            settings[setting_names[1]] = setting_defaults[1]
-            settings[setting_names[2]] = setting_defaults[2]
-            settings[setting_names[3]] = setting_defaults[3]
-            settings[setting_names[4]] = setting_defaults[4]          
+            
+            for i in range(len(lc_names)):
+                led_control[lc_names[i]] = lc_defaults[i]
+            
+            for i in range(len(setting_names)):
+                settings[setting_names[i]] = setting_defaults[i]
+            
+            # settings[setting_names[0]] = setting_defaults[0]
+            # settings[setting_names[1]] = setting_defaults[1]
+            # settings[setting_names[2]] = setting_defaults[2]
+            # settings[setting_names[3]] = setting_defaults[3]
+            # settings[setting_names[4]] = setting_defaults[4]          
             f_err = True
             
         m_menu_elements = [] # Menu elementleri arrayi
@@ -253,6 +246,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
         if settings is not None:    
             # Menunun geri kalani, durum reporu veriyor.
             try:
+                m_menu_elements.append(" ## TEAM_NUMBER : " + str(settings["Team Number"]) + " ## ")
                 m_menu_elements.append(" ## CAMERA_TOLERANCE : " + str(settings["Camera Tolerance"]) + " ## ")
                 m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
                 m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
@@ -282,7 +276,7 @@ def match_mode(stdscr, settings=None, led1=None, out1=None, swt1=None, pot1=None
                     not_main(stdscr)
 
 
-def get_first_menu_values():
+def get_first_menu_values(team_ip2):
     ipaddr_func = InputPFunctions.get_ipaddr()
     check_cam_func = InputPFunctions.check_cam()
 
@@ -333,7 +327,7 @@ def get_first_menu_values():
     return [mainmenu, mainmenucheck]
 
 
-def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPFunctions.get_ipaddr()):
+def get_ip_menu_values(team_ip2, ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPFunctions.get_ipaddr()):
     mainmenu = []
     mainmenu_status = []
 
@@ -344,9 +338,12 @@ def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPF
     mainmenu.append("HOSTNAME: " + str(socket.gethostname()))
     mainmenu.append("SSID: " + str(ssid_func))
     mainmenu.append("IP ADRESS: " + ipaddr_func)
+    mainmenu.append("RADIO IP RANGE: 10." + team_ip2 + ".0/24")
+    mainmenu_status.append("Normal")
+
+    
     mainmenu.append("OK")
 
-    mainmenu_status.append("Normal")
 
     if str(socket.gethostname()) != "frcvision":
         mainmenu_status[0] = False
@@ -364,6 +361,8 @@ def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPF
         mainmenu_status.append(True)
         mainmenu_status.append(True)
 
+    
+    mainmenu_status.append("Normal")
     mainmenu_status.append("Normal")
 
     return [mainmenu, mainmenu_status]
@@ -372,8 +371,6 @@ def get_ip_menu_values(ssid_func=InputPFunctions.get_ssid(), ipaddr_func=InputPF
 def get_arduino_menu_values(settings):
     mainmenu = []
     mainmenu_status = []
-
-
 
     # ROBOT LOCATION
     if settings["Robot Location"] is None:
@@ -515,10 +512,10 @@ def print_error(stdscr, cur_stat, color=2):
         stdscr.refresh()
 
 
-def print_team_no_edit(stdscr, settings, team_no_select, cur_stat):
+def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
     if team_no_select is not None:
         h, w = stdscr.getmaxyx()
-        for idx, i in enumerate(settings["Team Number"]):
+        for idx, i in enumerate(team_n):
             y = h // 2
             x = w // 2 
             
@@ -575,6 +572,7 @@ def print_team_no_edit(stdscr, settings, team_no_select, cur_stat):
                 stdscr.attroff(curses.color_pair(3))
 
                 stdscr.refresh()
+
 
 def print_current_menu(stdscr, cur_stat):
     firsttime = True
@@ -685,8 +683,9 @@ def set_current_menu(cur_stat, all_menu_elements):
     return cur_stat["current_menu_elements"], cur_stat["current_menu_status"]
 
 
-def return_to_menu(key, cur_stat):
+def return_to_menu(key, cur_stat, stdscr):
     # Ana Menuye Cikma
+    settings = None
     if (
         (key == "button0")
         and cur_stat["current_menu"] != 0
@@ -694,8 +693,12 @@ def return_to_menu(key, cur_stat):
     ):
         cur_stat["current_row"] = 0
         cur_stat["current_menu"] = 0
+        
+        settings = DbFunctions.get_setting(file_s)
+        handle_error(settings, stdscr, PanicMenu=True)
 
-    # Save settings icin
+
+    # write settings icin
     if (
         (key == "button0")
         and cur_stat["current_menu"] == arduino_menu_value
@@ -703,9 +706,13 @@ def return_to_menu(key, cur_stat):
     ):
         cur_stat["current_row"] = 0
         cur_stat["current_menu"] = 0
-    
+        
+        settings = DbFunctions.get_setting(file_s)
+        handle_error(settings, stdscr, PanicMenu=True)
 
-    return cur_stat["current_row"], cur_stat["current_menu"]
+
+
+    return cur_stat["current_row"], cur_stat["current_menu"], settings
 
 
 def background_setup(stdscr, cur_stat=None, PanicMode=False):
@@ -725,12 +732,11 @@ def background_setup(stdscr, cur_stat=None, PanicMode=False):
         stdscr.bkgd(" ", curses.color_pair(4))
     
 
-def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings):
+def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings, team_ip2):
     new_all_menu_elements = cur_stat["all_menu_elements"]
-
-
-    new_all_menu_elements[main_menu_value] = get_first_menu_values()
-    new_all_menu_elements[ip_menu_value] = get_ip_menu_values(InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr())
+    
+    new_all_menu_elements[main_menu_value] = get_first_menu_values(team_ip2)
+    new_all_menu_elements[ip_menu_value] = get_ip_menu_values(team_ip2, InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr())
     new_all_menu_elements[arduino_menu_value] = get_arduino_menu_values(settings)
     new_all_menu_elements[camera_menu_value] = get_cam_menu_values()
 
@@ -743,10 +749,11 @@ def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings):
     # Background ayarlandiktan sonra menu yazdirildi
     print_current_menu(stdscr, cur_stat)
 
-    print_team_no_edit(stdscr, settings, team_no_pos, cur_stat)
+    print_team_no_edit(stdscr, settings["Team Number"], team_no_pos, cur_stat)
 
     return new_all_menu_elements
 
+# region
 
 # def handle_errors(stdscr=None, PanicMenu=True, *args):
 #     for variable in args:    
@@ -766,6 +773,7 @@ def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings):
 #             else:
 #                 return False
 
+# endregion
 
 def handle_error(err_msg, stdscr=None, PanicMenu=True):  
     if type(err_msg) == str:
@@ -796,6 +804,18 @@ def handle_error(err_msg, stdscr=None, PanicMenu=True):
             return False
 
 
+def set_tip(team_number):
+    team_ip2 = team_number
+    
+    if len(team_ip2) == 3:
+        team_ip2 = "0" + team_ip2[0] + "." + team_ip2[1:]
+
+    elif len(team_ip2) == 4:
+        team_ip2 = team_ip2[0:2] + "." + team_ip2[2:]
+
+    return team_ip2
+
+
 def not_main(stdscr):
     # region while dongusune kadar olan gereksiz seyler
 
@@ -803,10 +823,12 @@ def not_main(stdscr):
     settings = DbFunctions.get_setting(file_s)
     handle_error(settings, stdscr, PanicMenu=True)
     #endregion
+    
+    team_ip2 = set_tip(settings["Team Number"])
 
     all_menu_elements = []
-    all_menu_elements.append(get_first_menu_values())
-    all_menu_elements.append(get_ip_menu_values())
+    all_menu_elements.append(get_first_menu_values(team_ip2))
+    all_menu_elements.append(get_ip_menu_values(team_ip2, InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr()))
     all_menu_elements.append(get_arduino_menu_values(settings))
     all_menu_elements.append(get_cam_menu_values(None))
     all_menu_elements.append(get_info_menu_values(None))
@@ -854,7 +876,7 @@ def not_main(stdscr):
     msg = None
     key = None
 
-    refresh_screen(stdscr, key, team_no_pos, cur_stat, settings)
+    refresh_screen(stdscr, key, team_no_pos, cur_stat, settings, team_ip2)
 
     # time.sleep(1)
     # region arduino import
@@ -910,7 +932,7 @@ def not_main(stdscr):
 
         ##########
         # Ekran yenilenmesi
-        cur_stat["all_menu_elements"] = refresh_screen(stdscr, key, team_no_pos, cur_stat, settings=settings)
+        cur_stat["all_menu_elements"] = refresh_screen(stdscr, key, team_no_pos, cur_stat, settings=settings, team_ip2=team_ip2)
 
         key, ports = ArduinoFunctions.key_get(but1, but2, pot1, wait_time_for_get_key, ArduinoFunctions.check_ports)
 
@@ -976,21 +998,26 @@ def not_main(stdscr):
                 settings["Autonomous Mode"] = str(ArduinoFunctions.map_x(key, 0, max_v, 0, 5))
 
 
+
             if(cur_stat["current_row"] == 4 and team_no_pos == 9):
                 team_no_pos = 0
-            # Team değiştirme şeysi
-            if (
-                key == "button0"
-                and cur_stat["current_row"] == 4
-            ):
-                if team_no_pos < 4:
-                    team_no_pos += 1
-                
-                if team_no_pos == 4 or team_no_pos == 5:
-                    team_no_pos = 0
+            
 
+            # Team değiştirme şeysi
+            if (cur_stat["current_row"] == 4):
+                if key == "button0":
+                    if team_no_pos < 4:
+                        team_no_pos += 1
+                    
+                    if team_no_pos >= 4:
+                        team_no_pos = 0
+   
+                if type(key) == int:
+                    settings["Team Number"] = settings["Team Number"][0:team_no_pos] + str(ArduinoFunctions.map_x(key, 0, max_v, 0, 9)) + settings["Team Number"][(team_no_pos+1):4]
+                    
             if (cur_stat["current_row"] != 4):
                 team_no_pos = 9 # 9 sadece 0 ile 3 arasında olmayan bir değer olarak
+
 
             # Write tusu
             if (
@@ -1014,9 +1041,15 @@ def not_main(stdscr):
 
         # Menu degistirme olaylari
         cur_stat["current_row"], cur_stat["current_menu"] = InputPFunctions.change_menu(key, cur_stat, led1, out1)
-        cur_stat["current_row"], cur_stat["current_menu"] = return_to_menu(key, cur_stat)
+        cur_stat["current_row"], cur_stat["current_menu"], sett = return_to_menu(key, cur_stat, stdscr)
         cur_stat["current_menu_elements"], cur_stat["current_menu_status"] = set_current_menu(cur_stat, all_menu_elements)
 
+        team_ip2 = set_tip(settings["Team Number"])
+            
+        if sett is not None and not type(sett) == 4:
+            settings = sett
+        
+        
 
 curses.wrapper(not_main)
 
