@@ -315,17 +315,17 @@ def match_mode(
 
         while True:
             print_menu_for_match(stdscr, m_menu_elements)
+            time.sleep(1)
 
             if type(errmsg) == str and errmsg.startswith("InputP"):
                 print_info(stdscr, errmsg, color=2)
                 errmsg = None
 
             background_setup(stdscr, None, PanicMode=True)
-            time.sleep(1)
 
             if type(err_type) == str and err_type == "ARDUINO":
                 rv2 = ArduinoFunctions.check_ports()
-                if not handle_error(rv2, stdscr, PanicMenu=False):
+                if not handle_error(rv2, stdscr, PanicMenu=False, i=True):
                     not_main(stdscr)
 
 
@@ -838,7 +838,7 @@ def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings, team_ip2):
 # endregion
 
 
-def handle_error(err_msg, stdscr=None, PanicMenu=True):
+def handle_error(err_msg, stdscr=None, PanicMenu=True, i=False):
     if type(err_msg) == str:
         if str(err_msg).startswith("InputP"):
             err_type = None
@@ -865,7 +865,8 @@ def handle_error(err_msg, stdscr=None, PanicMenu=True):
                     )
 
                 else:
-                    print_info(stdscr, err_msg, color=2)
+                    if not i:
+                        print_info(stdscr, err_msg, color=2)
 
                 return True
 
