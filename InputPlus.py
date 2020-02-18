@@ -308,15 +308,15 @@ def match_mode(
             except:
                 pass
 
-        errortimer = threading.Timer(5, print_error, args=[stdscr, None])
+        errortimer = threading.Timer(0.1, print_error, args=[stdscr, errmsg])
         errortimer.start()
-        print_error(stdscr, errmsg)
+
 
         while True:
             print_menu_for_match(stdscr, m_menu_elements)
 
             if type(errmsg) == str and errmsg.startswith("InputP"):
-                print_info(stdscr, errmsg, color=2, time=5)
+                print_info(stdscr, errmsg, color=2)
                 errmsg = None
 
             background_setup(stdscr, None, PanicMode=True)
@@ -529,46 +529,49 @@ def get_info_menu_values(teamnumber):
     return [menu, menucheck]
 
 
-def print_info(stdscr, input_str, color=2, time=5):
-    errortimer = threading.Timer(time, print_error, args=[stdscr, None])
+def print_info(stdscr, input_str, color=3):
+    errortimer = threading.Timer(0.1, print_error, args=[stdscr, input_str, color])
     errortimer.start()
-    print_error(stdscr, input_str, color=color)
 
 
-def print_error(stdscr, cur_stat, color=2):
-    if type(cur_stat) == str:
-        errmsg = cur_stat
+def print_error(stdscr, cur_stat, color=2, wait_time=5):
+    starttime = time.perf_counter()
+    while True:
+        if type(cur_stat) == str:
+            errmsg = cur_stat
+            if errmsg is not None:
+                h, w = stdscr.getmaxyx()
+                x = w // 2 - (len(errmsg) + 1) // 2
+                y = h - 1
+                stdscr.attron(curses.color_pair(color))
+                stdscr.addstr(y, x, errmsg)
+                stdscr.attroff(curses.color_pair(color))
+                stdscr.refresh()
 
-        if errmsg is not None:
+        elif cur_stat is not None:
+            errmsg = cur_stat["current_error"]
+
+            if errmsg is not None:
+                h, w = stdscr.getmaxyx()
+                x = w // 2 - (len(errmsg) + 1) // 2
+                y = h - 1
+                stdscr.attron(curses.color_pair(2))
+                stdscr.addstr(y, x, errmsg)
+                stdscr.attroff(curses.color_pair(2))
+                stdscr.refresh()
+
+        elif cur_stat is None:
             h, w = stdscr.getmaxyx()
-            x = w // 2 - (len(errmsg) + 1) // 2
-            y = h - 1
-            stdscr.attron(curses.color_pair(color))
-            stdscr.addstr(y, x, errmsg)
-            stdscr.attroff(curses.color_pair(color))
-            stdscr.refresh()
-
-    elif cur_stat is not None:
-        errmsg = cur_stat["current_error"]
-
-        if errmsg is not None:
-            h, w = stdscr.getmaxyx()
-            x = w // 2 - (len(errmsg) + 1) // 2
+            x = (w // 2) - (1 // 2)
             y = h - 1
             stdscr.attron(curses.color_pair(2))
-            stdscr.addstr(y, x, errmsg)
+            stdscr.addstr(y, x, "")
             stdscr.attroff(curses.color_pair(2))
             stdscr.refresh()
-
-    elif cur_stat is None:
-        h, w = stdscr.getmaxyx()
-        x = (w // 2) - (1 // 2)
-        y = h - 1
-        stdscr.attron(curses.color_pair(2))
-        stdscr.addstr(y, x, "")
-        stdscr.attroff(curses.color_pair(2))
-        stdscr.refresh()
-                
+        timenow = time.perf_counter()
+        if timenow - starttime > wait_time:
+            break
+                    
 
 
 def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
@@ -861,7 +864,7 @@ def handle_error(err_msg, stdscr=None, PanicMenu=True):
                     )
 
                 else:
-                    print_info(stdscr, err_msg, color=2, time=5)
+                    print_info(stdscr, err_msg, color=2)
 
                 return True
 
@@ -950,7 +953,10 @@ def not_main(stdscr):
     # region arduino import
 
     # board = pyfirmata.ArduinoNano("COM4")
-    print_error(stdscr, "InputP INFO: Importing Arduino", 3)
+    errortimer = threading.Timer(0.1, print_error, args=[stdscr, "InputP: Importing Arduino...", 3])
+    errortimer.start()
+
+
 
     start_t = timeit.default_timer()
     ###
@@ -969,14 +975,18 @@ def not_main(stdscr):
     if elapsed < 5:
         time.sleep(5 - elapsed)
 
-    print_error(stdscr, None)
+        errortimer = threading.Timer(0.1, print_error, args=[stdscr, None])
+        errortimer.start()
+
+
 
     
     if type(board) == str:
         handle_error(board, stdscr)
 
     else:
-        print_info(stdscr, all_infos[ARDUINO_CONNECTION_SUCCESS] , color=3, time=3)
+        # Arduino basarili bir sekilde import edilirse mesaj verecek
+        print_info(stdscr, all_infos[ARDUINO_CONNECTION_SUCCESS] , color=3)
 
     swt1 = board.get_pin("a:1:i")
     pot1 = board.get_pin("a:2:i")
