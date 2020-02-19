@@ -463,6 +463,13 @@ def get_arduino_menu_values(settings):
         mainmenu.append("AUTONOMOUS MODE: " + settings["Autonomous Mode"])
         mainmenu_status.append("Normal")
 
+    if settings["Camera Offset"] is None:
+        mainmenu.append("INPUT FOR CAMERA OFFSET")
+        mainmenu_status.append(False)
+    else:
+        mainmenu.append("CAMERA OFFSET:    mm")
+        mainmenu_status.append("Normal")
+
     # mainmenu.append("")
     mainmenu.append("TEAM NUMBER:     ")
     mainmenu_status.append(True)
@@ -572,7 +579,62 @@ def print_error(stdscr, cur_stat, color=2, wait_time=5):
         timenow = time.perf_counter()
         if timenow - starttime > wait_time:
             break
-                    
+
+
+def print_cam_offset_edit(stdscr, team_n, cam_offset_pos, cur_stat):
+    if cam_offset_pos is not None:
+        h, w = stdscr.getmaxyx()
+        cam_offset_pos_list = []
+
+        for idx, i in enumerate(team_n):
+            y = h // 2
+            x = w // 2
+
+            x -=- 1
+
+            if cur_stat["current_menu"] == arduino_menu_value:
+
+                if idx == 0:
+                    x = x + 4
+                    if cam_offset_pos == 0:
+                        stdscr.attron(curses.color_pair(1))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(1))
+                    else:
+                        stdscr.attron(curses.color_pair(3))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(3))
+
+                if idx == 1:
+                    x = x + 5
+                    if cam_offset_pos == 1:
+                        stdscr.attron(curses.color_pair(1))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(1))
+                    else:
+                        stdscr.attron(curses.color_pair(3))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(3))
+
+                if idx == 2:
+                    x = x + 6
+                    if cam_offset_pos == 2:
+                        stdscr.attron(curses.color_pair(1))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(1))
+                    else:
+                        stdscr.attron(curses.color_pair(3))
+                        stdscr.addstr(y, x, i)
+                        stdscr.attroff(curses.color_pair(3))
+
+
+                x = w // 2
+                x = x - 9
+                stdscr.attron(curses.color_pair(3))
+                # stdscr.addstr(y, x, "TEAM NUMBER: ")
+                stdscr.attroff(curses.color_pair(3))
+
+                stdscr.refresh()
 
 
 def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
@@ -581,6 +643,7 @@ def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
         for idx, i in enumerate(team_n):
             y = h // 2
             x = w // 2
+            y -=- 1
 
             if cur_stat["current_menu"] == arduino_menu_value:
 
@@ -791,7 +854,7 @@ def background_setup(stdscr, cur_stat=None, PanicMode=False):
         stdscr.bkgd(" ", curses.color_pair(4))
 
 
-def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings, team_ip2):
+def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings, team_ip2):
     new_all_menu_elements = cur_stat["all_menu_elements"]
 
     new_all_menu_elements[main_menu_value] = get_first_menu_values(team_ip2)
@@ -811,6 +874,8 @@ def refresh_screen(stdscr, key, team_no_pos, cur_stat, settings, team_ip2):
     print_current_menu(stdscr, cur_stat)
 
     print_team_no_edit(stdscr, settings["Team Number"], team_no_pos, cur_stat)
+
+    print_cam_offset_edit(stdscr, settings["Camera Offset"], cam_offset_pos, cur_stat)
 
     return new_all_menu_elements
 
@@ -946,10 +1011,11 @@ def not_main(stdscr):
     # endregion
 
     team_no_pos = 9
+    cam_offset_pos = 9
     msg = None
     key = None
 
-    refresh_screen(stdscr, key, team_no_pos, cur_stat, settings, team_ip2)
+    refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings, team_ip2)
 
     # time.sleep(1)
     # region arduino import
@@ -1012,7 +1078,7 @@ def not_main(stdscr):
         ##########
         # Ekran yenilenmesi
         cur_stat["all_menu_elements"] = refresh_screen(
-            stdscr, key, team_no_pos, cur_stat, settings=settings, team_ip2=team_ip2
+            stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings=settings, team_ip2=team_ip2
         )
         
         key, ports = ArduinoFunctions.key_get(
@@ -1078,11 +1144,14 @@ def not_main(stdscr):
                     ArduinoFunctions.map_x(key, 0, max_v, 0, 5)
                 )
 
-            if cur_stat["current_row"] == 4 and team_no_pos == 9:
+            if cur_stat["current_row"] == 5 and team_no_pos == 9:
                 team_no_pos = 0
+            if cur_stat["current_row"] == 4 and team_no_pos == 9:
+                cam_offset_pos = 0
+
 
             # Team degistirme seysi
-            if cur_stat["current_row"] == 4:
+            if cur_stat["current_row"] == 5:
                 if key == "button0":
                     if team_no_pos < 4:
                         team_no_pos += 1
@@ -1097,8 +1166,31 @@ def not_main(stdscr):
                         + settings["Team Number"][(team_no_pos + 1) : 4]
                     )
 
-            if cur_stat["current_row"] != 4:
+            if cur_stat["current_row"] == 4:
+                if key == "button0":
+                    if cam_offset_pos < 3:
+                        cam_offset_pos += 1
+
+                    if cam_offset_pos >= 3:
+                        cam_offset_pos = 0
+                    
+                
+                if type(key) == int:
+                    settings["Camera Offset"] = (
+                        settings["Camera Offset"][0:cam_offset_pos]
+                        + str(ArduinoFunctions.map_x(key, 0, max_v, 0, 9))
+                        + settings["Camera Offset"][(cam_offset_pos + 1) : 3]
+                    )
+
+
+
+            if cur_stat["current_row"] != 5:
                 team_no_pos = 9  # 9 sadece 0 ile 3 arasinda olmayan bir deger olarak
+
+            
+            if cur_stat["current_row"] != 4:
+                cam_offset_pos = 9  # 9 sadece 0 ile 3 arasinda olmayan bir deger olarak
+
 
             # Write tusu
             if key == "button0" and cur_stat["current_row"] == 5:

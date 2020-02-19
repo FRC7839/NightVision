@@ -4,5 +4,6 @@
     "Camera Tolerance": "15",
     "Waiting Period": "0",
     "Autonomous Mode": "1",
-    "Team Number": "7839"
+    "Team Number": "7879",
+    "Camera Offset": "666"
 }

@@ -66,7 +66,8 @@ setting_names = [
     "Camera Tolerance",
     "Waiting Period",
     "Autonomous Mode",
-    "Team Number"
+    "Team Number",
+    "Camera Offset"
 ]
 
 setting_defaults = [
@@ -75,7 +76,8 @@ setting_defaults = [
     "15",
     "0",
     "1",
-    "7839"
+    "7839",
+    "666"
 ]
 
 lc_names = [
