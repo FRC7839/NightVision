@@ -39,8 +39,7 @@
                                                                             17-18/2 Led dosyasina is mm started ayarini ekle (Kamera algoritmasinin okuyup okumamasi gerektigini soylemek icin)
                                                                             17-18/2 INFO MENuSu cALIsMIYOR
                                                                             (YALAN) Settings write error (TUNAPRO1234)     
-# Info menüsüne siyonun dediği şeyi ekle
-
+                                                                            
 # Arduino takılı olduğunda ama değer okuyamadoğımızda loopa giriyoruz
 
 # Panic Mode icinde de error ayni sebeple kisa duruyor, ona bak (COLONELKAI)
