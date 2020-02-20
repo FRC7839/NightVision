@@ -70,7 +70,12 @@ Aktif olan versiyon 2 buton 1 switch 1 led ve 1 tane de potansiyometre gerektiri
 
 Kodları hem bilgisayarınıza hem de Raspberry'ye yüklemeniz gerekiyor. Raspberry'ye kurmak için "git clone https://github.com/FRC7839/NightVision" kodunu terminale girin. Windows'a yüklemek için kodalrın hemen yukarısında clone or download yazısına tıklayarak zip uzantısında sıkıştırılmış halde indirebilirsiniz.
 
+Raspberry pi her çalıştığında arayüzün de çalışmasını sağlamak için /home/pi klasörü içinde bulunan .bashrc dosyasında değişiklik yapmamız gerekiyor. Dosyanın sonuna:
+  
+  sleep 10 
+  python3 NightVision/InputP.py
 
+kodlarını ekleyin. BU kodları .bashrc dosyasına eklemek her ssh bağlantısı yaptığınızda da bu programın çalışacağı anlamına geliyor. 
 
 
 
