@@ -102,12 +102,12 @@
 # endregion
 
 from threading import Thread
-from frc_lib7839 import *
 import threading
 import pyfirmata
 import curses
 import json
 import time
+import sys
 import os
 
 # region global
@@ -124,7 +124,13 @@ test_mode = InputPFunctions.find_arg("--test-mode", num=True)
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 
 if os.name == "nt":
+    from frc_lib7839 import *
     pc_mode = 1
+
+elif pc_mode is not None and os.name == "posix":
+    sys.path.insert(1, '/home/pi/NightVision')
+    from frc_lib7839 import *
+
 
 if pc_mode is not None:
     skip_cam_arg = 1
