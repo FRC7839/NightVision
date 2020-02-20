@@ -228,9 +228,6 @@ class ArduinoFunctions:
             return output
 
 
-
-
-
     ### ERROR PROOF ### (Raise)
     @staticmethod
     def map_x(value, min_v, max_v, min_wv, max_wv):
@@ -386,6 +383,40 @@ class ArduinoFunctions:
             print(output_e + " # FROM KEY_GET FUNCTION")
             return output_e
 
+    @staticmethod
+    def encoder_key_get(
+        outputA,
+        outputB,
+        swt2
+    ):
+        aLastState = outputA.read()
+        counter = None
+        
+        while True: 
+            aState = outputA.read()
+            
+            if (aState != aLastState):
+                
+                if (outputB.read() != aState):
+                    counter-=-1
+                    
+                    if((counter % 2) == 0):
+                        print("Position: " + counter + "LOCATION: RIGHT" + swt2.read())
+                        
+                else:
+                    counter+=-1
+                    
+                    if((counter % 2) == 0):
+                        print("Position: " + counter + "LOCATION: LEFT" + swt2.read())
+                        
+                aLastState = aState; 
+            
+                if (swt2.read() == 0 and not (counter == 0)):
+                    counter = 0;
+                    print("Position: " + counter + "LOCATION: MIDDLE" + swt2.read())
+                    time.sleep(wait_time_for_get_key);
+            
+        
     ### ERROR PROOF ### (Handle)
     @staticmethod
     def get_robo_loc_from_inp(potan, max_v):
