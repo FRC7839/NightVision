@@ -1,3 +1,4 @@
+# region gereksiz yazilar
 #########################################################################################################
 ###
 ### WRITTEN BY:
@@ -98,6 +99,7 @@
 # bu bize get menu values kullanark ekrandaki goruntuyu aktif olarak degistirmemizi sagliyor.  #
 ################################################################################################
 
+# endregion
 
 from threading import Thread
 from frc_lib7839 import *
