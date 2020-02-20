@@ -66,7 +66,11 @@ Aktif olan versiyon 2 buton 1 switch 1 led ve 1 tane de potansiyometre gerektiri
 
 # Kodları Rasberry'ye Yüklemek
 
-Öncelikle python için kurmamız gereken birkaç kütüphane var. Bu kütüphaneleri Raspberry'ye kurmak için "pip3 install -r requirements.txt", bu kütüphaneleri windowsa kurmak için "py -3 -m pip install -r requirements.txt" kodlarını terminale girebilirsiniz.
+Öncelikle python için kurmamız gereken birkaç kütüphane var. Bu kütüphaneleri Raspberry'ye kurmak için "pip3 install -r requirements.txt" kodunu terminale girebilirsiniz. 
+
+Kodları hem bilgisayarınıza hem de Raspberry'ye yüklemeniz gerekiyor. Raspberry'ye kurmak için "git clone https://github.com/FRC7839/NightVision" kodunu terminale girin. Windows'a yüklemek için kodalrın hemen yukarısında clone or download yazısına tıklayarak zip uzantısında sıkıştırılmış halde indirebilirsiniz.
+
+
 
 
 
