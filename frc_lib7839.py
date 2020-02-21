@@ -387,35 +387,87 @@ class ArduinoFunctions:
     def encoder_key_get(
         outputA,
         outputB,
-        swt2
+        but1,
+        wait_time,
+        func,
+        *args
     ):
-        aLastState = outputA.read()
-        counter = None
-        
-        while True: 
-            aState = outputA.read()
+        try:
+            aLastState = outputA.read()
+            counter = None
+            # Normalde encoder icin caldigim kodda vardi. Silmeyi dusundum ama encoder icin biraz sikinti yaratiyor. cidden
             
-            if (aState != aLastState):
+            if aLastState is None:
+                return all_errors[ARDUINO_INPUT_ERR]
+                        
+            while True: 
+                aState = outputA.read()
                 
-                if (outputB.read() != aState):
-                    counter-=-1
+                
+                if (aState != aLastState):
                     
-                    if((counter % 2) == 0):
-                        print("Position: " + counter + "LOCATION: RIGHT" + swt2.read())
+                    if (outputB.read() != aState):
+                        counter-=-1
                         
-                else:
-                    counter+=-1
-                    
-                    if((counter % 2) == 0):
-                        print("Position: " + counter + "LOCATION: LEFT" + swt2.read())
+                        if((counter % 2) == 0):
+                            # print("Position: " + counter + "LOCATION: RIGHT" + swt2.read())
+                            return "button+1"
+                            
+                    else:
+                        counter+=-1
                         
-                aLastState = aState; 
-            
-                if (swt2.read() == 0 and not (counter == 0)):
+                        if((counter % 2) == 0):
+                            # print("Position: " + counter + "LOCATION: LEFT" + swt2.read())
+                            return "button-1"
+                            
+                            
+                    aLastState = aState; 
+                
+                
+                if (but1.read() == 0 and not (counter == 0)):
                     counter = 0;
-                    print("Position: " + counter + "LOCATION: MIDDLE" + swt2.read())
-                    time.sleep(wait_time_for_get_key);
-            
+                    # print("Position: " + counter + "LOCATION: MIDDLE" + swt2.read())
+                    return "button0"
+
+                # region fonksiyon
+
+                if func is not None:
+                    start_t = timeit.default_timer()
+
+                    try:
+                        rv = func(*args)
+
+                    except:
+                        ### ERROR ###
+                        rv = all_errors[INTERNAL_KEY_GET_FUNC_ERR]
+                        print(rv)
+                        return rv
+                    
+                    else:
+                        if type(rv) == str and rv.startswith("InputP"):
+                            key = None
+                            return key, rv
+                    
+                    elapsed = timeit.default_timer() - start_t
+                    
+
+                    if elapsed < wait_time:
+                        time.sleep(wait_time - elapsed)
+
+    
+                else:
+                    time.sleep(wait_time)
+
+                # endregion
+                
+                # time.sleep(wait_time)
+                
+        except:
+            ### ERROR ###
+            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            print(output_e + " # FROM KEY_GET FUNCTION")
+            return output_e
+                
         
     ### ERROR PROOF ### (Handle)
     @staticmethod
