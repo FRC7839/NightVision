@@ -790,7 +790,7 @@ def cursor_handler(key, cur_stat):
     # Imlec Asagi
     current_row = cur_stat["current_row"]
 
-    if (key == "button1") and (
+    if (key == "button+1") and (
         current_row < (len(cur_stat["current_menu_elements"]) - 1)
     ):
 
@@ -798,7 +798,7 @@ def cursor_handler(key, cur_stat):
 
     # Imlec Dongu
     elif (
-        current_row == (len(cur_stat["current_menu_elements"]) - 1) and key == "button1"
+        current_row == (len(cur_stat["current_menu_elements"]) - 1) and key == "button+1"
     ):
 
         current_row = 0
@@ -969,14 +969,19 @@ def not_main(stdscr):
     team_ip2 = set_tip(settings["Team Number"])
 
     all_menu_elements = []
+    
     all_menu_elements.append(get_first_menu_values(team_ip2))
+    
     all_menu_elements.append(
         get_ip_menu_values(
             team_ip2, InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr()
         )
     )
+    
     all_menu_elements.append(get_arduino_menu_values(settings))
+    
     all_menu_elements.append(get_cam_menu_values(None))
+    
     all_menu_elements.append(get_info_menu_values(None))
 
     # Imlec konumu
@@ -1063,13 +1068,28 @@ def not_main(stdscr):
         # Arduino basarili bir sekilde import edilirse mesaj verecek
         print_info(stdscr, all_infos[ARDUINO_CONNECTION_SUCCESS] , color=3)
 
-    swt1 = board.get_pin("a:1:i")
-    pot1 = board.get_pin("a:2:i")
-    inp1 = board.get_pin("a:6:i")
-    out1 = board.get_pin("d:10:p")
-    but1 = board.get_pin("d:2:i")
-    but2 = board.get_pin("d:7:i")
-    led1 = board.get_pin("d:11:p")
+    # OLD SETUP
+    # swt1 = board.get_pin("a:1:i") 
+    # pot1 = board.get_pin("a:2:i")
+    # but1 = board.get_pin("d:2:i")
+    # but2 = board.get_pin("d:7:i")
+    # led1 = board.get_pin("d:11:p")
+    
+    # inp1 = board.get_pin("a:6:i")
+    # out1 = board.get_pin("d:10:p")
+
+    enc_but = board.get_pin("d:2:i")
+    enc_out_b = board.get_pin("d:3:i")
+    enc_out_a = board.get_pin("d:4:i")
+    led1 = board.get_pin("d:5:i")
+    swt1 = board.get_pin("d:6:i") 
+    # led_set = board.get_pin("d:7:p")
+    led_change = board.get_pin("d:8:p")
+    
+    
+    
+    
+
 
     iterator = pyfirmata.util.Iterator(board)
     iterator.start()
@@ -1124,7 +1144,7 @@ def not_main(stdscr):
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2:
             if (
-                key not in ["button1", "button0", "switch on", "switch off"]
+                key not in ["button+1", "button0", "switch on", "switch off"]
                 and cur_stat["current_row"] == 0
             ):
                 settings["Robot Location"] = ArduinoFunctions.get_robo_loc_from_inp(
@@ -1132,19 +1152,19 @@ def not_main(stdscr):
                 )
 
             elif (
-                key not in ["button1", "button0", "switch on", "switch off"]
+                key not in ["button+1", "button0", "switch on", "switch off"]
                 and cur_stat["current_row"] == 1
             ):
                 settings["Camera Tolerance"] = str(key)
 
             elif (
-                key not in ["button1", "button0", "switch on", "switch off"]
+                key not in ["button+1", "button0", "switch on", "switch off"]
                 and cur_stat["current_row"] == 2
             ):
                 settings["Waiting Period"] = str(key // 2)
 
             elif (
-                key not in ["button1", "button0", "switch on", "switch off"]
+                key not in ["button+1", "button0", "switch on", "switch off"]
                 and cur_stat["current_row"] == 3
             ):
                 settings["Autonomous Mode"] = str(
