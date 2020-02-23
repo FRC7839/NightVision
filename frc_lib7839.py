@@ -389,16 +389,18 @@ class ArduinoFunctions:
         outputB,
         but1,
         wait_time,
-        func,
+        func = None,
         *args
     ):
         try:
             aLastState = outputA.read()
-            counter = None
+            counter = 0
+            key = None
+            rv = None
             # Normalde encoder icin caldigim kodda vardi. Silmeyi dusundum ama encoder icin biraz sikinti yaratiyor. cidden
             
             if aLastState is None:
-                return all_errors[ARDUINO_INPUT_ERR]
+                key = all_errors[ARDUINO_INPUT_ERR]
                         
             while True: 
                 aState = outputA.read()
@@ -411,14 +413,14 @@ class ArduinoFunctions:
                         
                         if((counter % 2) == 0):
                             # print("Position: " + counter + "LOCATION: RIGHT" + swt2.read())
-                            return "button+1"
+                            key = "button+1"
                             
                     else:
                         counter+=-1
                         
                         if((counter % 2) == 0):
                             # print("Position: " + counter + "LOCATION: LEFT" + swt2.read())
-                            return "button-1"
+                            key = "button-1"
                             
                             
                     aLastState = aState; 
@@ -427,10 +429,9 @@ class ArduinoFunctions:
                 if (but1.read() == 0 and not (counter == 0)):
                     counter = 0;
                     # print("Position: " + counter + "LOCATION: MIDDLE" + swt2.read())
-                    return "button0"
+                    key = "button0"
 
                 # region fonksiyon
-
                 if func is not None:
                     start_t = timeit.default_timer()
 
@@ -439,9 +440,10 @@ class ArduinoFunctions:
 
                     except:
                         ### ERROR ###
+                        key = None
                         rv = all_errors[INTERNAL_KEY_GET_FUNC_ERR]
                         print(rv)
-                        return rv
+                        return key, rv
                     
                     else:
                         if type(rv) == str and rv.startswith("InputP"):
@@ -452,11 +454,13 @@ class ArduinoFunctions:
                     
 
                     if elapsed < wait_time:
-                        time.sleep(wait_time - elapsed)
-
+                        # time.sleep(wait_time - elapsed)
+                        pass
     
                 else:
-                    time.sleep(wait_time)
+                    # time.sleep(wait_time)
+                    if key is not None:
+                        return key, None
 
                 # endregion
                 
@@ -466,7 +470,7 @@ class ArduinoFunctions:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
             print(output_e + " # FROM KEY_GET FUNCTION")
-            return output_e
+            return output_e, None
                 
         
     ### ERROR PROOF ### (Handle)
