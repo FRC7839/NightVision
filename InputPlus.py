@@ -537,8 +537,8 @@ def get_info_menu_values(teamnumber):
     menu.append("ColonelKai")
     menucheck.append(True)
 
-    menu.append("BlackShadow")
-    menucheck.append(False)
+    menu.append("Siyo")
+    menucheck.append(True)
 
     menu.append("NICE")
     menucheck.append(True)
