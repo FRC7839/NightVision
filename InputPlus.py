@@ -43,6 +43,8 @@
                                                                             
 # Arduino takılı olduğunda ama değer okuyamadoğımızda loopa giriyoruz
 
+bum.
+
 # Panic Mode icinde de error ayni sebeple kisa duruyor, ona bak (COLONELKAI)
 
 # ARDUINO IMPORT SUCCESS Mesaji ekranda kalmiyor (refresh yuzunden) (COLONELKAI)
