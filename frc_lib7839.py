@@ -49,7 +49,7 @@ SERVER_ALREADY_STARTED_ERR = "SERVER_ALREADY_STARTED_ERROR"
 ARDUINO_CONN_LOST = "ARDUINO_CONNECTION_LOST"
 MM_CANNOT_START_ERR = "MM_CANNOT_START_ERROR"
 INTERNAL_SYNTAX_ERR = "INTERNAL_SYNTAX_ERROR"
-ARDUINO_INPUT_ERR = "ARDUINO_CONNECTION_ERROR"
+ARDUINO_INPUT_ERR = "ARDUINO_INPUT_ERROR"
 CANT_CONNECT_ERR = "CAN_NOT_CONNECT_TO_SERVER"
 SERVER_NOT_STARTED_ERR = "SERVER_NOT_STARTED"
 ARDUINO_CONN_ERR = "ARDUINO_INPUT_ERROR"
@@ -344,7 +344,7 @@ class ArduinoFunctions:
                         ### ERROR ###
                         rv = all_errors[INTERNAL_KEY_GET_FUNC_ERR]
                         print(rv)
-                        return rv
+                        return None, rv
                     
                     else:
                         if type(rv) == str and rv.startswith("InputP"):

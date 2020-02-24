@@ -40,10 +40,9 @@
                                                                             17-18/2 Led dosyasina is mm started ayarini ekle (Kamera algoritmasinin okuyup okumamasi gerektigini soylemek icin)
                                                                             17-18/2 INFO MENuSu cALIsMIYOR
                                                                             (YALAN) Settings write error (TUNAPRO1234)     
-                                                                            
-# Arduino takılı olduğunda ama değer okuyamadoğımızda loopa giriyoruz
+# Info menüsüne siyonun dediği şeyi ekle
 
-bum.
+# Arduino takılı olduğunda ama değer okuyamadoğımızda loopa giriyoruz
 
 # Panic Mode icinde de error ayni sebeple kisa duruyor, ona bak (COLONELKAI)
 
@@ -101,9 +100,11 @@ bum.
 # bu bize get menu values kullanark ekrandaki goruntuyu aktif olarak degistirmemizi sagliyor.  #
 ################################################################################################
 
-# endregion
+#endregion
+
 
 from threading import Thread
+from frc_lib7839 import *
 import threading
 import pyfirmata
 import curses
@@ -166,6 +167,7 @@ def match_mode(
     PanicMenu=False,
     errmsg=None,
     err_type=None,
+    isReadError=False
 ):
     if not PanicMenu:
         led_control = {}
@@ -321,8 +323,8 @@ def match_mode(
         errortimer = threading.Timer(0.1, print_error, args=[stdscr, errmsg])
         errortimer.start()
 
-
         while True:
+
             print_menu_for_match(stdscr, m_menu_elements)
             time.sleep(1)
 
@@ -334,7 +336,19 @@ def match_mode(
 
             if type(err_type) == str and err_type == "ARDUINO":
                 rv2 = ArduinoFunctions.check_ports()
-                if not handle_error(rv2, stdscr, PanicMenu=False, i=True):
+
+                try:
+                    if swt1.read() is None and rv2 != all_errors[ARDUINO_CONN_LOST]:
+                        isReadError = True
+                    else:
+                        isReadError = False
+                except:
+                    if rv2 != all_errors[ARDUINO_CONN_LOST]:
+                        isReadError = True
+                    else:
+                        isReadError = False
+
+                if not handle_error(rv2, stdscr, PanicMenu=False, i=True) and not isReadError:
                     not_main(stdscr)
 
 
@@ -537,8 +551,8 @@ def get_info_menu_values(teamnumber):
     menu.append("ColonelKai")
     menucheck.append(True)
 
-    menu.append("Siyo")
-    menucheck.append(True)
+    menu.append("BlackShadow")
+    menucheck.append(False)
 
     menu.append("NICE")
     menucheck.append(True)
@@ -971,19 +985,14 @@ def not_main(stdscr):
     team_ip2 = set_tip(settings["Team Number"])
 
     all_menu_elements = []
-    
     all_menu_elements.append(get_first_menu_values(team_ip2))
-    
     all_menu_elements.append(
         get_ip_menu_values(
             team_ip2, InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr()
         )
     )
-    
     all_menu_elements.append(get_arduino_menu_values(settings))
-    
     all_menu_elements.append(get_cam_menu_values(None))
-    
     all_menu_elements.append(get_info_menu_values(None))
 
     # Imlec konumu
@@ -1061,39 +1070,31 @@ def not_main(stdscr):
         errortimer.start()
 
 
+    if not type(board) == str:
 
-    
-    if type(board) == str:
+        swt1 = board.get_pin("a:1:i")
+        pot1 = board.get_pin("a:2:i")
+        inp1 = board.get_pin("a:6:i")
+        out1 = board.get_pin("d:10:p")
+        but1 = board.get_pin("d:2:i")
+        but2 = board.get_pin("d:7:i")
+        led1 = board.get_pin("d:11:p")
+
+        time.sleep(0.5)
+        iterator= pyfirmata.util.Iterator(board)
+        iterator.start()
+        time.sleep(0.5)
+
+        if inp1.read() is None:
+            handle_error(all_errors[ARDUINO_INPUT_ERR], stdscr, PanicMenu=True)
+        
+    elif type(board) == str:
         handle_error(board, stdscr)
 
     else:
         # Arduino basarili bir sekilde import edilirse mesaj verecek
         print_info(stdscr, all_infos[ARDUINO_CONNECTION_SUCCESS] , color=3)
 
-    swt1 = board.get_pin("a:1:i") 
-    pot1 = board.get_pin("a:2:i")
-    but1 = board.get_pin("d:2:i")
-    but2 = board.get_pin("d:7:i")
-    led1 = board.get_pin("d:11:p")
-    
-    inp1 = board.get_pin("a:6:i")
-    out1 = board.get_pin("d:10:p")
-
-    # enc_but = board.get_pin("d:2:i")
-    # enc_out_b = board.get_pin("d:3:i")
-    # enc_out_a = board.get_pin("d:4:i")
-    # led1 = board.get_pin("d:5:i")
-    # swt1 = board.get_pin("d:6:i") 
-    # # led_set = board.get_pin("d:7:p")
-    # led_change = board.get_pin("d:8:p")
-    
-    
-    
-    
-
-
-    iterator = pyfirmata.util.Iterator(board)
-    iterator.start()
     time.sleep(0.2)
 
     # endregion
@@ -1112,6 +1113,11 @@ def not_main(stdscr):
         key, ports = ArduinoFunctions.key_get(
             but1, but2, pot1, wait_time_for_get_key, ArduinoFunctions.check_ports
         )
+
+        if key is None:
+            isKeyError = True
+        else:
+            isKeyError = False
 
         handle_error(ports, stdscr, PanicMenu=True)
 
@@ -1140,7 +1146,7 @@ def not_main(stdscr):
             and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == max_v
             and cur_stat["current_menu"] == main_menu_value
         ):
-            match_mode(stdscr, settings, led1, out1, swt1, pot1)
+            match_mode(stdscr, settings, led1, out1, swt1, pot1, isKeyError)
 
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2:
