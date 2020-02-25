@@ -6,8 +6,8 @@ Bu repo şu anda geliştirme aşamasındadır. Yazıyı yazma amacım her ne kad
 
 Görüntü işleme konusunda daha detaylı açıklamalar için https://docs.wpilib.org/en/latest/docs/software/vision-processing/raspberry-pi/index.html
 
-  #### Gereksinimler:
-  1. Elektronik Gereksinimler
+  ### Gereksinimler:
+  #### 1. Elektronik Gereksinimler
   * [Raspberry Pi](https://market.samm.com/raspberry-pi-3-b-plus) (Ben 3b+ kullanıyorum) 
   
   * Raspberry Pi için [micro sd kart](https://market.samm.com/toshiba-16-gb-micro-sdhc-hafiza-karti) (16 gb öneririm ama 8 gb da olur)
@@ -32,7 +32,7 @@ Görüntü işleme konusunda daha detaylı açıklamalar için https://docs.wpil
 
   * Yeniyseniz [Breadboard](https://www.robotistan.com/orta-boy-breadboard?language=tr&h=04cbdb53&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gCfZXgLMqwqVf2fgMvt6EE4CcCSFUfkiYC35L4hbObrY0w49vFkOZgaAg25EALw_wcB)  ve [jumper kablo](https://www.robotistan.com/40-pin-ayrilabilen-erkek-erkek-m-m-jumper-kablo-200-mm?OM.zn=CategoryPage%20-%20CatTopSeller-w21&OM.zpc=11958)
 
-  2. Yazılımsal Gereksinimler
+  #### 2. Yazılımsal Gereksinimler
   * [FRCVision](https://github.com/wpilibsuite/FRCVision-pi-gen/releases)
   
   * [Python 3](https://www.python.org/downloads/)
