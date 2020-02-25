@@ -8,41 +8,41 @@ Görüntü işleme konusunda daha detaylı açıklamalar için https://docs.wpil
 
   #### Gereksinimler:
   1. Elektronik Gereksinimler
-    * [Raspberry Pi](https://market.samm.com/raspberry-pi-3-b-plus) (Ben 3b+ kullanıyorum) 
-    
-    * Raspberry Pi için [micro sd kart](https://market.samm.com/toshiba-16-gb-micro-sdhc-hafiza-karti) (16 gb öneririm ama 8 gb da olur)
-    
-    * [Raspberry Pi için 5" ekran](https://www.direnc.net/raspberry-5inch-hdmi-lcd-800480-waveshare?language=tr&h=13a1ff21&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gBmeehrhJSXjY6Sz5K1PcAOPMcgBhNZfwbGUMXMS1bif4VEx_g9jkAaAjwrEALw_wcB) (Zorunlu değil)
-    
-    * Raspberry Pi için micro usb kablosu
-    
-    * Ethernet kablosu veya WiFi adaptörü
-    
-    * [12'li led ring](https://www.f1depo.com/urun/neopixel-12li-halka) (16 veya farklı sayılarda da olur)
-    
-    * [Arduino Nano](https://www.direnc.net/arduino-nano-usb-chip-ch340-usb-kablo-dahil?language=tr&h=2ef1190d&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gC7qaeETEafGkdqWlcDeEYIMpmfsQ-50ygmyPwUwib78QWhGOusjBEaAkxyEALw_wcB) (Arduino nano, micro veya pro mini de kullanılabilir ama nano öneririm)
-    
-    * 10K'lık potansiyometre
+  * [Raspberry Pi](https://market.samm.com/raspberry-pi-3-b-plus) (Ben 3b+ kullanıyorum) 
+  
+  * Raspberry Pi için [micro sd kart](https://market.samm.com/toshiba-16-gb-micro-sdhc-hafiza-karti) (16 gb öneririm ama 8 gb da olur)
+  
+  * [Raspberry Pi için 5" ekran](https://www.direnc.net/raspberry-5inch-hdmi-lcd-800480-waveshare?language=tr&h=13a1ff21&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gBmeehrhJSXjY6Sz5K1PcAOPMcgBhNZfwbGUMXMS1bif4VEx_g9jkAaAjwrEALw_wcB) (Zorunlu değil)
+  
+  * Raspberry Pi için micro usb kablosu
+  
+  * Ethernet kablosu veya WiFi adaptörü
+  
+  * [12'li led ring](https://www.f1depo.com/urun/neopixel-12li-halka) (16 veya farklı sayılarda da olur)
+  
+  * [Arduino Nano](https://www.direnc.net/arduino-nano-usb-chip-ch340-usb-kablo-dahil?language=tr&h=2ef1190d&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gC7qaeETEafGkdqWlcDeEYIMpmfsQ-50ygmyPwUwib78QWhGOusjBEaAkxyEALw_wcB) (Arduino nano, micro veya pro mini de kullanılabilir ama nano öneririm)
+  
+  * 10K'lık potansiyometre
 
-    * Push button
+  * Push button
 
-    * Yaklaşık 100 tane dişi header
+  * Yaklaşık 100 tane dişi header
 
-    * Lehim konusunda yetenekli olduğunuza inanıyorsanız [delikli pertinaks](https://www.hepsiburada.com/diyotlab-4x6-cm-cift-yuzlu-delikli-pertinaks-pm-HB00000NAQUN) (Biraz kablo ve lehim teli de gerekebilir)
+  * Lehim konusunda yetenekli olduğunuza inanıyorsanız [delikli pertinaks](https://www.hepsiburada.com/diyotlab-4x6-cm-cift-yuzlu-delikli-pertinaks-pm-HB00000NAQUN) (Biraz kablo ve lehim teli de gerekebilir)
 
-    * Yeniyseniz [Breadboard](https://www.robotistan.com/orta-boy-breadboard?language=tr&h=04cbdb53&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gCfZXgLMqwqVf2fgMvt6EE4CcCSFUfkiYC35L4hbObrY0w49vFkOZgaAg25EALw_wcB)  ve [jumper kablo](https://www.robotistan.com/40-pin-ayrilabilen-erkek-erkek-m-m-jumper-kablo-200-mm?OM.zn=CategoryPage%20-%20CatTopSeller-w21&OM.zpc=11958)
- 
+  * Yeniyseniz [Breadboard](https://www.robotistan.com/orta-boy-breadboard?language=tr&h=04cbdb53&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gCfZXgLMqwqVf2fgMvt6EE4CcCSFUfkiYC35L4hbObrY0w49vFkOZgaAg25EALw_wcB)  ve [jumper kablo](https://www.robotistan.com/40-pin-ayrilabilen-erkek-erkek-m-m-jumper-kablo-200-mm?OM.zn=CategoryPage%20-%20CatTopSeller-w21&OM.zpc=11958)
+
   2. Yazılımsal Gereksinimler
-    * [FRCVision](https://github.com/wpilibsuite/FRCVision-pi-gen/releases)
-    
-    * [Python 3](https://www.python.org/downloads/)
-    
-    * [RobotPy](https://robotpy.readthedocs.io/en/stable/getting_started.html) (Python üzerinde FRC işlemlerini yapabilmemiz için gerekli Python kütüphanesi)
-    
-    * [Putty](https://www.putty.org/) (Windows üzerinde SSH bağlantısı kurmamız için gerekli program. İsteğinize göre farklı bir program da kullanabilirsiniz.)
-    
-    * [balenaEtcher](https://www.balena.io/etcher/) (FRCVision işletim sistemini Raspberry Pi üzerine yüklemek için gerekli olan program.)
-    
+  * [FRCVision](https://github.com/wpilibsuite/FRCVision-pi-gen/releases)
+  
+  * [Python 3](https://www.python.org/downloads/)
+  
+  * [RobotPy](https://robotpy.readthedocs.io/en/stable/getting_started.html) (Python üzerinde FRC işlemlerini yapabilmemiz için gerekli Python kütüphanesi)
+  
+  * [Putty](https://www.putty.org/) (Windows üzerinde SSH bağlantısı kurmamız için gerekli program. İsteğinize göre farklı bir program da kullanabilirsiniz.)
+  
+  * [balenaEtcher](https://www.balena.io/etcher/) (FRCVision işletim sistemini Raspberry Pi üzerine yüklemek için gerekli olan program.)
+  
     
   
 # Raspberry Pi'a FRCVision'ı Kurma
