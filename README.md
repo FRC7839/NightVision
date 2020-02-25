@@ -2,7 +2,7 @@
 Vision proccessing codes for FRC 2020 by FRC 7839
 
 
-Bu repo şu anda geliştirme aşamasındadır. Her sistemde çalışmama ihitmali var. Çıkan her problemi belirtmeyi unutmayın. Elimden geldiğince rookieler için anlaşılabilir yapmaya çalıştım ama ben de çok profesyonel değilim.
+Bu repo şu anda geliştirme aşamasındadır. Yazıyı yazma amacım her ne kadar NightVision programının kurulumunu anlatmak olsa da elimden geldiğince evrensel olmaya çalıştım ve yeni şeyler öğrenmek isteyenler için güzel bir yazı olduğunu düşünüyorum. Her sistemde çalışmama ihitmali var. Çıkan her problemi belirtmeyi unutmayın. Elimden geldiğince rookieler için anlaşılabilir yapmaya çalıştım ama ben de çok profesyonel değilim.
 
 Görüntü işleme konusunda daha detaylı açıklamalar için https://docs.wpilib.org/en/latest/docs/software/vision-processing/raspberry-pi/index.html
 
@@ -33,6 +33,7 @@ Görüntü işleme konusunda daha detaylı açıklamalar için https://docs.wpil
   Yeniyseniz breadboard ve jumper kablo: https://www.robotistan.com/orta-boy-breadboard?language=tr&h=04cbdb53&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gCfZXgLMqwqVf2fgMvt6EE4CcCSFUfkiYC35L4hbObrY0w49vFkOZgaAg25EALw_wcB https://www.robotistan.com/40-pin-ayrilabilen-erkek-erkek-m-m-jumper-kablo-200-mm?OM.zn=CategoryPage%20-%20CatTopSeller-w21&OM.zpc=11958
 
 # Raspberry Pi'a FrcVision'ı Kurma
+
 FrcVision, Raspberry pi için yayınlanmış ve görüntü işleme için hazırlanmış bir işletim sistemidir. İşletim sistemini Raspberry Pi'a yüklemek için Balena Etcher'ı (https://www.balena.io/etcher/) kullancağız. Eğer linux varsa dd komutunu da kullanbilirsiniz.
 
 Öncelikle frcvision dosyasını bilgisayarınıza indirin. https://github.com/wpilibsuite/FRCVision-pi-gen/releases
@@ -42,9 +43,12 @@ Balena etcher ile: Select Image tuşuna bastıktan sonra indirdiğiniz fcrvision
 Linux üzerinde dd komudu ile: Öncelikle sd kartın /dev klasörü içinde nerede olduğunu bulmanız gerekiyor. En basit yöntem sd kartı takmadan önce lsblk komutunu girin. Sd kartı taktıktan sonra tekrar lsblk komutunu girip yeni gelen şeyleri görebilirsiniz. Burada önemli bir nokta var. Sd kartın unmounted olması gerekiyor. Bunun için umount /dev/sdX komutunu kullanabilirsiniz.dd bs=4M if=frcvision_dosyası of=sd_kart conv=fsync status=progress
 
 # FrcVision ve Raspberry Pi'a Python Kodlarını Yükleme
-Rpi'a bilgisayardan bağlanmak için onunla aynı ağ üzerinde olmamız gerekiyor. Fakat FrcVision frc sahasında robot bağlantılarında kesinti yaşanmasını önlemek için rpi'ın wifi özelliğini kapatıyor. Bu nedenle kurulum yaparken bir wifi adaptörü kullanmak kullanışlı oluyor. Fakat frc'nin gönderdiği ethernet kablosunu da kullanabilirsiniz. Rpi'ı ethernet kablosuyla bilgisayara bağlayabilirsiniz fakat bu her zaman çalışmayabilir ayrıca birkaç programın kurulumunu yapmak için internete ihtiyacımız olacak. Bu nedenle Rpi'ı ethernet kablosuyla internete bağlamanız gerekiyor. Siz de aynı ağa bağlanın. http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için Writable butonuna basın.
 
-Rpi'a ssh ile bağlanmak için putty kullanıyorum. https://www.putty.org/ buradan indirebilirsiniz. Hostname kısmına pi@frcvision.local yazdıktan sonra opena basın. Açılan ekranda ssh bağlantısı için şifreyi soracak. Eğer değiştirmediyseniz şifre raspberry. sudo raspi-config şifreyi değiştirmek dahil çoğu ayarı bu komut yardımıyla yapacağız.
+Rpi'a bilgisayardan bağlanmak için onunla aynı ağ üzerinde olmamız gerekiyor. Fakat FrcVision frc sahasında robot bağlantılarında kesinti yaşanmasını önlemek için rpi'ın wifi özelliğini kapatıyor. Bu nedenle kurulum yaparken bir wifi adaptörü kullanmak kullanışlı oluyor. Fakat frc'nin gönderdiği ethernet kablosunu da kullanabilirsiniz. Rpi'ı ethernet kablosuyla bilgisayara bağlayabilirsiniz fakat bu her zaman çalışmayabilir ayrıca birkaç programın kurulumunu yapmak için internete ihtiyacımız olacak. Bu nedenle Rpi'ı ethernet kablosuyla internete bağlamanız gerekiyor. Siz de aynı ağa bağlanın. http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için Writable butonuna basın. frcvision.local adresi her zaman çalışmayabilir. Aynı internet üzerinde ağ taraması yaparak (nmap veya Advanced Ip Scanner gibi programlarla) Raspberrynin local ip adresi ip adresini bulup direkt o ip adresini tarayıcınızın url kısmına o ip adresini yapıştırarak düzenlemeleir yapmak için frcvision sisteminin arayüzüne girebilirsiniz.
+
+Rpi'a ssh ile bağlanmak için putty kullanıyorum. https://www.putty.org/ buradan indirebilirsiniz. Hostname kısmına pi@frcvision.local yazdıktan sonra opena basın. Açılan ekranda ssh bağlantısı için şifreyi soracak. Eğer değiştirmediyseniz şifre raspberry. sudo raspi-config komutu yardımıyla şifre değiştirme dahil çoğu işlemi gerçekleştireceğiz.
+
+# raspi-config menüsü ve Kullanımı
 
 Change User Password kullanıcı şifresini değiştiriyor. :-P
 
@@ -52,7 +56,7 @@ Network Options kısmında kullanışlı olabileceğni düşündüğüm tek şey
 
 Boot Options kısmından Desktop / CLI bölümünü seçin ve Raspberry pi açıldığında şifre girmekle uğraşmamak için Console Autologin seçeneğini seçin.
 
-Interfacing Options SSH
+Interfacing Options kısmından SSH'i seçerek enable etmeniz gerekiyor. Ekran satın almadıysanız ve arayüz kullanmayacaksınız bile kamera etrafına yerleştireceğiniz ledleri açıp kapatabilmek için bir arduino kullanmanız gerekiyor. Eğer ledi kapatmayı düşünmüyorsanız Arduino ile Raspberry arasında bir iletişime ihtiyacınız olmuyor ve Serial seçeneğini etkinleştirmek de anlamsız kalıyor. Fakat arayüz yapmayı hedefliyorsanız veya ledi kapatıp açmayı istiyorsanız Serialı etkinleştirmeniz gerekiyor.
 
 Eğer Rpi için 5"lik ekran aldıysanız /boot/config.txt dosyasında birkaç değişiklik yapmamız gerekecek. Ekranın tamamını kullanmak için /boot/config.txt dosyanın içinde   #hdmi_driver=2 kısmının altına şunları ekleyin:
   
@@ -72,14 +76,15 @@ Kodları hem bilgisayarınıza hem de Raspberry'ye yüklemeniz gerekiyor. Raspbe
 
 Raspberry pi her çalıştığında arayüzün de çalışmasını sağlamak için /home/pi klasörü içinde bulunan .bashrc dosyasında değişiklik yapmamız gerekiyor. Dosyanın sonuna:
   
-  sleep 10 
-  python3 NightVision/InputP.py
+sleep 10 
+python3 NightVision/InputP.py
 
-kodlarını ekleyin. BU kodları .bashrc dosyasına eklemek her ssh bağlantısı yaptığınızda da bu programın çalışacağı anlamına geliyor. 
+kodlarını ekleyin. Bu kodları .bashrc dosyasına eklemek her ssh bağlantısı yaptığınızda da bu programın çalışacağı anlamına geliyor. 
+Tabii ki bu bizim istemediğimiz bir şey fakat ssh sürekli kullandığımız bir şey olmadığından çözme gereği duymadık. Ssh bağlantılarını açtığınızda Ctrl + c tuşlarına basmak programın çalışmasını önleyecektir 
 
+# Görüntü İşleme Algoritmasını Yüklemek
 
-
-
+Görüntü işleme algoritmasını yüklemek için yukarıdaki gibi aynı internette olmanız gerekiyor. Internet tarayıcınız üzerinden http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için Writeable tuşuna bastığınızdan emin olun. 
 
 
 
