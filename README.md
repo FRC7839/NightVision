@@ -116,4 +116,4 @@ Tabii ki bu bizim istemediğimiz bir şey fakat SSH sürekli kullandığımız b
 
 # Görüntü İşleme Algoritmasını Yüklemek
 
-Görüntü işleme algoritmasını yüklemek için yukarıdaki gibi aynı internette olmanız gerekiyor. Internet tarayıcınız üzerinden http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için <kbd>**Writeable**</kbd> butonunu aktif ettiğinizden emin olun. 
+Görüntü işleme algoritmasını yüklemek için yukarıdaki gibi aynı internette olmanız gerekiyor. Internet tarayıcınız üzerinden http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için <kbd>**Writeable**</kbd> butonunu aktif ettiğinizden emin olun. Daha sonra 
