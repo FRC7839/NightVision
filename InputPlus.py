@@ -161,7 +161,7 @@ def match_mode(
     stdscr,
     settings=None,
     led_blue=None,
-    out1=None,
+    led_camera=None,
     swt1=None,
     pot1=None,
     PanicMenu=False,
@@ -224,13 +224,13 @@ def match_mode(
                 handle_error(all_errors[READ_ERR], stdscr, PanicMenu=True)
 
             if led_control["Led Status"] in ["True", True]:
-                ArduinoFunctions.led_write(led_blue, out1, 1)  # on
+                ArduinoFunctions.led_write(led_blue, led_camera, 1)  # on
 
             elif led_control["Led Status"] in ["False", False]:
-                ArduinoFunctions.led_write(led_blue, out1, 0)  # off
+                ArduinoFunctions.led_write(led_blue, led_camera, 0)  # off
 
             else:
-                ArduinoFunctions.led_write(led_blue, out1, 1)  # on
+                ArduinoFunctions.led_write(led_blue, led_camera, 1)  # on
 
             print_menu_for_match(stdscr, m_menu_elements)
 
@@ -239,7 +239,7 @@ def match_mode(
                 ArduinoFunctions.map_xi(pot1.read(), 0, 1, 0, max_v) == max_v
                 and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == 0
             ):
-                ArduinoFunctions.led_write(led_blue, out1, 1)  # on
+                ArduinoFunctions.led_write(led_blue, led_camera, 1)  # on
 
                 led_control["Match Mode Status"] = False
 
@@ -1075,27 +1075,27 @@ def not_main(stdscr):
         # swt1 = board.get_pin("a:1:i")
         # pot1 = board.get_pin("a:2:i")
         # inp1 = board.get_pin("a:6:i")
-        # out1 = board.get_pin("d:10:p")
+        # led_camera = board.get_pin("d:10:p")
         # but1 = board.get_pin("d:2:i")
         # but2 = board.get_pin("d:7:i")
         # led1 = board.get_pin("d:11:p")
         
         pot1 = board.get_pin("a:0:i")
-        swt1 = board.get_pin("d:1:i")
+        swt1 = board.get_pin("d:5:i")
         but1 = board.get_pin("d:6:i")
         but2 = board.get_pin("d:7:i")
         
         led_camera = board.get_pin("d:3:o")
-        led_blue = board.get_pin("d:9:i")
-        led_green = board.get_pin("d:10:i")
-        led_red = board.get_pin("d:11:i")
+        led_blue = board.get_pin("d:9:p")
+        led_green = board.get_pin("d:10:p")
+        led_red = board.get_pin("d:11:p")
 
         time.sleep(0.5)
         iterator= pyfirmata.util.Iterator(board)
         iterator.start()
         time.sleep(0.5)
 
-        if inp1.read() is None:
+        if pot1.read() is None:
             handle_error(all_errors[ARDUINO_INPUT_ERR], stdscr, PanicMenu=True)
         
     elif type(board) == str:
@@ -1109,7 +1109,7 @@ def not_main(stdscr):
 
     # endregion
 
-    rv = ArduinoFunctions.led_write(led_blue, out1, 1.0)
+    rv = ArduinoFunctions.led_write(led_blue, led_camera, 1.0)
     handle_error(rv, stdscr, PanicMenu=True)
 
     while True:
@@ -1156,7 +1156,7 @@ def not_main(stdscr):
             and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == max_v
             and cur_stat["current_menu"] == main_menu_value
         ):
-            match_mode(stdscr, settings, led1, out1, swt1, pot1, isKeyError)
+            match_mode(stdscr, settings, led_blue, led_camera, swt1, pot1, isKeyError)
 
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2:
@@ -1254,7 +1254,7 @@ def not_main(stdscr):
 
         # Menu degistirme olaylari
         cur_stat["current_row"], cur_stat["current_menu"] = InputPFunctions.change_menu(
-            key, cur_stat, led_blue, out1
+            key, cur_stat, led_blue, led_camera
         )
         cur_stat["current_row"], cur_stat["current_menu"], sett = return_to_menu(
             key, cur_stat, stdscr
