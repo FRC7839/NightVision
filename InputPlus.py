@@ -1079,15 +1079,16 @@ def not_main(stdscr):
         # but1 = board.get_pin("d:2:i")
         # but2 = board.get_pin("d:7:i")
         # led1 = board.get_pin("d:11:p")
-
+        
         pot1 = board.get_pin("a:0:i")
+        swt1 = board.get_pin("d:1:i")
         but1 = board.get_pin("d:6:i")
         but2 = board.get_pin("d:7:i")
         
+        led_camera = board.get_pin("d:3:o")
         led_blue = board.get_pin("d:9:i")
         led_green = board.get_pin("d:10:i")
         led_red = board.get_pin("d:11:i")
-
 
         time.sleep(0.5)
         iterator= pyfirmata.util.Iterator(board)
