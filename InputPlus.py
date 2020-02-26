@@ -1121,7 +1121,7 @@ def not_main(stdscr):
         )
         
         key, ports = ArduinoFunctions.key_get(
-            but1, but2, pot1, wait_time_for_get_key, ArduinoFunctions.check_ports
+            but1, but2, pot1, wait_time_for_get_key
         )
 
         if key is None:

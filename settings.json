@@ -1,9 +1,9 @@
 {
     "isTunaPro": true,
-    "Robot Location": "MIDDLE",
-    "Camera Tolerance": "15",
+    "Robot Location": "LEFT",
+    "Camera Tolerance": "0",
     "Waiting Period": "0",
-    "Autonomous Mode": "1",
-    "Team Number": "7879",
-    "Camera Offset": "666"
+    "Autonomous Mode": "0",
+    "Team Number": "0009",
+    "Camera Offset": "066"
 }
