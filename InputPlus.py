@@ -1038,6 +1038,8 @@ def not_main(stdscr):
     msg = None
     key = None
 
+
+
     refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings, team_ip2)
 
     # time.sleep(1)
@@ -1113,6 +1115,15 @@ def not_main(stdscr):
     handle_error(rv, stdscr, PanicMenu=True)
 
     while True:
+
+        if cur_stat["current_menu"] == ip_menu_value:
+            cur_stat["current_row"] = 5
+
+        elif cur_stat["current_menu"] == camera_menu_value:
+            cur_stat["current_row"] = 1
+
+        elif cur_stat["current_menu"] == info_menu_value:
+            cur_stat["current_row"] = 4
 
         ##########
         # Ekran yenilenmesi

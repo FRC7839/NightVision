@@ -175,7 +175,7 @@ class ArduinoFunctions:
     @staticmethod
     def led_write(led1, out1, st, gnd=True):
         try:
-            led1.write(st / 50)
+            led1.write(st)
             if gnd == True:
                 st = 1 - st
             out1.write(st)
