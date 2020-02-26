@@ -376,7 +376,7 @@ class ArduinoFunctions:
 
                 but1 = digital_input1.read()
                 but2 = digital_input2.read()
-                pot1 = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
+                pot1 = ArduinoFunctions.map_x(analog_input1.read(), 0, 1, 0, 30)
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
