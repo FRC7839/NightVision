@@ -125,12 +125,14 @@ global pc_mode
 pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
 test_mode = InputPFunctions.find_arg("--test-mode", num=True)
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
+match_mode_can_be_started = False
 
-if os.name == "nt":
-    from frc_lib7839 import *
-    pc_mode = 1
 
-elif pc_mode is not None and os.name == "posix":
+# if os.name == "nt":
+#     from frc_lib7839 import *
+#     pc_mode = 1s
+
+if pc_mode is not None and os.name == "posix":
     sys.path.insert(1, '/home/pi/NightVision')
     from frc_lib7839 import *
 
@@ -723,7 +725,17 @@ def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
                 stdscr.refresh()
 
 
-def print_current_menu(stdscr, cur_stat):
+def flash_led(led_blue, led_camera):
+    flash_led.flashthreadopen = True
+    while not match_mode_can_be_started:
+        time.sleep(0.5)
+        ArduinoFunctions.led_write(led_blue, led_camera, 1)
+        time.sleep(0.5)
+        ArduinoFunctions.led_write(led_blue, led_camera, 0)
+    flash_led.flashtreadopen = False
+
+
+def print_current_menu(stdscr, cur_stat, led_blue = None, led_camera = None):
     firsttime = True
 
     if type(cur_stat["current_menu_elements"][0]) is list:
@@ -765,9 +777,21 @@ def print_current_menu(stdscr, cur_stat):
         if i:
             match_message = " ## MATCH MODE CAN BE STARTED ## "
             match_message_color = 4
+            if not led_blue is None and not led_camera is None:
+                ArduinoFunctions.led_write(led_blue, led_camera, 1)
+                match_mode_can_be_started = True
         else:
             match_message = " ## MATCH MODE CANNOT BE STARTED ## "
             match_message_color = 2
+            if not led_blue is None and not led_camera is None:
+                match_mode_can_be_started = False
+                try:
+                    if not flash_led.flashthreadopen:
+                        flash_timer = threading.Timer(0.1, flash_led, [led_blue, led_camera])
+                        flash_timer.start()
+                except:
+                    flash_timer = threading.Timer(0.1, flash_led, [led_blue, led_camera])
+                    flash_timer.start()
             break
 
     firstx = w // 2 - (len(match_message) + 1) // 2
@@ -877,7 +901,7 @@ def background_setup(stdscr, cur_stat=None, PanicMode=False):
         stdscr.bkgd(" ", curses.color_pair(4))
 
 
-def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings, team_ip2):
+def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings, team_ip2, led_blue = None, led_camera = None):
     new_all_menu_elements = cur_stat["all_menu_elements"]
 
     new_all_menu_elements[main_menu_value] = get_first_menu_values(team_ip2)
@@ -894,7 +918,7 @@ def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings,
     background_setup(stdscr, cur_stat)
 
     # Background ayarlandiktan sonra menu yazdirildi
-    print_current_menu(stdscr, cur_stat)
+    print_current_menu(stdscr, cur_stat, led_blue, led_camera)
 
     print_team_no_edit(stdscr, settings["Team Number"], team_no_pos, cur_stat)
 
@@ -1128,7 +1152,7 @@ def not_main(stdscr):
         ##########
         # Ekran yenilenmesi
         cur_stat["all_menu_elements"] = refresh_screen(
-            stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings=settings, team_ip2=team_ip2
+            stdscr, key, team_no_pos, cam_offset_pos, cur_stat,settings, team_ip2, led_blue, led_camera,
         )
         
         key, ports = ArduinoFunctions.key_get(
