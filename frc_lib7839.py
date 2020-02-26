@@ -924,7 +924,7 @@ class InputPFunctions:
 
             elif str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
                 ipaddress = os.popen(
-                    "ifconfig wlan0 \
+                    "ifconfig eth0 \
                             | grep 'inet addr' \
                             | awk -F: '{print $2}' \
                             | awk '{print $1}'"
