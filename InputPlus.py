@@ -1237,7 +1237,7 @@ def not_main(stdscr):
 
 
             # Write tusu
-            if key == "button0" and cur_stat["current_row"] == 5:
+            if key == "button0" and cur_stat["current_row"] == 6:
 
                 rv = DbFunctions.save_settings(file_s, settings)
                 handle_error(rv, stdscr, PanicMenu=True)

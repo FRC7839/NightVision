@@ -309,7 +309,7 @@ class ArduinoFunctions:
             but2_p = False
 
             # Pyfirmata librarysi bazen arduinoyu basarili bir sekilde import etesine ragmen iterator hatasi verip input alamiyor
-            pot1_p = ArduinoFunctions.map_xi(analog_input1.read(), 0, 1, 0, 30)
+            pot1_p = ArduinoFunctions.map_x(analog_input1.read(), 0, 1, 0, 30)
             pot1 = pot1_p
 
             while True:
