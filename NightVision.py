@@ -74,7 +74,7 @@
 ##
 "TODO"#####################################################################################################"""
 
-from FRC_LIB7839 import *
+from frc_lib7839 import *
 import numpy as np
 import socket
 import math
