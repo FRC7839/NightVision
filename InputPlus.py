@@ -1190,7 +1190,7 @@ def not_main(stdscr):
 
             if cur_stat["current_row"] == 5 and team_no_pos == 9:
                 team_no_pos = 0
-            if cur_stat["current_row"] == 4 and team_no_pos == 9:
+            if cur_stat["current_row"] == 4 and cam_offset_pos == 9:
                 cam_offset_pos = 0
 
 
