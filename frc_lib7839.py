@@ -632,7 +632,7 @@ class DbFunctions:
             output = all_errors[INTERNAL_SYNTAX_ERR]
             print(output + " # FROM SAVE_SETTINGS FUNCTION")
             return output
-
+    
     
     @staticmethod
     def get_setting(file=file_s, setting_name=None):
@@ -813,7 +813,7 @@ class CameraFunctions:
         upper_green = np.array([102, 255, 255])
 
         mask = cv2.inRange(hsv, lower_green, upper_green)
-        cv2.imshow("sl", mask)
+        # cv2.imshow("sl", mask)
 
         filter2 = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         filter3 = cv2.morphologyEx(filter2, cv2.MORPH_CLOSE, kernel2)

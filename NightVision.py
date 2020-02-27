@@ -157,11 +157,12 @@ def handle_error_lite(errmsg):
             return False
 
 def main():
+    # os.popen('export DISPLAY=":0"') 
     functions = CameraFunctions()
     
     print("Started")
     
-    settings = DbFunctions.get_setting(file_s)
+    settings = DbFunctions.read_settings_on_json(file_s)
     
     if handle_error_lite(settings) == True:
         settings = {}
@@ -172,9 +173,13 @@ def main():
         settings[setting_names[4]] = setting_defaults[4]
     
 
-    cam_tol = int(DbFunctions.get_setting(file_s, "Camera Tolerance"))
-    robo_loc = DbFunctions.get_setting(file_s, "Robot Location")
+    robo_loc = DbFunctions.read_settings_on_json("Robot Location", file_s)
+    cam_tol = DbFunctions.read_settings_on_json("Camera Tolerance", file_s)
+    wait_per = DbFunctions.read_settings_on_json("Waiting Period", file_s)
+    auto_mode = DbFunctions.read_settings_on_json("Autonomous Mode", file_s)
+    cam_off = DbFunctions.read_settings_on_json("Camera Offset", file_s)
     
+
     isNtStarted = None
     isConntedtoRadio = None
     y_error = None
@@ -303,11 +308,11 @@ def main():
                 
         imgLQ = cv2.resize(final_result, (120, 90))
         
-        if pc_mode is not None:
-            cv2.imshow("FRC Vision", final_result)
+        # if pc_mode is not None:
+        #     cv2.imshow("FRC Vision", final_result)
 
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            break
+        # if cv2.waitKey(1) & 0xFF == ord("q"):
+        #     break
         
         if success == True and y_error is None: # Hedefin yarısı görüldüğünde success değişkeni true değerini almasına rağmen hedef kenarlara değdiği için y_error değeri almıyor (Siyabendin müthiş çözümleri)
             success = False                     #  
@@ -373,14 +378,9 @@ def main():
                     sep="  --  ",
                 )         
 
-            
-
-
-
-
         elif y_error is not None and success == True and pc_mode is not None:
             
-            if ((success == True) and (y_error < (-1 * cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
+            if ((success == True) and (int(y_error) < (-1 * int(cam_tol)))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
                 print(
                     "Success: " + str(success),
                     "Error: " + str(y_error),
@@ -393,7 +393,7 @@ def main():
                 # go_right()
                                 
                                 
-            elif ((success == True) and (y_error > cam_tol)): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın solunda kalıyorsa ve servo en solda değilse
+            elif ((success == True) and (int(y_error) > int(cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın solunda kalıyorsa ve servo en solda değilse
                 print(
                     "Success: " + str(success),
                     "Error: " + str(y_error),
