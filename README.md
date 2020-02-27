@@ -8,45 +8,44 @@ Görüntü işleme konusunda daha detaylı açıklamalar için https://docs.wpil
   #### Gereksinimler:
   1. Elektronik Gereksinimler
 
-    * [Raspberry Pi](https://market.samm.com/raspberry-pi-3-b-plus) (Ben 3b+ kullanıyorum) 
-    
-    * Microsoft Lifecam HD 3000 (Yazılım diğer web kameralar üzerinde test edilmemiştir.)
+  * [Raspberry Pi](https://market.samm.com/raspberry-pi-3-b-plus) (Ben 3b+ kullanıyorum) 
+  
+  * Microsoft Lifecam HD 3000 (Yazılım diğer web kameralar üzerinde test edilmemiştir.)
 
-    * Raspberry Pi için [micro sd kart](https://market.samm.com/toshiba-16-gb-micro-sdhc-hafiza-karti) (16 gb öneririm ama 8 gb da olur)
+  * Raspberry Pi için [micro sd kart](https://market.samm.com/toshiba-16-gb-micro-sdhc-hafiza-karti) (16 gb öneririm ama 8 gb da olur)
     
-    * [Raspberry Pi için 5" ekran](https://www.direnc.net/raspberry-5inch-hdmi-lcd-800480-waveshare?language=tr&h=13a1ff21&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gBmeehrhJSXjY6Sz5K1PcAOPMcgBhNZfwbGUMXMS1bif4VEx_g9jkAaAjwrEALw_wcB) (Arayüz kullanacaklar için)
+  * [Raspberry Pi için 5" ekran](https://www.direnc.net/raspberry-5inch-hdmi-lcd-800480-waveshare?language=tr&h=13a1ff21&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gBmeehrhJSXjY6Sz5K1PcAOPMcgBhNZfwbGUMXMS1bif4VEx_g9jkAaAjwrEALw_wcB) (Arayüz kullanacaklar için)
     
-    * Raspberry Pi için micro usb kablosu
+  * Raspberry Pi için micro usb kablosu
     
-    * Ethernet kablosu veya WiFi adaptörü
+  * Ethernet kablosu veya WiFi adaptörü
     
-    * [12'li led ring](https://www.f1depo.com/urun/neopixel-12li-halka) (16 veya farklı sayılarda da olur)
+  * [12'li led ring](https://www.f1depo.com/urun/neopixel-12li-halka) (16 veya farklı sayılarda da olur)
     
-    * [Arduino Nano](https://www.direnc.net/arduino-nano-usb-chip-ch340-usb-kablo-dahil?language=tr&h=2ef1190d&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gC7qaeETEafGkdqWlcDeEYIMpmfsQ-50ygmyPwUwib78QWhGOusjBEaAkxyEALw_wcB) (Arduino uno, micro veya pro mini ya da serial konusunda sıkıntı çıkarmayacak herhangi bir arduino da kullanılabilir ama nano öneririm)
+  * [Arduino Nano](https://www.direnc.net/arduino-nano-usb-chip-ch340-usb-kablo-dahil?language=tr&h=2ef1190d&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gC7qaeETEafGkdqWlcDeEYIMpmfsQ-50ygmyPwUwib78QWhGOusjBEaAkxyEALw_wcB) (Arduino uno, micro veya pro mini ya da serial konusunda sıkıntı çıkarmayacak herhangi bir arduino da kullanılabilir ama nano öneririm)
     
-    * 10K'lık potansiyometre (Arayüz kullanacaklar için)
+  * 10K'lık potansiyometre (Arayüz kullanacaklar için)
 
-    * 1 tane switch (Arayüz kullanacaklar için)
+  * 1 tane switch (Arayüz kullanacaklar için)
 
-    * 3 tane led (Kırmızı, Yeşil ve Mavi olması önerilir ve yine arayüz kullanacaklar için)
+  * 3 tane led (Kırmızı, Yeşil ve Mavi olması önerilir ve yine arayüz kullanacaklar için)
 
-    * 2 tane Push button (Arayüz kullanacaklar için)
+  * 2 tane Push button (Arayüz kullanacaklar için)
 
-    * Lehim konusunda yetenekli olduğunuza inanıyorsanız yaklaşık 100 tane dişi header ve [delikli pertinaks](https://www.hepsiburada.com/diyotlab-4x6-cm-cift-yuzlu-delikli-pertinaks-pm-HB00000NAQUN) (Biraz kablo ve lehim teli de gerekebilir)
+  * Lehim konusunda yetenekli olduğunuza inanıyorsanız yaklaşık 100 tane dişi header ve [delikli pertinaks](https://www.hepsiburada.com/diyotlab-4x6-cm-cift-yuzlu-delikli-pertinaks-pm-HB00000NAQUN) (Biraz kablo ve lehim teli de gerekebilir)
 
-    * Yeniyseniz [Breadboard](https://www.robotistan.com/orta-boy-breadboard?language=tr&h=04cbdb53&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gCfZXgLMqwqVf2fgMvt6EE4CcCSFUfkiYC35L4hbObrY0w49vFkOZgaAg25EALw_wcB)  ve [jumper kablo](https://www.robotistan.com/40-pin-ayrilabilen-erkek-erkek-m-m-jumper-kablo-200-mm?OM.zn=CategoryPage%20-%20CatTopSeller-w21&OM.zpc=11958)
- 
+  * Yeniyseniz [Breadboard](https://www.robotistan.com/orta-boy-breadboard?language=tr&h=04cbdb53&gclid=Cj0KCQiA4NTxBRDxARIsAHyp6gCfZXgLMqwqVf2fgMvt6EE4CcCSFUfkiYC35L4hbObrY0w49vFkOZgaAg25EALw_wcB)  ve [jumper kablo](https://www.robotistan.com/40-pin-ayrilabilen-erkek-erkek-m-m-jumper-kablo-200-mm?OM.zn=CategoryPage%20-%20CatTopSeller-w21&OM.zpc=11958)
+
   2. Yazılımsal Gereksinimler
-    * [FRCVision](https://github.com/wpilibsuite/FRCVision-pi-gen/releases)
-    
-    * [Python 3](https://www.python.org/downloads/)
-    
-    * [Putty](https://www.putty.org/) (Windows üzerinde SSH bağlantısı kurmamız için gerekli program. İsteğinize göre farklı bir program da kullanabilirsiniz.)
-    
-    * [balenaEtcher](https://www.balena.io/etcher/) (FRCVision işletim sistemini Raspberry Pi üzerine yüklemek için gerekli olan program.)
-    
-    
-<br>
+  * [FRCVision](https://github.com/wpilibsuite/FRCVision-pi-gen/releases)
+
+  * [Python 3](https://www.python.org/downloads/)
+
+  * [Putty](https://www.putty.org/) (Windows üzerinde SSH bağlantısı kurmamız için gerekli program. İsteğinize göre farklı bir program da kullanabilirsiniz.)
+
+  * [balenaEtcher](https://www.balena.io/etcher/) (FRCVision işletim sistemini Raspberry Pi üzerine yüklemek için gerekli olan program.)
+
+
 # Raspberry Pi'a FRCVision'ı Kurma
 
 FRCVision, Raspberry Pi için yayınlanmış ve görüntü işleme için hazırlanmış bir işletim sistemidir. İşletim sistemini Raspberry Pi'a yüklemek için [Balena Etcher'ı](https://www.balena.io/etcher/) kullancağız. Eğer linux tabanlı bir işletim sistemine sahipseniz `dd` komutunu da kullanbilirsiniz.
@@ -66,7 +65,6 @@ FRCVision, Raspberry Pi için yayınlanmış ve görüntü işleme için hazırl
 ```shell
 dd bs=4M if=frcvision-dosyasının-konumu of=/dev/sd-kart-konumu conv=fsync status=progress
 ```
-<br>
 # FRCVision ve Raspberry Pi'a Python Kodlarını Yükleme
 
 ### Ağ bağlantısının yapılması
@@ -82,7 +80,6 @@ http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilme
 Rpi'a SSH ile bağlanmak için [Putty](https://www.putty.org/) kullanıyorum. Hostname kısmına `pi@frcvision.local` (Eğer tarayıcınızda frcvision.local çalışmadıysa pi@tarayıcıda-kullandığınız-ip-adresi) yazdıktan sonra opena basın. Açılan ekranda SSH bağlantısı için şifreyi soracak. Varsayılan şifre `raspberry`' dir. `sudo raspi-config` komutu yardımıyla şifre değiştirme dahil çoğu işlemi gerçekleştireceğiz.
 
 ![Putty Configuration](https://i.ibb.co/m6Ccwzd/2.png)
-<br>
 
 # Raspi-config menüsü ve Kullanımı
 
@@ -113,14 +110,14 @@ Bunları ekledikten sonra raspberry'yi yeniden başlatırsanız ekranın tamamı
 Öncelikle python için kurmamız gereken birkaç kütüphane var. Bu kütüphaneleri Raspberry'ye kurmak için `pip3 install -r requirements.txt` kodunu terminale girebilirsiniz. 
 
 Kodları hem bilgisayarınıza hem de Raspberry'ye yüklemeniz gerekiyor.
-
- ** 1. Raspberry'ye kurmak için: ** 
+ 
+ **1. Raspberry'ye kurmak için:** 
 ```
 git clone https://github.com/FRC7839/NightVision
 ```
- ** 2. Windows'a yüklemek için: ** 
+ **2. Windows'a yüklemek için:** 
   Kodların hemen yukarısında `Clone or Download` yazısına tıklayarak veya [buradan](https://github.com/FRC7839/NightVision/archive/test.zip) zip uzantısında sıkıştırılmış halde indirebilirsiniz.
-<br>
+
 # Arayüzün Otomatik Olarak Çalışmasını Sağlamak
 Raspberry Pi her çalıştığında arayüzün de çalışmasını sağlamak için `/home/pi` klasörü içinde bulunan `.bashrc` dosyasında değişiklik yapmamız gerekiyor. Dosyanın sonuna:
   
@@ -135,7 +132,6 @@ Tabii ki bu bizim istemediğimiz bir şey fakat SSH sürekli kullandığımız b
 # Görüntü İşleme Algoritmasını Yüklemek
 
 Görüntü işleme algoritmasını yüklemek için yukarıdaki gibi aynı internette olmanız gerekiyor. Internet tarayıcınız üzerinden http://frcvision.local adresine gidin. (**Sistem üzerinde değişiklik yapabilmek için <kbd>Writeable</kbd> özelliğini aktif ettiğinizden emin olun**)
-<br>
 
 ![Uploading Algorithm](https://i.ibb.co/B6hknnJ/1.png?v=4&s)
 
@@ -166,7 +162,6 @@ veya
 py -3 NightVision.py --örnek-argüman eğer-varsa-argüman-değeri
 ```
 
-<br>
 **--pc-mode (kamera-numarası)**:
 
 Bu argüman bilgisayar için test modunu açar. Eğer laptop kullanıyorsanız kamera numarası için 0 kullandığınız laptopun gömülü kamerasını ifade eder. Eğer ek kamera taktıysanız argüman olarak muhtemelen `--pc-mode 1` girmelisiniz.
