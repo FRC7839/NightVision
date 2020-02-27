@@ -302,6 +302,7 @@ def main():
                     procTable.putString('Camera Tolerance', cam_tol)
                     procTable.putString('Waiting Period', wait_per)
                     procTable.putString('Autonomous Mode', auto_mode)
+                    procTable.putString('Camera Offset', cam_off)
                     procTable.putString('Y Error', y_error)
                 
         # print("debug 3")
@@ -324,109 +325,111 @@ def main():
         
         if success == False:
             print("Not found anything")    
-        
-        if y_error is not None and success == True and pc_mode is None:
             
-            if ((success == True) and (y_error < (-1 * cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),      
-                    "Network Tables " + str(isNtStarted),              
-                    "Hedef sağda",
-                    sep="  --  ",
-                )
-                # go_right()
-                                
-                                
-            elif ((success == True) and (y_error > cam_tol)): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın solunda kalıyorsa ve servo en solda değilse
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),
-                    "Network Tables " + str(isNtStarted),
-                    "Hedef solda",
-                    sep="  --  ",
-                )
-                # go_left()                
+        try:
+            if y_error is not None and success == True and pc_mode is None:
+                
+                if ((success == True) and (y_error < (-1 * int(cam_tol)))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(y_error),
+                        "Distance: " + str(distance),
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),      
+                        "Network Tables " + str(isNtStarted),              
+                        "Hedef sağda",
+                        sep="  --  ",
+                    )
+                    # go_right()
+                                    
+                                    
+                elif ((success == True) and (int(y_error) > int(cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın solunda kalıyorsa ve servo en solda değilse
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(int(y_error)),
+                        "Distance: " + str(distance),
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),
+                        "Network Tables " + str(isNtStarted),
+                        "Hedef solda",
+                        sep="  --  ",
+                    )
+                    # go_left()                
 
-            elif ((success == True) and (y_error < cam_tol) and (y_error > (-1 * cam_tol))):
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),
-                    "Network Tables " + str(isNtStarted),
-                    "Hedef ortada",
-                    sep="  --  ",
-                )        
+                elif ((success == True) and (int(y_error) < int(cam_tol)) and (int(y_error) > (-1 * int(cam_tol)))):
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(int(y_error)),
+                        "Distance: " + str(distance),
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),
+                        "Network Tables " + str(isNtStarted),
+                        "Hedef ortada",
+                        sep="  --  ",
+                    )        
 
-            else:
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),                    
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),
-                    "Network Tables " + str(isNtStarted),
-                    "Hedef bulunamadı",
-                    sep="  --  ",
-                )         
+                else:
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(int(y_error)),
+                        "Distance: " + str(distance),                    
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),
+                        "Network Tables " + str(isNtStarted),
+                        "Hedef bulunamadı",
+                        sep="  --  ",
+                    )         
 
-        elif y_error is not None and success == True and pc_mode is not None:
-            
-            if ((success == True) and (int(y_error) < (-1 * int(cam_tol)))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),      
-                    "Hedef sağda",
-                    sep="  --  ",
-                )
-                # go_right()
-                                
-                                
-            elif ((success == True) and (int(y_error) > int(cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın solunda kalıyorsa ve servo en solda değilse
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),
-                    "Hedef solda",
-                    sep="  --  ",
-                )
-                # go_left()                
+            elif int(y_error) is not None and success == True and pc_mode is not None:
+                
+                if ((success == True) and (int(int(y_error)) < (-1 * int(int(cam_tol))))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(int(y_error)),
+                        "Distance: " + str(distance),
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),      
+                        "Hedef sağda",
+                        sep="  --  ",
+                    )
+                    # go_right()
+                                    
+                                    
+                elif ((success == True) and (int(y_error) > int(cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın solunda kalıyorsa ve servo en solda değilse
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(int(y_error)),
+                        "Distance: " + str(distance),
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),
+                        "Hedef solda",
+                        sep="  --  ",
+                    )
+                    # go_left()                
 
-            elif ((success == True) and (y_error < cam_tol) and (y_error > (-1 * cam_tol))):
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),
-                    "Hedef ortada",
-                    sep="  --  ",
-                )        
+                elif ((success == True) and (int(y_error) < int(cam_tol)) and (int(y_error) > (-1 * int(cam_tol)))):
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(int(y_error)),
+                        "Distance: " + str(distance),
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),
+                        "Hedef ortada",
+                        sep="  --  ",
+                    )        
 
-            else:
-                print(
-                    "Success: " + str(success),
-                    "Error: " + str(y_error),
-                    "Distance: " + str(distance),                    
-                    "Robot location: " + robo_loc,
-                    "Camera Tolerance: " + str(cam_tol),
-                    "Hedef bulunamadı",
-                    sep="  --  ",
-                )         
-                 
+                else:
+                    print(
+                        "Success: " + str(success),
+                        "Error: " + str(int(y_error)),
+                        "Distance: " + str(distance),                    
+                        "Robot location: " + robo_loc,
+                        "Camera Tolerance: " + str(int(cam_tol)),
+                        "Hedef bulunamadı",
+                        sep="  --  ",
+                    )         
+        except TypeError:
+            pass            
                 
     if image_mode is None:
         cap.release()
