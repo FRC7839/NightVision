@@ -260,8 +260,10 @@ def main():
                 if isNtStarted:
                     outputStream.notifyError(cvSink.getError())
             # logging.debug(cvSink.getError())
-            continue
+            # continue
         
+        # if processingImg is not None:
+        #     print("debug 1")
 
         contours = functions.detect_targets(processingImg)
         
@@ -274,6 +276,10 @@ def main():
         except TypeError:
             pass
 
+        # print("debug 2")
+        
+        
+        
         final_result = processingImg
         
         # gen_frames(final_result, True)
@@ -293,6 +299,8 @@ def main():
                     procTable.putString('Autonomous Mode', auto_mode)
                     procTable.putString('Y Error', y_error)
                 
+        # print("debug 3")
+                
         imgLQ = cv2.resize(final_result, (120, 90))
         
         if pc_mode is not None:
@@ -306,7 +314,12 @@ def main():
         # Success true olunca tarama modu duruyor ve kamera y_errora göre hareket etmeye başlıyor         
         # Ama bizim y_error köşe olayı yüzünden olmadığı için kamera hareketsiz kalıyordu
         
-                
+        # print("debug 4")
+        
+        
+        if success == False:
+            print("Not found anything")    
+        
         if y_error is not None and success == True and pc_mode is None:
             
             if ((success == True) and (y_error < (-1 * cam_tol))): # Eğer herhangi bir obje aktif olarak görülüyorsa, objenin orta noktası ekranın sağında kalıyorsa ve servo en sağda değilse
