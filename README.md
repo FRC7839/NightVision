@@ -49,7 +49,7 @@ Görüntü işleme konusunda daha detaylı açıklamalar için https://docs.wpil
 <br>
 # Raspberry Pi'a FRCVision'ı Kurma
 
-FRCVision, Raspberry pi için yayınlanmış ve görüntü işleme için hazırlanmış bir işletim sistemidir. İşletim sistemini Raspberry Pi'a yüklemek için [Balena Etcher'ı](https://www.balena.io/etcher/) kullancağız. Eğer linux tabanlı bir işletim sistemine sahipseniz `dd` komutunu da kullanbilirsiniz.
+FRCVision, Raspberry Pi için yayınlanmış ve görüntü işleme için hazırlanmış bir işletim sistemidir. İşletim sistemini Raspberry Pi'a yüklemek için [Balena Etcher'ı](https://www.balena.io/etcher/) kullancağız. Eğer linux tabanlı bir işletim sistemine sahipseniz `dd` komutunu da kullanbilirsiniz.
 
 Öncelikle frcvision dosyasını bilgisayarınıza indirin: https://github.com/wpilibsuite/FRCVision-pi-gen/releases
 
@@ -71,11 +71,11 @@ dd bs=4M if=frcvision-dosyasının-konumu of=/dev/sd-kart-konumu conv=fsync stat
 
 ### Ağ bağlantısının yapılması
 
-Rpi'a bilgisayardan bağlanmak için onunla aynı ağ üzerinde olmamız gerekiyor. Fakat FRCVision işletim sistemi FRC sahasında robot bağlantılarında kesinti yaşanmasını önlemek için raspberry'nin WiFi özelliğini kapatıyor. Bu nedenle kurulum yaparken bir WiFi adaptörü kullanmak kullanışlı oluyor. Fakat ethernet kablosu da kullanabilirsiniz. Raspberry'yi ethernet kablosuyla bilgisayara bağlayabilirsiniz fakat bu her zaman çalışmayabilir ayrıca birkaç programın kurulumunu yapmak için internete ihtiyacımız olacak. Bu nedenle Raspberry'yi ethernet kablosuyla internete bağladıktan sonra bilgisayarınızı da aynı ağa bağlayın. 
+Raspberry Pi'a bilgisayardan bağlanmak için onunla aynı ağ üzerinde olmamız gerekiyor. Fakat FRCVision işletim sistemi FRC sahasında robot bağlantılarında kesinti yaşanmasını önlemek için raspberry'nin WiFi özelliğini kapatıyor. Bu nedenle kurulum yaparken bir WiFi adaptörü kullanmak kullanışlı oluyor. Fakat ethernet kablosu da kullanabilirsiniz. Raspberry'yi ethernet kablosuyla bilgisayara bağlayabilirsiniz fakat bu her zaman çalışmayabilir ayrıca birkaç programın kurulumunu yapmak için internete ihtiyacımız olacak. Bu nedenle Raspberry'yi ethernet kablosuyla internete bağladıktan sonra bilgisayarınızı da aynı ağa bağlayın. 
 
 ### FRCVision arayüzüne ulaşma
 
-http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için Writable butonuna basın. frcvision.local adresi her zaman çalışmayabilir. Aynı internet üzerinde ağ taraması yaparak ([Nmap](https://nmap.org/download.html) veya [Advanced Ip Scanner](https://www.advanced-ip-scanner.com/tr/) gibi programlarla) Raspberry'nin local ip adresini bulup direkt o ip adresini tarayıcınızın URL kısmına o ip adresini yapıştırarak düzenlemeleir yapmak için FRCVision sisteminin arayüzüne girebilirsiniz.
+http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için <kbd>Writable</kbd> butonuna basın. http://frcvision.local adresi her zaman çalışmayabilir. Aynı internet üzerinde ağ taraması yaparak ([Nmap](https://nmap.org/download.html) veya [Advanced Ip Scanner](https://www.advanced-ip-scanner.com/tr/) gibi programlarla) Raspberry'nin local ip adresini bulup direkt o ip adresini tarayıcınızın URL kısmına o ip adresini yapıştırarak düzenlemeleir yapmak için FRCVision sisteminin arayüzüne girebilirsiniz.
 
 ### SSH aracılığıyla Raspberry Pi'a bağlanma
 
@@ -90,12 +90,12 @@ Rpi'a SSH ile bağlanmak için [Putty](https://www.putty.org/) kullanıyorum. Ho
 Kullanıcı şifresini değiştirmek için sizi terminale yönlendirir. (Linux, şifreyi korumak için sizin yazdığınız karakterleri göstermiyor.)
 
 ### Network Options 
-Bu bölümde kullanışlı olabileceğni düşündüğüm tek şey WiFi bölümü. WiFi bölümü de eğer bir WiFi adaptörü satın almadıysanız anlamsız. Ama aldıysanız SSID kısmına ağın adını, passphrase kısmına da şifreyi yazın.  Kaydettiğiniz WiFi ssid ve şifrelerini `cat /etc/wpa_supplicant/wpa_supplicant.conf` komutuyla görüntüyleyebilir, sistem Writeable konumundayken `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf` komutuyla da düzenleyebilirsiniz. (Nano üzerinde bir dosyayı kaydedip çıkmak için <kbd>Ctrl</kbd> + <kbd>X</kbd> , daha sonra <kbd>y</kbd>, daha sonra da ,<kbd>Enter</kbd> )
+Bu bölümde kullanışlı olabileceğni düşündüğüm tek şey WiFi bölümü. WiFi bölümü de eğer bir WiFi adaptörü satın almadıysanız anlamsız. Ama aldıysanız SSID kısmına ağın adını, passphrase kısmına da şifreyi yazın.  Kaydettiğiniz WiFi ssid ve şifrelerini `cat /etc/wpa_supplicant/wpa_supplicant.conf` komutuyla görüntüyleyebilir, sistem Writeable konumundayken `sudo nano /etc/wpa_supplicant/wpa_supplicant.conf` komutuyla da düzenleyebilirsiniz. (Nano üzerinde bir dosyayı kaydedip çıkmak için <kbd>Ctrl</kbd> + <kbd>X</kbd> , daha sonra <kbd>Y</kbd>, daha sonra da <kbd>Enter</kbd>)
 
 &#10071; **FRCVision yazılımının WiFi özelliğini kapatmasının bir sebebi var, lütfen yarışma sırasında WiFi adaptörü kullanmayın**.
 
 ### Boot Options 
-Önyükleme ayarlarının yapılacağı menüdür. Desktop / CLI bölümünü seçin ve Raspberry pi açıldığında şifre girmekle uğraşmamak için Console Autologin seçeneğini seçin.
+Önyükleme ayarlarının yapılacağı menüdür. Desktop / CLI bölümünü seçin ve Raspberry Pi açıldığında şifre girmekle uğraşmamak için Console Autologin seçeneğini seçin.
 
 ### Interfacing Options 
 Öncelikle SSH'i seçerek enable etmeniz gerekiyor. Ekran satın almadıysanız ve arayüz kullanmayacaksınız bile kamera etrafına yerleştireceğiniz ledleri açıp kapatabilmek için bir arduino kullanmanız gerekiyor. Eğer ledi kapatmayı düşünmüyorsanız Arduino ile Raspberry arasında bir iletişime ihtiyacınız olmuyor ve Serial seçeneğini etkinleştirmek de anlamsız kalıyor. Fakat arayüz yapmayı hedefliyorsanız veya ledi kapatıp açmayı istiyorsanız Serial seçeneğini etkinleştirmeniz gerekiyor.
@@ -134,40 +134,53 @@ Tabii ki bu bizim istemediğimiz bir şey fakat SSH sürekli kullandığımız b
 
 # Görüntü İşleme Algoritmasını Yüklemek
 
-Görüntü işleme algoritmasını yüklemek için yukarıdaki gibi aynı internette olmanız gerekiyor. Internet tarayıcınız üzerinden http://frcvision.local adresine gidin. (**Sistem üzerinde değişiklik yapabilmek için <kbd>Writeable</kbd> özelliğini aktif ettiğinizden emin olun.**). Buranın devamını yarın okulda paylaşacağım
+Görüntü işleme algoritmasını yüklemek için yukarıdaki gibi aynı internette olmanız gerekiyor. Internet tarayıcınız üzerinden http://frcvision.local adresine gidin. (**Sistem üzerinde değişiklik yapabilmek için <kbd>Writeable</kbd> özelliğini aktif ettiğinizden emin olun**)
+<br>
 
 ![Uploading Algorithm](https://i.ibb.co/B6hknnJ/1.png?v=4&s)
 
-# Bilgisayar Testleri İçin Görüntü İşleme Algoritmasının Kullanımı (Biz bitirene kadar kullanıp test etmek çok yardımcı olabilir)
+# Bilgisayar Testleri İçin Görüntü İşleme Algoritmasının Kullanımı 
+#### NOT: Biz bitirene kadar kullanıp test etmek çok yardımcı olabilir
 
-Bilgisayarda görüntü işleme algoritmasını kullanabilmek için NightVision kütüphanesini zip halinde yukarıdan indirip içindeki dosyaları çıkarmalısınız. Bizim kullanacağımız kod NightVision.py olmasına rağmen bu kod frc_lib7839.py kodundan da fonksiyon kullandığı için sadece NightVision.py kodunun yerini değiştiriseniz hata almaya başlarsınız. 
+Bilgisayarda görüntü işleme algoritmasını kullanabilmek için NightVision kütüphanesini zip halinde yukarıdan indirip içindeki dosyaları çıkarmalısınız. Bizim kullanacağımız kod `NightVision.py` olmasına rağmen bu kod `frc_lib7839.py` modülünden de fonksiyon kullandığı için sadece `NightVision.py` kodunun yerini değiştiriseniz hata almaya başlarsınız. 
 
-Kodu indirdikten sonra windows + r 'ye basıp çalıştırı açtıktan sonra cmd yazın ve Enter'a basın. Cmd'den NightVision dosyalarını çıkarttığınız yere geçmeniz gerekiyor.
-pwd komutu aktif olarak bulunduğunuz klasörü gösterir. dir komudu o klasör içindeki dosyaları ve klasörleri gösterir. cd komutu da belirttiğiniz klasörün içine girmenizi sağlar (cd Documents gibi) eğer dir komutunu girdiğinizde cmd'nin size verdiği çıktının içinde NightVision.py ve frc_lib7839.py'yi görebiliyorsanız doğru yere gelmişsiniz demektir.
+Kodu indirdikten sonra <kbd>Windows</kbd> + <kbd>R</kbd> tuş kombinasyonuna basıp Çalıştır'ı açtıktan sonra `cmd` yazın ve <kbd>Enter</kbd> tuşuna basın. Açılan komut satırından NightVision dosyalarını çıkarttığınız yere geçmeniz gerekiyor. Bulunduğunuz yeri öğrenmek için `pwd` komutunu kullanabilirsiniz. Bulunduğunuz klasör içindeki dosya ve klasörleri görmek için ise `dir` komutunu kullanın. Belirttiğiniz klasörün içine girmenizi sağlayan komut ise `cd` komududur. Eğer `dir` komutunu girdiğinizde cmd'nin size verdiği çıktının içinde `NightVision.py` ve `frc_lib7839.py` dosyalarını görebiliyorsanız doğru yere gelmişsiniz demektir.
 
-Python kodlarının çalışması için gerekli kütüphaneleri bilgisayara da kurmamız gerekiyor. py -3 -m pip install -r requirements1.txt kodunu cmd'ye girin.
+Python kodlarının çalışması için gerekli kütüphaneleri bilgisayara da kurmamız gerekiyor. Bunun için ise aşağıdaki kodları komut konsoluna(cmd) girmeniz yeterli. 
 
-Argümanlar
+```
+py -3 -m pip install -r requirements1.txt
+```
+
+### Argümanlar
 
 Programı çalıştırıken ek olarak girdiğimiz argümanlar program tarafından işleniyor. Argümanların temel kullanım şekli şu şekildedir: 
 
-py -3 NightVision.py 
+```
+py -3 NightVision.py
+```
+
 veya
+
+```
 py -3 NightVision.py --örnek-argüman eğer-varsa-argüman-değeri
+```
 
---pc-mode (kamera-numarası) bu argüman bilgisayar için test modunu açar. Eğer laptop kullanıyorsanız kamera numarası için 0 laptopun builtin kamerasını ifade eder. Eğer ek kamera taktıysanız argüman olarak muhtemelen --pc-mode 1 girmelisiniz.
+<br>
+**--pc-mode (kamera-numarası)**:
 
---test-image (resim-konumu) bu argüman bilgisayar için resim üzerinden test modunu açar. Eğer yüklemek istediğiniz örnek bir fotoğraf varsa fotoğrafın konumunu (resim-konumu) kısmına girerek algoritmayı test edebilirsiniz.
+Bu argüman bilgisayar için test modunu açar. Eğer laptop kullanıyorsanız kamera numarası için 0 kullandığınız laptopun gömülü kamerasını ifade eder. Eğer ek kamera taktıysanız argüman olarak muhtemelen `--pc-mode 1` girmelisiniz.
 
---team-number (takım-numarası) bu argüman radionun dağıttığı ip adreslerine dayanarak radioya bağlı olup olmadığımızı anlamak için yazılmış fonksiyonların çalışmasını sağlar. Radio'nun verilen takım numarasına göre konfigüre edilmiş olması gerekmektedir. Raspberry pi üzerinde bu argümanı giremediğimiz için bu argümanı kullanma ihtiyacınız yok.
+Örnek Kullanım: `py -3 NightVision.py --pc-mode 1`
 
+**--test-image (resim-konumu)**:
 
+Bu argüman bilgisayar için resim üzerinden test modunu açar. Eğer yüklemek istediğiniz örnek bir fotoğraf varsa fotoğrafın konumunu (resim-konumu) kısmına girerek algoritmayı test edebilirsiniz.
 
+Örnek Kullanım: `py -3 NightVision.py --test-image "C:/Users/blackshadow/Pictures/1.jpg"`
 
+**--team-number (takım-numarası)**:
 
+Bu argüman modemin dağıttığı ip adreslerine dayanarak modeme bağlı olup olmadığımızı anlamak için yazılmış fonksiyonların çalışmasını sağlar. Modemin verilen takım numarasına göre konfigüre edilmiş olması gerekmektedir. Raspberry Pi üzerinde bu argümanı giremediğimiz için bu argümanı kullanma ihtiyacınız yok.
 
-
-
-
-
-
+Örnek Kullanım: `py -3 NightVision.py --team-number "7839"`
