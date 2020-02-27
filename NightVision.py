@@ -240,6 +240,8 @@ def main():
     text_font = cv2.FONT_HERSHEY_SIMPLEX
     _name = ""
 
+    print("VISION PROCESSING STARTED")
+    
     while True:
         ok_contours = []
         
