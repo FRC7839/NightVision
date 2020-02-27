@@ -86,13 +86,9 @@ import os
 
 # region global
 global success
-global pc_test_mode
-global test_mode
 global pc_mode
 global cam_num
 global team_ip1
-
-
 
 
 team_number = InputPFunctions.find_arg("--team-number", num=True)
@@ -199,10 +195,10 @@ def main():
         isConntedtoRadio = False
     
     if pc_mode is None:
-        if isConntedtoRadio and os.name == "posix" and str(socket.gethostname()) == "frcvision":
+        if os.name == "posix":
             try:
                 print(" ## NETWORK TABLES INIT ## ")
-                NetworkTables.initialize()
+                NetworkTables.initialize("10.78.39.2")
                 
             except:
                 ### ERROR ###
@@ -230,12 +226,18 @@ def main():
 
         camera = cs.startAutomaticCapture()  
         camera.setResolution(640, 480)
-
+        camera.getProperty("brightness").set(0)
+        camera.getProperty("contrast").set(50)
+        camera.getProperty("saturation").set(100)
+        camera.getProperty("exposure_auto").set(0)
+        camera.getProperty("exposure_absolute").set(0)
+        
         cvSink = cs.getVideo()
         
         procTable = NetworkTables.getTable("imgProc")
+        smartTable = NetworkTables.getTable("SmartDashboard")
         
-    if isNtStarted:
+    if True:
         outputStream = cs.putVideo("LQimg", 120, 90)
         print("outputStream = cs.putVideo('LQimg', 120, 90)")
 
@@ -298,15 +300,24 @@ def main():
         
             if pc_mode is None:
                 if success and y_error is not None:
+                    # print("ok")
                     procTable.putString('Robot Location', robo_loc)
                     procTable.putString('Camera Tolerance', cam_tol)
                     procTable.putString('Waiting Period', wait_per)
                     procTable.putString('Autonomous Mode', auto_mode)
                     procTable.putString('Camera Offset', cam_off)
                     procTable.putString('Y Error', y_error)
+                    
+                    smartTable.putString('Robot Location', robo_loc)
+                    smartTable.putString('Camera Tolerance', cam_tol)
+                    smartTable.putString('Waiting Period', wait_per)
+                    smartTable.putString('Autonomous Mode', auto_mode)
+                    smartTable.putString('Camera Offset', cam_off)
+                    smartTable.putString('Y Error', y_error)
+                    
                 
         # print("debug 3")
-                
+        
         imgLQ = cv2.resize(final_result, (120, 90))
         
         # if pc_mode is not None:
@@ -315,17 +326,18 @@ def main():
         # if cv2.waitKey(1) & 0xFF == ord("q"):
         #     break
         
-        if success == True and y_error is None: # Hedefin yarısı görüldüğünde success değişkeni true değerini almasına rağmen hedef kenarlara değdiği için y_error değeri almıyor (Siyabendin müthiş çözümleri)
+        if success == False:
+            print("Not found anything")    
+            
+        
+        if y_error is None and success == True: # Hedefin yarısı görüldüğünde success değişkeni true değerini almasına rağmen hedef kenarlara değdiği için y_error değeri almıyor (Siyabendin müthiş çözümleri)
             success = False                     #  
+            print("y_error none but success true")
         # Success true olunca tarama modu duruyor ve kamera y_errora göre hareket etmeye başlıyor         
         # Ama bizim y_error köşe olayı yüzünden olmadığı için kamera hareketsiz kalıyordu
         
         # print("debug 4")
         
-        
-        if success == False:
-            print("Not found anything")    
-            
         try:
             if y_error is not None and success == True and pc_mode is None:
                 
