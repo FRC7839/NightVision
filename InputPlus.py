@@ -164,6 +164,8 @@ def match_mode(
     settings=None,
     led_blue=None,
     led_camera=None,
+    led_red=None,
+    led_green=None,
     swt1=None,
     pot1=None,
     PanicMenu=False,
@@ -172,6 +174,7 @@ def match_mode(
     isReadError=False
 ):
     if not PanicMenu:
+        led_green.write(1)
         led_control = {}
         # Ana yer
         while True:
@@ -250,10 +253,13 @@ def match_mode(
                 )
                 handle_error(rv, stdscr, PanicMenu=True)
 
+                led_green.write(0)
+
                 break
 
     ### KERNEL PANIC ###
     else:
+        led_red.write(1)
         settings = DbFunctions.get_setting(file_s)
         led_control = DbFunctions.get_setting(
             file_lc
@@ -352,6 +358,7 @@ def match_mode(
 
                 if not handle_error(rv2, stdscr, PanicMenu=False, i=True) and not isReadError:
                     not_main(stdscr)
+                    led_red.write(0)
 
 
 def get_first_menu_values(team_ip2):
@@ -1191,7 +1198,7 @@ def not_main(stdscr):
             and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == max_v
             and cur_stat["current_menu"] == main_menu_value
         ):
-            match_mode(stdscr, settings, led_blue, led_camera, swt1, pot1, isKeyError)
+            match_mode(stdscr, settings, led_blue, led_camera, led_red, led_green, swt1, pot1, isKeyError)
 
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2:
