@@ -128,9 +128,9 @@ pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 match_mode_can_be_started = False
 
 
-# if os.name == "nt":
-#     from frc_lib7839 import *
-#     pc_mode = 1s
+if os.name == "nt":
+    from frc_lib7839 import *
+    pc_mode = 1
 
 if pc_mode is not None and os.name == "posix":
     sys.path.insert(1, '/home/pi/NightVision')

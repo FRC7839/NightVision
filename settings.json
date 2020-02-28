@@ -1,6 +1,6 @@
 {
     "isTunaPro": true,
-    "Robot Location": "LEFT",
+    "Robot Location": "MIDDLE",
     "Camera Tolerance": "15",
     "Waiting Period": "15",
     "Autonomous Mode": "5",

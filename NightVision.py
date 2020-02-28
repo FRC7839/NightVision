@@ -239,7 +239,7 @@ def main():
         procTable = NetworkTables.getTable("imgProc")
         smartTable = NetworkTables.getTable("SmartDashboard")
         
-    if True:
+    if pc_mode is None:
         outputStream = cs.putVideo("LQimg", 120, 90)
         print("outputStream = cs.putVideo('LQimg', 120, 90)")
 
