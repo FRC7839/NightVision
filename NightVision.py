@@ -312,9 +312,9 @@ def main():
             procTable.putString('Camera Offset', cam_off)
             
             if success and y_error is not None:
-                procTable.putString('Y Error', y_error)
+                procTable.putString('yerror', y_error)
             else:
-                procTable.putString('Y Error', "NF")
+                procTable.putString('yerror', "NF")
                                         
             smartTable.putString('Robot Location', robo_loc)
             smartTable.putString('Cam Tol', cam_tol)
@@ -323,9 +323,9 @@ def main():
             smartTable.putString('Camera Offset', cam_off)
 
             if success and y_error is not None:
-                smartTable.putString('Y Error', y_error)
+                smartTable.putString('yerror', y_error)
             else:
-                smartTable.putString('Y Error', "NF")
+                smartTable.putString('yerror', "NF")
                                     
             
                 
