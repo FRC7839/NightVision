@@ -152,12 +152,7 @@ def handle_error_lite(errmsg):
         else:
             return False
 
-def main():
-    # os.popen('export DISPLAY=":0"') 
-    functions = CameraFunctions()
-    
-    print("Started")
-    
+def threading_func_sakat_kayra():        
     settings = DbFunctions.read_settings_on_json(file_s)
     
     if handle_error_lite(settings) == True:
@@ -168,13 +163,20 @@ def main():
         settings[setting_names[3]] = setting_defaults[3]
         settings[setting_names[4]] = setting_defaults[4]
     
+    else:
+        robo_loc = DbFunctions.read_settings_on_json("Robot Location", file_s)
+        cam_tol = DbFunctions.read_settings_on_json("Camera Tolerance", file_s)
+        wait_per = DbFunctions.read_settings_on_json("Waiting Period", file_s)
+        auto_mode = DbFunctions.read_settings_on_json("Autonomous Mode", file_s)
+        cam_off = DbFunctions.read_settings_on_json("Camera Offset", file_s)
+        
+    return robo_loc, cam_tol, wait_per, auto_mode, cam_off    
 
-    robo_loc = DbFunctions.read_settings_on_json("Robot Location", file_s)
-    cam_tol = DbFunctions.read_settings_on_json("Camera Tolerance", file_s)
-    wait_per = DbFunctions.read_settings_on_json("Waiting Period", file_s)
-    auto_mode = DbFunctions.read_settings_on_json("Autonomous Mode", file_s)
-    cam_off = DbFunctions.read_settings_on_json("Camera Offset", file_s)
+def main():
+    # os.popen('export DISPLAY=":0"') 
+    functions = CameraFunctions()
     
+    print("Started")    
 
     isNtStarted = None
     isConntedtoRadio = None
@@ -246,8 +248,11 @@ def main():
 
     text_font = cv2.FONT_HERSHEY_SIMPLEX
     _name = ""
-
+    
     print("VISION PROCESSING STARTED")
+    
+    robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
+    
     
     while True:
         ok_contours = []
@@ -285,7 +290,7 @@ def main():
 
         # print("debug 2")
         
-        
+        # robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
         
         final_result = processingImg
         
@@ -297,24 +302,33 @@ def main():
                 final_result, _name, (30, 50), text_font, 1, (0, 0, 255), 2, cv2.LINE_AA
             )
             _, y_error, distance = functions.calculate_errors(ok_contours)
-        
-            if pc_mode is None:
-                if success and y_error is not None:
-                    # print("ok")
-                    procTable.putString('Robot Location', robo_loc)
-                    procTable.putString('Camera Tolerance', cam_tol)
-                    procTable.putString('Waiting Period', wait_per)
-                    procTable.putString('Autonomous Mode', auto_mode)
-                    procTable.putString('Camera Offset', cam_off)
-                    procTable.putString('Y Error', y_error)
-                    
-                    smartTable.putString('Robot Location', robo_loc)
-                    smartTable.putString('Camera Tolerance', cam_tol)
-                    smartTable.putString('Waiting Period', wait_per)
-                    smartTable.putString('Autonomous Mode', auto_mode)
-                    smartTable.putString('Camera Offset', cam_off)
-                    smartTable.putString('Y Error', y_error)
-                    
+    
+        if pc_mode is None:
+            # print("ok")
+            procTable.putString('Robot Location', robo_loc)
+            procTable.putString('Cam Tol', cam_tol)
+            procTable.putString('Waiting Period', wait_per)
+            procTable.putString('Autonomous Mode', auto_mode)
+            procTable.putString('Camera Offset', cam_off)
+            
+            if success and y_error is not None:
+                procTable.putString('Y Error', y_error)
+            else:
+                procTable.putString('Y Error', "NF")
+                                        
+            smartTable.putString('Robot Location', robo_loc)
+            smartTable.putString('Cam Tol', cam_tol)
+            smartTable.putString('Waiting Period', wait_per)
+            smartTable.putString('Autonomous Mode', auto_mode)
+            smartTable.putString('Camera Offset', cam_off)
+
+            if success and y_error is not None:
+                smartTable.putString('Y Error', y_error)
+            else:
+                smartTable.putString('Y Error', "NF")
+                                    
+            
+                
                 
         # print("debug 3")
         
@@ -326,8 +340,6 @@ def main():
         # if cv2.waitKey(1) & 0xFF == ord("q"):
         #     break
         
-        if success == False:
-            print("Not found anything")    
             
         
         if y_error is None and success == True: # Hedefin yarısı görüldüğünde success değişkeni true değerini almasına rağmen hedef kenarlara değdiği için y_error değeri almıyor (Siyabendin müthiş çözümleri)
@@ -335,6 +347,9 @@ def main():
             print("y_error none but success true")
         # Success true olunca tarama modu duruyor ve kamera y_errora göre hareket etmeye başlıyor         
         # Ama bizim y_error köşe olayı yüzünden olmadığı için kamera hareketsiz kalıyordu
+        
+        if success == False: 
+            print("Not found anything")    
         
         # print("debug 4")
         
@@ -368,7 +383,7 @@ def main():
                     )
                     # go_left()                
 
-                elif ((success == True) and (int(y_error) < int(cam_tol)) and (int(y_error) > (-1 * int(cam_tol)))):
+                elif ((success == True) and (int(y_error) <= int(cam_tol)) and (int(y_error) >= (-1 * int(cam_tol)))):
                     print(
                         "Success: " + str(success),
                         "Error: " + str(int(y_error)),
@@ -419,7 +434,7 @@ def main():
                     )
                     # go_left()                
 
-                elif ((success == True) and (int(y_error) < int(cam_tol)) and (int(y_error) > (-1 * int(cam_tol)))):
+                elif ((success == True) and (int(y_error) <= int(cam_tol)) and (int(y_error) >= (-1 * int(cam_tol)))):
                     print(
                         "Success: " + str(success),
                         "Error: " + str(int(y_error)),
