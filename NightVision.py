@@ -76,7 +76,9 @@
 
 from frc_lib7839 import *
 import numpy as np
+import threading
 import socket
+import queue
 import math
 import time
 import sys
@@ -251,10 +253,27 @@ def main():
     
     print("VISION PROCESSING STARTED")
     
-    robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
+    #, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
     
-    
+    current_time = int(time.time())
+
+    start_t = timeit.default_timer()
+
     while True:
+        elapsed = timeit.default_timer() - start_t 
+        
+        if elapsed <= 30:
+            start_t = timeit.default_timer()
+            
+            # kayranın threading return değer ataması
+
+            que = queue.Queue()
+            t = threading.Thread(target=lambda q, arg1: q.put(threading_func_sakat_kayra(arg1)), args=(que))
+            t.start()
+            t.join()
+            cam_tol, wait_per, auto_mode, cam_off = que.get()
+
+
         ok_contours = []
         
         success = False
@@ -290,8 +309,7 @@ def main():
 
         # print("debug 2")
         
-        # robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
-        
+        # robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()        
         final_result = processingImg
         
         # gen_frames(final_result, True)
