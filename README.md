@@ -116,7 +116,8 @@ Kodları hem bilgisayarınıza hem de Raspberry'ye yüklemeniz gerekiyor.
 git clone https://github.com/FRC7839/NightVision
 ```
  **2. Windows'a yüklemek için:** 
-  Kodların hemen yukarısında `Clone or Download` yazısına tıklayarak veya [buradan](https://github.com/FRC7839/NightVision/archive/test.zip) zip uzantısında sıkıştırılmış halde indirebilirsiniz.
+ 
+ Kodların hemen yukarısında `Clone or Download` yazısına tıklayarak veya [buradan](https://github.com/FRC7839/NightVision/archive/test.zip) zip uzantısında sıkıştırılmış halde indirebilirsiniz.
 
 # Arayüzün Otomatik Olarak Çalışmasını Sağlamak
 Raspberry Pi her çalıştığında arayüzün de çalışmasını sağlamak için `/home/pi` klasörü içinde bulunan `.bashrc` dosyasında değişiklik yapmamız gerekiyor. Dosyanın sonuna:
