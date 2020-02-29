@@ -383,7 +383,7 @@ class ArduinoFunctions:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
             print(output_e + " # FROM KEY_GET FUNCTION")
-            return output_e
+            return output_e, None
 
     @staticmethod
     def encoder_key_get(

@@ -258,7 +258,10 @@ def match_mode(
 
     ### KERNEL PANIC ###
     else:
-        led_red.write(1)
+        try:
+            led_red.write(1)
+        except:
+            pass
         settings = DbFunctions.get_setting(file_s)
         led_control = DbFunctions.get_setting(
             file_lc
@@ -1123,8 +1126,8 @@ def not_main(stdscr):
         led_red = board.get_pin("d:11:p")
 
         time.sleep(0.5)
-        iterator= pyfirmata.util.Iterator(board)
-        iterator.start()
+        # iterator= pyfirmata.util.Iterator(board)
+        # iterator.start()
         time.sleep(0.5)
 
         if pot1.read() is None:
