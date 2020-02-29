@@ -258,7 +258,12 @@ def match_mode(
 
     ### KERNEL PANIC ###
     else:
-        led_red.write(1)
+        
+        try:
+            led_red.write(1)
+        except:
+            pass
+        
         settings = DbFunctions.get_setting(file_s)
         led_control = DbFunctions.get_setting(
             file_lc
@@ -340,7 +345,7 @@ def match_mode(
                 errmsg = None
 
             background_setup(stdscr, None, PanicMode=True)
-
+                        
             if type(err_type) == str and err_type == "ARDUINO":
                 rv2 = ArduinoFunctions.check_ports()
 
@@ -349,8 +354,10 @@ def match_mode(
                         isReadError = True
                     else:
                         isReadError = False
+                
                 except:
-                    if rv2 != all_errors[ARDUINO_CONN_LOST]:
+                    
+                    if rv2 != all_errors[ARDUINO_CONN_LOST] and not err_type == "ARDUINO":
                         isReadError = True
                     else:
                         isReadError = False
@@ -358,6 +365,11 @@ def match_mode(
                 if not handle_error(rv2, stdscr, PanicMenu=False, i=True) and not isReadError:
                     not_main(stdscr)
                     led_red.write(0)
+        
+            try:
+                ArduinoFunctions.led_write(led_green, led_camera, 1)
+            except:
+                pass
 
 
 def get_first_menu_values(team_ip2):
@@ -1101,7 +1113,7 @@ def not_main(stdscr):
         errortimer = threading.Timer(0.1, print_error, args=[stdscr, None])
         errortimer.start()
 
-
+ 
     if not type(board) == str:
 
         # swt1 = board.get_pin("a:1:i")

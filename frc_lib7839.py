@@ -52,7 +52,7 @@ INTERNAL_SYNTAX_ERR = "INTERNAL_SYNTAX_ERROR"
 ARDUINO_INPUT_ERR = "ARDUINO_INPUT_ERROR"
 CANT_CONNECT_ERR = "CAN_NOT_CONNECT_TO_SERVER"
 SERVER_NOT_STARTED_ERR = "SERVER_NOT_STARTED"
-ARDUINO_CONN_ERR = "ARDUINO_INPUT_ERROR"
+ARDUINO_CONN_ERR = "ARDUINO_CONNECTION_ERROR"
 WRITE_ERR = "FILE_NOT_FOUND_ERROR"
 READ_ERR = "READ_ERROR"
 
@@ -183,7 +183,7 @@ class ArduinoFunctions:
             out1.write(st)
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            output_e = all_errors[ARDUINO_CONN_ERR]
             print(output_e + " # FROM LED_WRITE FUNCTION")
             return output_e
 
