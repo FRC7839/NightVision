@@ -1,3 +1,4 @@
+import serial.tools.list_ports
 import numpy as np
 import pyfirmata
 import socket
@@ -9,8 +10,6 @@ import cv2
 import sys  
 import os
 
-if str(sys.platform).startswith("win"):
-    import serial.tools.list_ports
 
 # region global
 global wait_time_for_get_key
@@ -140,34 +139,20 @@ class ArduinoFunctions:
     @staticmethod
     def check_ports():
         try:
-            if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
-                dev = os.popen("ls /dev/tty* | grep USB").read()
-                if dev == "":
-                    return all_errors[ARDUINO_CONN_LOST]
-                
-                else:
-                    dev = dev.split("\n")
-                    # for i in range(len(dev)):
-                    #     COMS[i] = COMS[i].split(":")[0]
-                    return dev    
-                
-            elif str(sys.platform).startswith("win"):
-                ports = serial.tools.list_ports.comports()
+            comlist = serial.tools.list_ports.comports()
+            connected = []
+            for element in comlist:
+                if os.name == "nt":
+                    connected.append(element.device)
+                elif os.name == "posix" and str(element.device).startswith("/dev/ttyUSB"):
+                    connected.append(element.device)
+                    
+            if len(COMS) > 0:
+                return COMS
 
-                COMS = []
-
-                for port, desc, hwid in sorted(ports):
-                    COMS.append("{}: {} [{}]".format(port, desc, hwid))
-
-                for i in range(len(COMS)):
-                    COMS[i] = COMS[i].split(":")[0]
-                
-                if len(COMS) > 0:
-                    return COMS
-
-                else:
-                    return all_errors[ARDUINO_CONN_LOST]
-                
+            else:
+                return all_errors[ARDUINO_CONN_LOST]
+            
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]

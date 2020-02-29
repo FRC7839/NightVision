@@ -40,15 +40,18 @@
                                                                             17-18/2 Led dosyasina is mm started ayarini ekle (Kamera algoritmasinin okuyup okumamasi gerektigini soylemek icin)
                                                                             17-18/2 INFO MENuSu cALIsMIYOR
                                                                             (YALAN) Settings write error (TUNAPRO1234)     
-# BLUETOOTH COM PORT HATASI
 
-# Match mode da iken led_camera kapatılmak istenirse yeşil led yanıp sönebilir
+# SSID MENUSU HALLEDILECEK (KAYRA) 
 
-# Arduino takılı olduğunda ama değer okuyamadoğımızda loopa giriyoruz
+# CHECK PORTS LINUX ICIN DUZENLENECEK
 
-# Panic Mode icinde de error ayni sebeple kisa duruyor, ona bak (COLONELKAI)
+# THREADING ILE ARDUINONUN TAKILI OLUP OLMADIGI ANLASILACAK (KAYRA) 
 
-# ARDUINO IMPORT SUCCESS Mesaji ekranda kalmiyor (refresh yuzunden) (COLONELKAI)
+# Match mode da iken led_camera kapatılmak istenirse yeşil led yanıp sönebilir (KAYRA)
+
+# BLUETOOTH COM PORT HATASI 
+
+# MATCH MODE BASLATILABILIR OLMASINA RAGMEN MAVI LED YANIP SONUYOR
 
 # Yazilar uzerindeki turkce karakterleri kaldir (ç, ı, İ, ö, ş, ü, ğ)
 "TODO"########################################################################################################################"""
@@ -361,7 +364,7 @@ def match_mode(
                     else:
                         isReadError = False
 
-                if not handle_error(rv2, stdscr, PanicMenu=False, i=True) and not isReadError:
+                if not handle_error(rv2, stdscr, PanicMenu=False, clean=True) and not isReadError:
                     not_main(stdscr)
                     led_red.write(0)
         
@@ -402,7 +405,7 @@ def get_first_menu_values(team_ip2):
         mainmenucheck.append(True)
 
     elif (
-        check_cam_func == "CAMERA.PY CONNECTED"
+        check_cam_func == "CAMERA CONNECTED"
         or check_cam_func == "TRUE BECAUSE WINDOWS"
     ):
         mainmenu.append(check_cam_func)
@@ -544,7 +547,7 @@ def get_cam_menu_values(isCamOnline=InputPFunctions.check_cam()):
     #     mainmenu.append("NETWORK TABLES NOT CONNECTED")
     #     mainmenu_status.append(False)
     # else:
-    #     mianmenu.append("CAMERA.PY NOT STARTED")
+    #     mianmenu.append("CAMERA NOT STARTED")
     #     mainmenu_status.append(False)
 
     # IKINCI ELEMENT (IS CAM ONLINE)
