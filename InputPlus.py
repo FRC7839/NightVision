@@ -102,7 +102,6 @@
 
 #endregion
 
-
 from threading import Thread
 from frc_lib7839 import *
 import threading
@@ -739,7 +738,7 @@ def flash_led(led_blue, led_camera):
         ArduinoFunctions.led_write(led_blue, led_camera, 1)
         time.sleep(0.5)
         ArduinoFunctions.led_write(led_blue, led_camera, 0)
-    flash_led.flashtreadopen = False
+    flash_led.flashthreadopen = False
 
 
 def print_current_menu(stdscr, cur_stat, led_blue = None, led_camera = None):

@@ -161,7 +161,8 @@ def handle_error_lite(errmsg):
         else:
             return False
 
-def threading_func_sakat_kayra():        
+def json_read_thread():        
+    json_read_thread.finished = False
     settings = DbFunctions.read_settings_on_json(file_s)
     
     if handle_error_lite(settings) == True:
@@ -179,6 +180,8 @@ def threading_func_sakat_kayra():
         auto_mode = DbFunctions.read_settings_on_json("Autonomous Mode", file_s)
         cam_off = DbFunctions.read_settings_on_json("Camera Offset", file_s)
         
+    json_read_thread.finished = True
+
     return robo_loc, cam_tol, wait_per, auto_mode, cam_off    
 
 def main():
@@ -260,7 +263,7 @@ def main():
     
     print("VISION PROCESSING STARTED")
     
-    robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
+    #, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()
     
     start_t = timeit.default_timer()
 
@@ -272,13 +275,20 @@ def main():
             
             # kayranın threading return değer ataması
 
-            que = queue.Queue()
-            t = threading.Thread(target=lambda q, arg1: q.put(threading_func_sakat_kayra(arg1)), args=(que))
-            t.start()
-            t.join()
-            robo_loc, cam_tol, wait_per, auto_mode, cam_off = que.get()
+            try:    
+                if json_read_thread.finished:
 
+                    que = queue.Queue()
+                    t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que))
+                    t.start()
 
+                    t.join()
+                    robo_loc, cam_tol, wait_per, auto_mode, cam_off = que.get()
+            except:
+                    que = queue.Queue()
+                    t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que))
+                    t.start()
+                
 
 
         ok_contours = []
@@ -316,7 +326,7 @@ def main():
 
         # print("debug 2")
         
-        # robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()        
+        # robo_loc, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()        
         final_result = processingImg
         
         # gen_frames(final_result, True)
