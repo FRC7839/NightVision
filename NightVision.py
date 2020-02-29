@@ -246,7 +246,7 @@ def main():
         camera.getProperty("brightness").set(0)
         camera.getProperty("contrast").set(50)
         camera.getProperty("saturation").set(100)
-        camera.getProperty("exposure_auto").set(0)
+        camera.getProperty("exposure_auto").set(1)
         camera.getProperty("exposure_absolute").set(0)
         
         cvSink = cs.getVideo()
@@ -266,7 +266,7 @@ def main():
     
     print("VISION PROCESSING STARTED")
     
-    #, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()
+    robo_loc, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()        
     
     start_t = timeit.default_timer()
     que = queue.Queue()
