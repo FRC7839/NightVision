@@ -68,7 +68,7 @@ setting_names = [
     "Autonomous Mode",
     "Team Number",
     "Camera Offset",
-    "is MM Started"
+    "Match Mode Status"
 ]
 
 setting_defaults = [
@@ -175,9 +175,12 @@ class ArduinoFunctions:
             return output_e
     
     @staticmethod
-    def led_write(led1, out1, st, gnd=True):
+    def led_write(led1, out1, st, gnd=True, invert_f = False):
         try:
-            led1.write(st)
+            if not invert_f:
+                led1.write(st)
+            else:
+                led1.write(1 - st)
             if gnd == True:
                 st = 1 - st
             out1.write(st)
@@ -930,13 +933,7 @@ class InputPFunctions:
                 return socket.gethostbyname(socket.gethostname())
 
             elif str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
-                ipaddress = os.popen(
-                    "ifconfig eth0 \
-                            | grep 'inet addr' \
-                            | awk -F: '{print $2}' \
-                            | awk '{print $1}'"
-                ).read()
-
+                ipaddress = os.popen("hostname -I").read()
                 return ipaddress
         except:
             ### ERROR ###
@@ -963,27 +960,27 @@ class InputPFunctions:
             print(output_e + " # FROM CHECK_CAM FUNCTION")
             return output_e
 
-    ### ERROR PROOF ### (Raise)
-    @staticmethod
-    def get_ssid():
-        try:
-            if str(sys.platform).startswith("win"):
-                return "Tunapro1234 7/2/2020"
+    # ### ERROR PROOF ### (Raise)
+    # @staticmethod
+    # def get_ssid():
+    #     try:
+    #         if str(sys.platform).startswith("win"):
+    #             return "Tunapro1234 7/2/2020"
 
-            if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
-                ssid = os.popen(
-                    "iwconfig wlan0 \
-                        | grep 'ESSID' \
-                        | awk '{print $4}' \
-                        | awk -F\\\" '{print $2}'"
-                ).read()
+    #         if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
+    #             ssid = os.popen(
+    #                 "iwconfig eth0 \
+    #                     | grep 'ESSID' \
+    #                     | awk '{print $4}' \
+    #                     | awk -F\\\" '{print $2}'"
+    #             ).read()
 
-                return ssid
-        except:
-            ### ERROR ###
-            output = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM GET_SSID FUNCTION")
-            return output_e
+    #             return ssid
+    #     except:
+    #         ### ERROR ###
+    #         output = all_errors[INTERNAL_SYNTAX_ERR]
+    #         print(output_e + " # FROM GET_SSID FUNCTION")
+    #         return output_e
 
     
     @staticmethod    
@@ -1017,9 +1014,20 @@ class InputPFunctions:
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
             print(output_e  + " # FROM FIND_ARG FUNCTION")
             return output_e
-        
+    
+    @staticmethod
+    def system_reboot():
+        if os.name == "posix":
+            try:
+                os.system("sudo reboot")
+            except:
+                return "InputP ERROR: CANT REBOOT SYSTEM"
+        elif os.name == "nt":
+            exit()
+    
     @staticmethod        
     def change_menu(key, cur_stat, led1, out1):
+        rv = None
         if key == "button0" and cur_stat["current_menu"] == main_menu_value:
 
             # IP MENU
@@ -1042,15 +1050,21 @@ class InputPFunctions:
 
             # LED TEST
             elif cur_stat["current_row"] == 3:
-                ArduinoFunctions.led_write(led1, out1, 0)
+                ArduinoFunctions.led_write(led1, out1, 0, invert_f = True)
                 time.sleep(1)
-                ArduinoFunctions.led_write(led1, out1, 1)
+                ArduinoFunctions.led_write(led1, out1, 1, invert_f = True)
                 new_menu = cur_stat["current_menu"]
                 new_row = cur_stat["current_row"]
                 
             elif cur_stat["current_row"] == (info_menu_value):
                 new_menu = info_menu_value
                 new_row = 0
+
+            # REBOOT
+            elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 2:
+                new_menu = cur_stat["current_menu"]
+                new_row = cur_stat["current_row"]
+                rv = InputPFunctions.system_reboot()    
 
             #EXIT
             elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 1:
@@ -1062,4 +1076,5 @@ class InputPFunctions:
             new_row = cur_stat["current_row"]
             new_menu = cur_stat["current_menu"]
 
-        return new_row, new_menu
+        return new_row, new_menu, rv
+        

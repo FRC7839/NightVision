@@ -40,7 +40,9 @@
                                                                             17-18/2 Led dosyasina is mm started ayarini ekle (Kamera algoritmasinin okuyup okumamasi gerektigini soylemek icin)
                                                                             17-18/2 INFO MENuSu cALIsMIYOR
                                                                             (YALAN) Settings write error (TUNAPRO1234)     
-# Info menüsüne siyonun dediği şeyi ekle
+# BLUETOOTH COM PORT HATASI
+
+# Match mode da iken led_camera kapatılmak istenirse yeşil led yanıp sönebilir
 
 # Arduino takılı olduğunda ama değer okuyamadoğımızda loopa giriyoruz
 
@@ -136,9 +138,9 @@ if pc_mode is not None and os.name == "posix":
     from frc_lib7839 import *
 
 
-if pc_mode is not None:
-    skip_cam_arg = 1
-    skip_nt_arg = 1
+# if pc_mode is not None:
+#     skip_cam_arg = 1
+#     skip_nt_arg = 1
 
 elif pc_test_mode is not None:
     pc_mode = 1
@@ -173,17 +175,16 @@ def match_mode(
     isReadError=False
 ):
     if not PanicMenu:
+        led_blue.write(0)
         led_green.write(1)
         led_control = {}
         # Ana yer
         while True:
             # Dosyadan okumayi dene
-            led_control = DbFunctions.get_setting(
-                file_lc
-            )  # led control dosyasindan ayari cekiyor
+            led_control = DbFunctions.get_setting(file_lc)  # led control dosyasindan ayari cekiyor
             handle_error(led_control, stdscr, PanicMenu=True)
 
-            led_control["Match Mode Status"] = True
+            settings["Match Mode Status"] = True
 
             m_menu_elements = []  # Menu elementleri arrayi
             m_menu_elements.append(" ## MATCH MODE STARTED ## ")  # Title
@@ -199,7 +200,7 @@ def match_mode(
                     " ## LED CONTROL : " + str(led_control["Led Status"]) + " ## "
                 )
 
-            # Eger kapali yada acik alamazsa error veriyor.
+            # Eger kapali ya da acik alamazsa error veriyor.
             else:
                 m_menu_elements.append(" ## LED CONTROL FAILED ## ")
                 led_control["Led Status"] = True
@@ -228,31 +229,29 @@ def match_mode(
                 handle_error(all_errors[READ_ERR], stdscr, PanicMenu=True)
 
             if led_control["Led Status"] in ["True", True]:
-                ArduinoFunctions.led_write(led_blue, led_camera, 1)  # on
+                ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
 
             elif led_control["Led Status"] in ["False", False]:
-                ArduinoFunctions.led_write(led_blue, led_camera, 0)  # off
+                ArduinoFunctions.led_write(led_green, led_camera, 0)  # off
 
             else:
-                ArduinoFunctions.led_write(led_blue, led_camera, 1)  # on
+                ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
 
             print_menu_for_match(stdscr, m_menu_elements)
-
+            
+            time.sleep(3)
             # Exit kodu
             if (
-                ArduinoFunctions.map_xi(pot1.read(), 0, 1, 0, max_v) == max_v
+                ArduinoFunctions.map_x(pot1.read(), 0, 1, 0, max_v) == max_v
                 and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == 0
             ):
                 ArduinoFunctions.led_write(led_blue, led_camera, 1)  # on
-
-                led_control["Match Mode Status"] = False
-
-                rv = DbFunctions.save_settings(
-                    file_lc, led_control["Match Mode Status"]
-                )
-                handle_error(rv, stdscr, PanicMenu=True)
-
                 led_green.write(0)
+
+                settings["Match Mode Status"] = False
+
+                rv = DbFunctions.save_settings(file_s, settings)
+                handle_error(rv, stdscr, PanicMenu=True)
 
                 break
 
@@ -419,6 +418,9 @@ def get_first_menu_values(team_ip2):
     mainmenu.append("INFO")
     mainmenucheck.append(True)
 
+    mainmenu.append("REBOOT")
+    mainmenucheck.append(True)
+
     mainmenu.append("EXIT")
     mainmenucheck.append(True)
 
@@ -427,7 +429,6 @@ def get_first_menu_values(team_ip2):
 
 def get_ip_menu_values(
     team_ip2,
-    ssid_func=InputPFunctions.get_ssid(),
     ipaddr_func=InputPFunctions.get_ipaddr(),
 ):
     mainmenu = []
@@ -437,8 +438,12 @@ def get_ip_menu_values(
         mainmenu.append(" ## SKIPPED NETWORK CHECKING ## ")
         mainmenu_status.append(False)
 
+    else:
+        mainmenu.append("")
+        mainmenu_status.append(False)
+
     mainmenu.append("HOSTNAME: " + str(socket.gethostname()))
-    mainmenu.append("SSID: " + str(ssid_func))
+    mainmenu.append("BUNU OKUYORSAN SIYABEND GERIZEKALIDIR")
     mainmenu.append("IP ADRESS: " + ipaddr_func)
     mainmenu.append("RADIO IP RANGE: 10." + team_ip2 + ".0/24")
     mainmenu_status.append("Normal")
@@ -924,7 +929,7 @@ def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings,
 
     new_all_menu_elements[main_menu_value] = get_first_menu_values(team_ip2)
     new_all_menu_elements[ip_menu_value] = get_ip_menu_values(
-        team_ip2, InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr()
+        team_ip2, InputPFunctions.get_ipaddr()
     )
     new_all_menu_elements[arduino_menu_value] = get_arduino_menu_values(settings)
     new_all_menu_elements[camera_menu_value] = get_cam_menu_values()
@@ -968,7 +973,7 @@ def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings,
 # endregion
 
 
-def handle_error(err_msg, stdscr=None, PanicMenu=True, i=False):
+def handle_error(err_msg, stdscr=None, PanicMenu=True, clean=False):
     if type(err_msg) == str:
         if str(err_msg).startswith("InputP"):
             err_type = None
@@ -995,7 +1000,7 @@ def handle_error(err_msg, stdscr=None, PanicMenu=True, i=False):
                     )
 
                 else:
-                    if not i:
+                    if not clean:
                         print_info(stdscr, err_msg, color=2)
 
                 return True
@@ -1028,11 +1033,7 @@ def not_main(stdscr):
 
     all_menu_elements = []
     all_menu_elements.append(get_first_menu_values(team_ip2))
-    all_menu_elements.append(
-        get_ip_menu_values(
-            team_ip2, InputPFunctions.get_ssid(), InputPFunctions.get_ipaddr()
-        )
-    )
+    all_menu_elements.append(get_ip_menu_values(team_ip2, InputPFunctions.get_ipaddr()))
     all_menu_elements.append(get_arduino_menu_values(settings))
     all_menu_elements.append(get_cam_menu_values(None))
     all_menu_elements.append(get_info_menu_values(None))
@@ -1201,11 +1202,11 @@ def not_main(stdscr):
             elif not i:
                 canGoToMM = False
                 break
-
+        pass
         # Mac Modu
         if (
             canGoToMM == True
-            and ArduinoFunctions.map_xi(pot1.read(), 0, 1, 0, max_v) == 0
+            and ArduinoFunctions.map_x(pot1.read(), 0, 1, 0, max_v) == 0
             and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == max_v
             and cur_stat["current_menu"] == main_menu_value
         ):
@@ -1306,9 +1307,11 @@ def not_main(stdscr):
         # endregion
 
         # Menu degistirme olaylari
-        cur_stat["current_row"], cur_stat["current_menu"] = InputPFunctions.change_menu(
-            key, cur_stat, led_blue, led_camera
+        cur_stat["current_row"], cur_stat["current_menu"], rv = InputPFunctions.change_menu(
+            key, cur_stat, led_green, led_camera
         )
+        handle_error(rv, stdscr, PanicMenu=False, clean=False)
+        
         cur_stat["current_row"], cur_stat["current_menu"], sett = return_to_menu(
             key, cur_stat, stdscr
         )

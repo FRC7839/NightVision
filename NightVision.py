@@ -183,7 +183,7 @@ def json_read_thread():
         wait_per = DbFunctions.read_settings_on_json("Waiting Period", file_s)
         auto_mode = DbFunctions.read_settings_on_json("Autonomous Mode", file_s)
         cam_off = DbFunctions.read_settings_on_json("Camera Offset", file_s)
-        is_MM_started = DbFunctions.read_settings_on_json("is MM Started", file_s)
+        is_MM_started = DbFunctions.read_settings_on_json("Match Mode Status", file_s)
         
     json_read_thread.finished = True
 
@@ -405,10 +405,6 @@ def main():
             print("Not found anything")    
         
         # print("debug 4")
-        if os.name == "nt":
-            os.popen("cls")
-        elif os.name == "posix":
-            os.popen("clear")
             
         try:
             if y_error is not None and success == True and pc_mode is None:
