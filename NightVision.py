@@ -268,26 +268,26 @@ def main():
     start_t = timeit.default_timer()
 
     while True:
-        elapsed = timeit.default_timer() - start_t 
+        # elapsed = timeit.default_timer() - start_t 
 
-        if elapsed <= w_time:
-            start_t = timeit.default_timer()
+        # if elapsed <= w_time:
+        #     start_t = timeit.default_timer()
             
-            # kayranın threading return değer ataması
+        #     # kayranın threading return değer ataması
 
-            try:    
-                if json_read_thread.finished:
+        #     try:    
+        #         if json_read_thread.finished:
 
-                    que = queue.Queue()
-                    t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que))
-                    t.start()
+        #             que = queue.Queue()
+        #             t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que))
+        #             t.start()
 
-                    t.join()
-                    robo_loc, cam_tol, wait_per, auto_mode, cam_off = que.get()
-            except:
-                    que = queue.Queue()
-                    t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que))
-                    t.start()
+        #             t.join()
+        #             robo_loc, cam_tol, wait_per, auto_mode, cam_off = que.get()
+        #     except:
+        #             que = queue.Queue()
+        #             t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que))
+        #             t.start()
                 
 
 
