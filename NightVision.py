@@ -163,7 +163,7 @@ def handle_error_lite(errmsg):
         else:
             return False
 
-def json_read_thread(dummy):        
+def json_read_thread():        
     json_read_thread.finished = False
     settings = DbFunctions.read_settings_on_json(file_s)
 
@@ -268,25 +268,25 @@ def main():
     
     print("VISION PROCESSING STARTED")
     
-    robo_loc, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()        
+    robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread()        
     
     start_t = timeit.default_timer()
     que = queue.Queue()
-    # t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que, "dummy"))
+    # t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que, ""))
     # firsttimethreading = True
     is_MM_started = False
     w_timed = 5
 
 
     while True:
-        # elapsed = timeit.default_timer() - start_t 
+        elapsed = timeit.default_timer() - start_t 
 
         # print(threading.active_count())
 
         if is_MM_started is None or is_MM_started is False:        
             if elapsed >= w_timed:
                 start_t = timeit.default_timer()
-                robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread("dummy")
+                robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread()
                 print("db1")
         
 
@@ -405,7 +405,11 @@ def main():
             print("Not found anything")    
         
         # print("debug 4")
-        
+        if os.name == "nt":
+            os.popen("cls")
+        elif os.name == "posix":
+            os.popen("clear")
+            
         try:
             if y_error is not None and success == True and pc_mode is None:
                 
