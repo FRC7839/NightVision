@@ -133,8 +133,10 @@ if image_mode is not None:
         image_mode = None
 
 if cam_num is not None:
-    cam_num = int(cam_num)
-
+    try:
+        cam_num = int(cam_num)
+    except ValueError:
+        cam_num = cam_num
 else:
     cam_num = 0
 
@@ -277,7 +279,7 @@ def main():
 
 
     while True:
-        elapsed = timeit.default_timer() - start_t 
+        # elapsed = timeit.default_timer() - start_t 
 
         # print(threading.active_count())
 
@@ -329,7 +331,7 @@ def main():
         # if processingImg is not None:
         #     print("debug 1")
 
-        contours = functions.detect_targets(processingImg)
+        contours = functions.detect_targets(processingImg, pc_mode)
         
         try:
             for cnt in contours:
@@ -385,11 +387,11 @@ def main():
         
         imgLQ = cv2.resize(final_result, (120, 90))
         
-        # if pc_mode is not None:
-        #     cv2.imshow("FRC Vision", final_result)
+        if pc_mode is not None:
+            cv2.imshow("FRC Vision", final_result)
 
-        # if cv2.waitKey(1) & 0xFF == ord("q"):
-        #     break
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
         
             
         

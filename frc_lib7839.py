@@ -52,7 +52,7 @@ INTERNAL_SYNTAX_ERR = "INTERNAL_SYNTAX_ERROR"
 ARDUINO_INPUT_ERR = "ARDUINO_INPUT_ERROR"
 CANT_CONNECT_ERR = "CAN_NOT_CONNECT_TO_SERVER"
 SERVER_NOT_STARTED_ERR = "SERVER_NOT_STARTED"
-ARDUINO_CONN_ERR = "ARDUINO_INPUT_ERROR"
+ARDUINO_CONN_ERR = "ARDUINO_CONNECTION_ERROR"
 WRITE_ERR = "FILE_NOT_FOUND_ERROR"
 READ_ERR = "READ_ERROR"
 
@@ -183,7 +183,7 @@ class ArduinoFunctions:
             out1.write(st)
         except:
             ### ERROR ###
-            output_e = all_errors[INTERNAL_SYNTAX_ERR]
+            output_e = all_errors[ARDUINO_CONN_ERR]
             print(output_e + " # FROM LED_WRITE FUNCTION")
             return output_e
 
@@ -806,16 +806,21 @@ class ServerFunctions:
 # Siyabendin kodlarini ellemek istemiyorum
 class CameraFunctions:
     @staticmethod
-    def detect_targets(capture):
+    def detect_targets(capture, pc_mode = None):
         kernel = np.ones((3, 3), np.uint8)
         kernel2 = np.ones((13, 13), np.uint8)
 
         hsv = cv2.cvtColor(capture, cv2.COLOR_BGR2HSV)
-        lower_green = np.array([45, 110, 105])
-        upper_green = np.array([102, 255, 255])
+        # lower_green = np.array([45, 110, 105])
+        # upper_green = np.array([102, 255, 255])
+
+        lower_green = np.array([60, 110, 70])
+        upper_green = np.array([80, 255, 255])
 
         mask = cv2.inRange(hsv, lower_green, upper_green)
-        # cv2.imshow("sl", mask)
+        
+        if pc_mode is not None:
+            cv2.imshow("sl", mask)
 
         filter2 = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         filter3 = cv2.morphologyEx(filter2, cv2.MORPH_CLOSE, kernel2)
