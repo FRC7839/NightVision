@@ -79,7 +79,7 @@ setting_defaults = [
     "1",
     "7839",
     "666",
-    False
+    True
 ]
 
 lc_names = [
