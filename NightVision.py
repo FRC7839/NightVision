@@ -142,6 +142,13 @@ if pc_mode is None:
     from cscore import CameraServer, VideoSource
     from networktables import NetworkTables
 
+
+if pc_mode is not None:
+    w_time = 5
+
+else:
+    w_time = 30
+
 # endregion
 
 def handle_error_lite(errmsg):
@@ -253,16 +260,14 @@ def main():
     
     print("VISION PROCESSING STARTED")
     
-    #, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
+    robo_loc, cam_tol, wait_per, auto_mode, cam_off = threading_func_sakat_kayra()
     
-    current_time = int(time.time())
-
     start_t = timeit.default_timer()
 
     while True:
         elapsed = timeit.default_timer() - start_t 
-        
-        if elapsed <= 30:
+
+        if elapsed <= w_time:
             start_t = timeit.default_timer()
             
             # kayranın threading return değer ataması
@@ -271,7 +276,9 @@ def main():
             t = threading.Thread(target=lambda q, arg1: q.put(threading_func_sakat_kayra(arg1)), args=(que))
             t.start()
             t.join()
-            cam_tol, wait_per, auto_mode, cam_off = que.get()
+            robo_loc, cam_tol, wait_per, auto_mode, cam_off = que.get()
+
+
 
 
         ok_contours = []
