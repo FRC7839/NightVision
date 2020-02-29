@@ -243,7 +243,7 @@ def main():
         camera.getProperty("brightness").set(0)
         camera.getProperty("contrast").set(50)
         camera.getProperty("saturation").set(100)
-        camera.getProperty("exposure_auto").set(0)
+        camera.getProperty("exposure_auto").set(1)
         camera.getProperty("exposure_absolute").set(0)
         
         cvSink = cs.getVideo()
