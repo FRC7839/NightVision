@@ -263,7 +263,7 @@ def main():
     
     print("VISION PROCESSING STARTED")
     
-    #, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()
+    robo_loc, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()        
     
     start_t = timeit.default_timer()
 
