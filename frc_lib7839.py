@@ -804,7 +804,7 @@ class ServerFunctions:
 # Siyabendin kodlarini ellemek istemiyorum
 class CameraFunctions:
     @staticmethod
-    def detect_targets(capture):
+    def detect_targets(capture, pc_mode = None):
         kernel = np.ones((3, 3), np.uint8)
         kernel2 = np.ones((13, 13), np.uint8)
 
@@ -816,7 +816,9 @@ class CameraFunctions:
         upper_green = np.array([80, 255, 255])
 
         mask = cv2.inRange(hsv, lower_green, upper_green)
-        # cv2.imshow("sl", mask)
+        
+        if pc_mode is not None:
+            cv2.imshow("sl", mask)
 
         filter2 = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         filter3 = cv2.morphologyEx(filter2, cv2.MORPH_CLOSE, kernel2)
