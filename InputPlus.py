@@ -40,10 +40,8 @@
                                                                             17-18/2 Led dosyasina is mm started ayarini ekle (Kamera algoritmasinin okuyup okumamasi gerektigini soylemek icin)
                                                                             17-18/2 INFO MENuSu cALIsMIYOR
                                                                             (YALAN) Settings write error (TUNAPRO1234)     
-
-# SSID MENUSU HALLEDILECEK (KAYRA) 
-
-# CHECK PORTS LINUX ICIN DUZENLENECEK
+                                                                            1/3 SSID MENUSU HALLEDILECEK (KAYRA) 
+                                                                            28/2 CHECK PORTS LINUX ICIN DUZENLENECEK
 
 # THREADING ILE ARDUINONUN TAKILI OLUP OLMADIGI ANLASILACAK (KAYRA) 
 
@@ -178,6 +176,11 @@ def match_mode(
     isReadError=False
 ):
     if not PanicMenu:
+        try:
+            if flash_led.flashthreadopen:
+                flash_led.exitthread = True
+        except:
+            pass
         led_blue.write(0)
         led_green.write(1)
         led_control = {}
@@ -231,11 +234,16 @@ def match_mode(
             except:
                 handle_error(all_errors[READ_ERR], stdscr, PanicMenu=True)
 
+            if flash_led.flashthreadopen:
+                flash_led.exitthread = True 
+
             if led_control["Led Status"] in ["True", True]:
                 ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
 
+
             elif led_control["Led Status"] in ["False", False]:
-                ArduinoFunctions.led_write(led_green, led_camera, 0)  # off
+                ArduinoFunctions.led_write(None, led_camera, 0)  # off
+                flash_led(led_green)
 
             else:
                 ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
@@ -243,7 +251,7 @@ def match_mode(
             print_menu_for_match(stdscr, m_menu_elements)
             
             time.sleep(3)
-            # Exit kodu
+            # exit kodu
             if (
                 ArduinoFunctions.map_x(pot1.read(), 0, 1, 0, max_v) == max_v
                 and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == 0
@@ -260,18 +268,22 @@ def match_mode(
 
     ### KERNEL PANIC ###
     else:
+
+        try:
+            if flash_led.flashthreadopen:
+                flash_led.exitthread = True
+        except:
+            pass
+
         try:
             led_red.write(1)
         except:
             pass
+        
         settings = DbFunctions.get_setting(file_s)
-        led_control = DbFunctions.get_setting(
-            file_lc
-        )  # led control dosyasindan ayari cekiyor
+        led_control = DbFunctions.get_setting(file_lc)  # led control dosyasindan ayari cekiyor
 
-        if handle_error(led_control, stdscr, PanicMenu=False) or handle_error(
-            settings, stdscr, PanicMenu=False
-        ):
+        if handle_error(led_control, stdscr, PanicMenu=False) or handle_error(settings, stdscr, PanicMenu=False):
             led_control = {}
             settings = {}
 
@@ -287,46 +299,25 @@ def match_mode(
         m_menu_elements.append(" ## PANIC MODE STARTED ## ")  # Title
 
         # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
-        if led_control["Led Status"] is not None and led_control["Led Status"] in [
-            True,
-            False,
-            "True",
-            "False",
-        ]:
-            m_menu_elements.append(
-                " ## LED CONTROL : " + str(led_control["Led Status"]) + " ## "
-            )
+        if led_control["Led Status"] is not None and led_control["Led Status"] in [True,False,"True","False",]:
+            m_menu_elements.append(" ## LED CONTROL : " + str(led_control["Led Status"]) + " ## ")
 
         # Eger kapali yada acik alamazsa error veriyor.
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
 
             led_control["Led Status"] = True
-            rv = DbFunctions.save_settings(
-                file_lc, led_control
-            )  # Olmazsa yapacak bir sey yok
+            rv = DbFunctions.save_settings(file_lc, led_control)  # Olmazsa yapacak bir sey yok
             handle_error(rv, stdscr, PanicMenu=False)
 
         if settings is not None:
             # Menunun geri kalani, durum reporu veriyor.
             try:
-                m_menu_elements.append(
-                    " ## TEAM_NUMBER : " + str(settings["Team Number"]) + " ## "
-                )
-                m_menu_elements.append(
-                    " ## CAMERA_TOLERANCE : "
-                    + str(settings["Camera Tolerance"])
-                    + " ## "
-                )
-                m_menu_elements.append(
-                    " ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## "
-                )
-                m_menu_elements.append(
-                    " ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## "
-                )
-                m_menu_elements.append(
-                    " ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ## "
-                )
+                m_menu_elements.append(" ## TEAM_NUMBER : " + str(settings["Team Number"]) + " ## ")
+                m_menu_elements.append(" ## CAMERA_TOLERANCE : "+ str(settings["Camera Tolerance"])+ " ## ")
+                m_menu_elements.append(" ## ROBOT_LOCATION : " + str(settings["Robot Location"]) + " ## ")
+                m_menu_elements.append(" ## WAITING_PERIOD : " + str(settings["Waiting Period"]) + " ## ")
+                m_menu_elements.append(" ## AUTONOMOUS_MODE : " + str(settings["Autonomous Mode"]) + " ##")
                 if not err_type is None:
                     m_menu_elements.append(" ## ERROR : " + err_type + " ## ")
             except:
@@ -437,10 +428,8 @@ def get_ip_menu_values(
         mainmenu_status.append(False)
 
     mainmenu.append("HOSTNAME: " + str(socket.gethostname()))
-    mainmenu.append("BUNU OKUYORSAN SIYABEND GERIZEKALIDIR")
     mainmenu.append("IP ADRESS: " + ipaddr_func)
     mainmenu.append("RADIO IP RANGE: 10." + team_ip2 + ".0/24")
-    mainmenu_status.append("Normal")
 
     mainmenu.append("OK")
 
@@ -742,14 +731,26 @@ def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
                 stdscr.refresh()
 
 
-def flash_led(led_blue, led_camera):
-    flash_led.flashthreadopen = True
-    while not match_mode_can_be_started:
-        time.sleep(0.5)
-        ArduinoFunctions.led_write(led_blue, led_camera, 1)
-        time.sleep(0.5)
-        ArduinoFunctions.led_write(led_blue, led_camera, 0)
-    flash_led.flashthreadopen = False
+def flash_led(led):
+    flash_led.exitthread = False
+    def flash_led_actual(led):
+        flash_led.flashthreadopen = True
+        while True:
+            time.sleep(0.5)
+            ArduinoFunctions.led_write(led, None, 1)
+            time.sleep(0.5)
+            ArduinoFunctions.led_write(led, None, 0)
+            if flash_led.exitthread:
+                break
+        flash_led.flashthreadopen = False
+    
+    try:
+        if not flash_led.flashthreadopen:
+            flash_timer = threading.Timer(0.1, flash_led_actual, [led])
+            flash_timer.start()
+    except:
+        flash_timer = threading.Timer(0.1, flash_led_actual, [led])
+        flash_timer.start()
 
 
 def print_current_menu(stdscr, cur_stat, led_blue = None, led_camera = None):
@@ -800,15 +801,9 @@ def print_current_menu(stdscr, cur_stat, led_blue = None, led_camera = None):
         else:
             match_message = " ## MATCH MODE CANNOT BE STARTED ## "
             match_message_color = 2
-            if not led_blue is None and not led_camera is None:
+            if not led_blue is None:
                 match_mode_can_be_started = False
-                try:
-                    if not flash_led.flashthreadopen:
-                        flash_timer = threading.Timer(0.1, flash_led, [led_blue, led_camera])
-                        flash_timer.start()
-                except:
-                    flash_timer = threading.Timer(0.1, flash_led, [led_blue, led_camera])
-                    flash_timer.start()
+                flash_led(led_blue)
             break
 
     firstx = w // 2 - (len(match_message) + 1) // 2
@@ -1130,8 +1125,8 @@ def not_main(stdscr):
         led_red = board.get_pin("d:11:p")
 
         time.sleep(0.5)
-        # iterator= pyfirmata.util.Iterator(board)
-        # iterator.start()
+        iterator= pyfirmata.util.Iterator(board)
+        iterator.start()
         time.sleep(0.5)
 
         if pot1.read() is None:
@@ -1154,7 +1149,7 @@ def not_main(stdscr):
     while True:
 
         if cur_stat["current_menu"] == ip_menu_value:
-            cur_stat["current_row"] = 5
+            cur_stat["current_row"] = 4
 
         elif cur_stat["current_menu"] == camera_menu_value:
             cur_stat["current_row"] = 1

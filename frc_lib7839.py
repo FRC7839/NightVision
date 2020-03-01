@@ -915,6 +915,13 @@ class CameraFunctions:
 
 ### ALL ERROR PROOF ###
 class InputPFunctions:
+    @staticmethod
+    def exit_InputP():
+        try:
+            exit()
+            # end_thread()
+        except:
+            exit()
        
     ### ERROR PROOF ### (Raise)
     @staticmethod
@@ -1014,7 +1021,7 @@ class InputPFunctions:
             except:
                 return "InputP ERROR: CANT REBOOT SYSTEM"
         elif os.name == "nt":
-            exit()
+            InputPFunctions.exit_InputP()
     
     @staticmethod        
     def change_menu(key, cur_stat, led1, out1):
@@ -1061,7 +1068,7 @@ class InputPFunctions:
             elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 1:
                 new_menu = cur_stat["current_menu"]
                 new_row = cur_stat["current_row"]
-                exit()
+                InputPFunctions.exit_InputP()
 
         else:
             new_row = cur_stat["current_row"]
