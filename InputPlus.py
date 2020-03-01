@@ -346,12 +346,6 @@ def match_mode(
 
         while True:
 
-            cp_c = ArduinoFunctions.check_ports()
-            if cp_c != cp_p:
-                cp_p = cp_c
-                
-                if cp_c is not None and type(cp_c) == list and type(cp_c[0]) == str and not cp_c[0] == "":
-                    not_main(stdscr)
                     
                     
                     
@@ -378,10 +372,20 @@ def match_mode(
                     else:
                         isReadError = False
 
-                if not handle_error(rv2, stdscr, PanicMenu=False, clean=True) and not isReadError:
-                    not_main(stdscr)
-                    led_red.write(0)
+                # if not handle_error(rv2, stdscr, PanicMenu=False, clean=True) and not isReadError:
+                #     led_red.write(0)
+                #     not_main(stdscr)
 
+                cp_c = ArduinoFunctions.check_ports()
+                if cp_c != cp_p:
+                    cp_p = cp_c
+                    
+                    if cp_c is not None and type(cp_c) == list and type(cp_c[0]) == str and not cp_c[0] == "":
+                        try:
+                            led_red.write(0)
+                        except:
+                            pass
+                        not_main(stdscr)
 
 def get_first_menu_values(team_ip2):
     ipaddr_func = InputPFunctions.get_ipaddr()
@@ -1203,8 +1207,8 @@ def not_main(stdscr):
         led_red = board.get_pin("d:11:p")
 
         time.sleep(0.5)
-        iterator= pyfirmata.util.Iterator(board)
-        iterator.start()
+        # iterator= pyfirmata.util.Iterator(board)
+        # iterator.start()
         time.sleep(0.5)
 
         if pot1.read() is None:
