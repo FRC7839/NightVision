@@ -345,7 +345,16 @@ def match_mode(
         errortimer.start()
 
         while True:
-    
+
+            cp_c = ArduinoFunctions.check_ports()
+            if cp_c != cp_p:
+                cp_p = cp_c
+                
+                if cp_c is not None and type(cp_c) == list and type(cp_c[0]) == str and not cp_c[0] == "":
+                    not_main(stdscr)
+                    
+                    
+                    
             print_menu_for_match(stdscr, m_menu_elements)
             time.sleep(1)
 
