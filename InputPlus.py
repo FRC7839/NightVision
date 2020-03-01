@@ -103,6 +103,12 @@
 # bu bize get menu values kullanark ekrandaki goruntuyu aktif olarak degistirmemizi sagliyor.  #
 ################################################################################################
 
+# arduino_check_thread kullanımı
+# not: lütfen tüm değişkenleri okuma/yazma olaylarını "Try/except" içine alın thread başlamadı ise hata verir
+# thread başlatmak için: arduino_check_thread()
+# threadi durdurmak için: arduino_check_thread.exitthread = True (try except içine al)
+# thread'den değer okumak için (example yerine değerin yazılmasını istediğiniz değişken): example = arduino_check_thread.rv (try except içine al)
+
 #endregion
 
 from threading import Thread
@@ -234,8 +240,11 @@ def match_mode(
             except:
                 handle_error(all_errors[READ_ERR], stdscr, PanicMenu=True)
 
-            if flash_led.flashthreadopen:
-                flash_led.exitthread = True 
+            try:
+                if flash_led.flashthreadopen:
+                    flash_led.exitthread = True 
+            except:
+                pass
 
             if led_control["Led Status"] in ["True", True]:
                 ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
@@ -261,6 +270,12 @@ def match_mode(
 
                 settings["Match Mode Status"] = False
 
+                try:
+                    if flash_led.flashthreadopen:
+                        flash_led.exitthread = True 
+                except:
+                    pass
+
                 rv = DbFunctions.save_settings(file_s, settings)
                 handle_error(rv, stdscr, PanicMenu=True)
 
@@ -275,6 +290,9 @@ def match_mode(
         except:
             pass
 
+        cp_p = ArduinoFunctions.check_ports()
+        cp_c = cp_p
+        
         try:
             led_red.write(1)
         except:
@@ -327,7 +345,7 @@ def match_mode(
         errortimer.start()
 
         while True:
-
+    
             print_menu_for_match(stdscr, m_menu_elements)
             time.sleep(1)
 
@@ -729,6 +747,57 @@ def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
                 stdscr.attroff(curses.color_pair(3))
 
                 stdscr.refresh()
+
+
+def check_arduino_thread():
+    # Devamlı olarak arduino'nun bağlantısını kontrol eden threaded kod.
+    # not: threaded kodlardan beynim yok olmaya başladı
+    check_arduino_thread.exitthread = False
+
+    # threaded olarak çalışacak fonksiyon
+    def check_arduino_thread_actual():
+        check_arduino_thread.threadopen = True
+        check_arduino_thread.exitthread = False
+        while True:        
+            rv = ArduinoFunctions.check_ports()
+            try:
+                if type(rv) == list and rv[0] is None and rv[0] == "":
+                    # Bulunamadı
+                    check_arduino_thread.rv = True       
+
+                elif type(rv) == str and rv.startswith("InputP"):
+                    # ERROR
+                    check_arduino_thread.rv = all_errors[ARDUINO_CONN_LOST]
+
+                elif type(rv) == list and rv[0] is not None and type(rv[0]) == str and not rv[0] == "":
+                    # bulundu
+                    check_arduino_thread.rv = True
+
+            except:
+                pass
+
+            #thread kapama emri kontrolü
+            if check_arduino_thread.exitthread:   
+                check_arduino_thread.exitthread = False                 
+                break
+
+            time.sleep(5)
+        
+        check_arduino_thread.threadopen = False
+
+
+
+
+    # Threadi çalıştıran kod. 
+    # timer kullanmamın sebebi bunu yazarken henüz threading'in nasıl çalıştığını bilmiyordum 
+    try:
+        if not check_arduino_thread.flashthreadopen:
+            arduino_check_timer = threading.Timer(0.1, check_arduino_thread_actual, [])
+            arduino_check_timer.start()
+    except:
+        arduino_check_timer = threading.Timer(0.1, check_arduino_thread_actual, [])
+        arduino_check_timer.start()
+
 
 
 def flash_led(led):
@@ -1314,6 +1383,11 @@ def not_main(stdscr):
         if sett is not None and not type(sett) == 4:
             settings = sett
 
-
-curses.wrapper(not_main)
-
+try:
+    curses.wrapper(not_main)
+except KeyboardInterrupt:
+    try:
+        if flash_led.flashthreadopen:
+            flash_led.exitthread = True 
+    except:
+        pass
