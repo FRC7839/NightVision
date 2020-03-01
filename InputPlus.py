@@ -805,7 +805,7 @@ def check_arduino_thread():
     # Threadi çalıştıran kod. 
     # timer kullanmamın sebebi bunu yazarken henüz threading'in nasıl çalıştığını bilmiyordum 
     try:
-        if not check_arduino_thread.threadopen:
+        if not check_arduino_thread.threadopen :
             arduino_check_timer = threading.Timer(0.1, check_arduino_thread_actual, [])
             arduino_check_timer.start()
     except:
