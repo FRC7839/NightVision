@@ -1,3 +1,4 @@
+import serial.tools.list_ports
 import numpy as np
 import pyfirmata
 import socket
@@ -9,8 +10,6 @@ import cv2
 import sys  
 import os
 
-if str(sys.platform).startswith("win"):
-    import serial.tools.list_ports
 
 # region global
 global wait_time_for_get_key
@@ -68,7 +67,7 @@ setting_names = [
     "Autonomous Mode",
     "Team Number",
     "Camera Offset",
-    "is MM Started"
+    "Match Mode Status"
 ]
 
 setting_defaults = [
@@ -140,51 +139,40 @@ class ArduinoFunctions:
     @staticmethod
     def check_ports():
         try:
-            if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
-                dev = os.popen("ls /dev/tty* | grep USB").read()
-                if dev == "":
-                    return all_errors[ARDUINO_CONN_LOST]
-                
-                else:
-                    dev = dev.split("\n")
-                    # for i in range(len(dev)):
-                    #     COMS[i] = COMS[i].split(":")[0]
-                    return dev    
-                
-            elif str(sys.platform).startswith("win"):
-                ports = serial.tools.list_ports.comports()
+            comlist = serial.tools.list_ports.comports()
+            connected = []
+            for element in comlist:
+                if os.name == "nt":
+                    connected.append(element.device)
+                elif os.name == "posix" and str(element.device).startswith("/dev/ttyUSB"):
+                    connected.append(element.device)
+                    
+            if len(connected) > 0:
+                return connected
 
-                COMS = []
-
-                for port, desc, hwid in sorted(ports):
-                    COMS.append("{}: {} [{}]".format(port, desc, hwid))
-
-                for i in range(len(COMS)):
-                    COMS[i] = COMS[i].split(":")[0]
-                
-                if len(COMS) > 0:
-                    return COMS
-
-                else:
-                    return all_errors[ARDUINO_CONN_LOST]
-                
+            else:
+                return all_errors[ARDUINO_CONN_LOST]
+            
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM LED_WRITE FUNCTION")
+            # print(output_e + " # FROM LED_WRITE FUNCTION")
             return output_e
     
     @staticmethod
-    def led_write(led1, out1, st, gnd=True):
+    def led_write(led1, out1, st, gnd=True, invert_f = False):
         try:
-            led1.write(st)
+            if not invert_f:
+                led1.write(st)
+            else:
+                led1.write(1 - st)
             if gnd == True:
                 st = 1 - st
             out1.write(st)
         except:
             ### ERROR ###
             output_e = all_errors[ARDUINO_CONN_ERR]
-            print(output_e + " # FROM LED_WRITE FUNCTION")
+            # print(output_e + " # FROM LED_WRITE FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -215,18 +203,18 @@ class ArduinoFunctions:
             else:
                 ### ERROR ###
                 output_e = all_errors[INTERNAL_SYNTAX_ERR]
-                print(output_e + " # FROM IMPORT_ARDUINO FUNCTION")
+                # print(output_e + " # FROM IMPORT_ARDUINO FUNCTION")
                 return output_e                
     
             ### ERROR ###
             output_e = all_errors[ARDUINO_CONN_ERR]
-            print(output_e)
+            # print(output_e)
             return output_e
 
         except:
             ### ERROR ###
             output = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output + " # FROM IMPORT_ARDUINO FUNCTION")
+            # print(output + " # FROM IMPORT_ARDUINO FUNCTION")
             return output
 
 
@@ -254,12 +242,12 @@ class ArduinoFunctions:
             else:
                 ### ERROR ###
                 output_e = all_errors[ARDUINO_INPUT_ERR]
-                print(output_e)
+                # print(output_e)
                 return output_e
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM MAP_X FUNCTION")
+            # print(output_e + " # FROM MAP_X FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -287,12 +275,12 @@ class ArduinoFunctions:
             else:
                 ### ERROR ###
                 output_e = all_errors[ARDUINO_INPUT_ERR]
-                print(output_e)
+                # print(output_e)
                 return output_e
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM MAP_XI FUNCTION")
+            # print(output_e + " # FROM MAP_XI FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Handle and Raise)
@@ -321,7 +309,7 @@ class ArduinoFunctions:
                 if str(pot1_p).startswith("InputP"):
                     ### ERROR ###
                     pot1 = str(pot1_p)
-                    print(pot1 + " # FROM KEY_GET FUNCTION")
+                    # print(pot1 + " # FROM KEY_GET FUNCTION")
                     return pot1, None
 
                 elif (but1 != but1_p) and but1 > 0 and (not (but2 > 0)):
@@ -345,7 +333,7 @@ class ArduinoFunctions:
                     except:
                         ### ERROR ###
                         rv = all_errors[INTERNAL_KEY_GET_FUNC_ERR]
-                        print(rv)
+                        # print(rv)
                         return None, rv
                     
                     else:
@@ -370,7 +358,7 @@ class ArduinoFunctions:
                     try:
                         if str(rv).startswith("InputP"):
                             rv = str(rv)
-                            print(rv + " # FROM KEY_GET FUNCTION")
+                            # print(rv + " # FROM KEY_GET FUNCTION")
                     except:
                         pass    
                     
@@ -382,8 +370,13 @@ class ArduinoFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
+<<<<<<< HEAD
             print(output_e + " # FROM KEY_GET FUNCTION")
             return output_e, None
+=======
+            # print(output_e + " # FROM KEY_GET FUNCTION")
+            return output_e
+>>>>>>> abd889c02d0a2f430a72b856e84ce50446bd592a
 
     @staticmethod
     def encoder_key_get(
@@ -414,14 +407,14 @@ class ArduinoFunctions:
                         counter-=-1
                         
                         if((counter % 2) == 0):
-                            # print("Position: " + counter + "LOCATION: RIGHT" + swt2.read())
+                            # # print("Position: " + counter + "LOCATION: RIGHT" + swt2.read())
                             key = "button+1"
                             
                     else:
                         counter+=-1
                         
                         if((counter % 2) == 0):
-                            # print("Position: " + counter + "LOCATION: LEFT" + swt2.read())
+                            # # print("Position: " + counter + "LOCATION: LEFT" + swt2.read())
                             key = "button-1"
                             
                             
@@ -430,7 +423,7 @@ class ArduinoFunctions:
                 
                 if (but1.read() == 0 and not (counter == 0)):
                     counter = 0;
-                    # print("Position: " + counter + "LOCATION: MIDDLE" + swt2.read())
+                    # # print("Position: " + counter + "LOCATION: MIDDLE" + swt2.read())
                     key = "button0"
 
                 # region fonksiyon
@@ -444,7 +437,7 @@ class ArduinoFunctions:
                         ### ERROR ###
                         key = None
                         rv = all_errors[INTERNAL_KEY_GET_FUNC_ERR]
-                        print(rv)
+                        # print(rv)
                         return key, rv
                     
                     else:
@@ -471,7 +464,7 @@ class ArduinoFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM KEY_GET FUNCTION")
+            # print(output_e + " # FROM KEY_GET FUNCTION")
             return output_e, None
                 
         
@@ -485,7 +478,7 @@ class ArduinoFunctions:
             if str(i1).startswith("InputP"):
                 ### ERROR ###
                 i1 = str(i1)
-                print(i1 + " # FROM GET_ROBO_LOC FUNCTION")
+                # print(i1 + " # FROM GET_ROBO_LOC FUNCTION")
                 return i1
 
             elif i1 == 0:
@@ -500,7 +493,7 @@ class ArduinoFunctions:
         except:
             ### ERROR ###
             output = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output + " # FROM GET_ROBO_LOC FUNCTION")
+            # print(output + " # FROM GET_ROBO_LOC FUNCTION")
             return output
 
 
@@ -545,7 +538,7 @@ class DbFunctions:
                 except:
                     ### ERROR ###
                     output_e = all_errors[WRITE_ERR]
-                    print(output_e)
+                    # print(output_e)
                     return output_e
 
                 DbFunctions.write_settings_to_json(input_dictionary, file, reset=False)
@@ -558,13 +551,13 @@ class DbFunctions:
                 except:
                     ### ERROR ###
                     output_e = all_errors[WRITE_ERR]
-                    print(output_e)
+                    # print(output_e)
                     return output_e
 
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM WRITE_SETTINGS FUNCTION")
+            # print(output_e + " # FROM WRITE_SETTINGS FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Raise)
@@ -577,7 +570,7 @@ class DbFunctions:
             except:
                 ### ERROR ###
                 output_e = all_errors[READ_ERR]
-                print(output_e)
+                # print(output_e)
                 return output_e
 
             if wanted_setting is not None:
@@ -594,7 +587,7 @@ class DbFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM READ_SETTINGS FUNCTION")
+            # print(output_e + " # FROM READ_SETTINGS FUNCTION")
             return output_e
 
     ### ERROR PROOF ### (Handle)
@@ -611,7 +604,7 @@ class DbFunctions:
                         if str(rv).startswith("InputP"):
                             ### ERROR ###
                             rv += str(rv)
-                            print(rv + " # FROM SAVE_SETTINGS FUNCTION")
+                            # print(rv + " # FROM SAVE_SETTINGS FUNCTION")
                             return rv
                 
                 if settings is None:
@@ -632,7 +625,7 @@ class DbFunctions:
         except:
             ### ERROR ###
             output = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output + " # FROM SAVE_SETTINGS FUNCTION")
+            # print(output + " # FROM SAVE_SETTINGS FUNCTION")
             return output
     
     
@@ -642,7 +635,7 @@ class DbFunctions:
             if not (setting_name in setting_names) and file == file_s and setting_name is not None:
                 ### ERROR ###
                 output_e = all_errors[INTERNAL_SYNTAX_ERR]
-                print(output_e + " # FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND) ")
+                # print(output_e + " # FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND) ")
                 return output_e
 
             c_s = DbFunctions.read_settings_on_json(file=file)
@@ -656,7 +649,7 @@ class DbFunctions:
                 if str(rv).startswith("InputP"):
                     ### ERROR ###
                     rv = str(rv)
-                    print(rv + " # FROM GET_SETTING FUNCTION")
+                    # print(rv + " # FROM GET_SETTING FUNCTION")
                     return rv
 
             
@@ -687,7 +680,7 @@ class DbFunctions:
                 if type(rv2) == str and str(rv2).startswith("InputP"):
                     ### ERROR ###
                     output_e = str(rv2)
-                    print(output_e + " # FROM GET_SETTING FUNCTION")
+                    # print(output_e + " # FROM GET_SETTING FUNCTION")
                     return output_e
 
 
@@ -696,7 +689,7 @@ class DbFunctions:
             if type(c_s) == str and str(c_s).startswith("InputP") or c_s == None or c_s == "":
                 ### ERROR ###
                 c_s = all_errors[READ_ERR]
-                print(c_s + " # FROM GET_SETTING FUNCTION")
+                # print(c_s + " # FROM GET_SETTING FUNCTION")
                 return c_s
 
             
@@ -707,7 +700,7 @@ class DbFunctions:
                 except:
                     ### ERROR ###
                     output_e = all_errors[INTERNAL_SYNTAX_ERR]
-                    print(output_e + " # FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND)")
+                    # print(output_e + " # FROM GET_SETTING FUNCTION (SPECIFIED SETTING NOT FOUND)")
                     return output_e
 
                 return output
@@ -718,7 +711,7 @@ class DbFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM GET_SETTING FUNCTION")
+            # print(output_e + " # FROM GET_SETTING FUNCTION")
             return output_e
 
 
@@ -731,10 +724,10 @@ class ServerFunctions:
             sockettemp = ServerFunctions.start_server(port)
             sockettemp.close()
         except:
-            print("Server Opened")
+            # print("Server Opened")
             return True
         else:
-            print("Server Not Opened")
+            # print("Server Not Opened")
             return False
 
     ### OK ###
@@ -751,7 +744,7 @@ class ServerFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[SERVER_ALREADY_STARTED_ERR]
-            print(output_e)
+            # print(output_e)
             return output_e
             
     ### OK ###
@@ -774,7 +767,7 @@ class ServerFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM RECEIVE FUNCTION")
+            # print(output_e + " # FROM RECEIVE FUNCTION")
             return output_e
                         
 
@@ -788,7 +781,7 @@ class ServerFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM CONNECT_TO_SERVER FUNCTION")
+            # print(output_e + " # FROM CONNECT_TO_SERVER FUNCTION")
             return output_e
 
     ### OK ###
@@ -799,7 +792,7 @@ class ServerFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM SEND FUNCTION")
+            # print(output_e + " # FROM SEND FUNCTION")
             return output_e
 
 
@@ -930,19 +923,13 @@ class InputPFunctions:
                 return socket.gethostbyname(socket.gethostname())
 
             elif str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
-                ipaddress = os.popen(
-                    "ifconfig eth0 \
-                            | grep 'inet addr' \
-                            | awk -F: '{print $2}' \
-                            | awk '{print $1}'"
-                ).read()
-
+                ipaddress = os.popen("hostname -I").read()
                 return ipaddress
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
             return output_e
-            print(output_e + " # FROM GET_IPADDR FUNCTION")
+            # print(output_e + " # FROM GET_IPADDR FUNCTION")
 
     ### ERROR PROOF ### (Raise)
     @staticmethod
@@ -960,30 +947,30 @@ class InputPFunctions:
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM CHECK_CAM FUNCTION")
+            # print(output_e + " # FROM CHECK_CAM FUNCTION")
             return output_e
 
-    ### ERROR PROOF ### (Raise)
-    @staticmethod
-    def get_ssid():
-        try:
-            if str(sys.platform).startswith("win"):
-                return "Tunapro1234 7/2/2020"
+    # ### ERROR PROOF ### (Raise)
+    # @staticmethod
+    # def get_ssid():
+    #     try:
+    #         if str(sys.platform).startswith("win"):
+    #             return "Tunapro1234 7/2/2020"
 
-            if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
-                ssid = os.popen(
-                    "iwconfig wlan0 \
-                        | grep 'ESSID' \
-                        | awk '{print $4}' \
-                        | awk -F\\\" '{print $2}'"
-                ).read()
+    #         if str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
+    #             ssid = os.popen(
+    #                 "iwconfig eth0 \
+    #                     | grep 'ESSID' \
+    #                     | awk '{print $4}' \
+    #                     | awk -F\\\" '{print $2}'"
+    #             ).read()
 
-                return ssid
-        except:
-            ### ERROR ###
-            output = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e + " # FROM GET_SSID FUNCTION")
-            return output_e
+    #             return ssid
+    #     except:
+    #         ### ERROR ###
+    #         output = all_errors[INTERNAL_SYNTAX_ERR]
+    #         # print(output_e + " # FROM GET_SSID FUNCTION")
+    #         return output_e
 
     
     @staticmethod    
@@ -1015,11 +1002,22 @@ class InputPFunctions:
         
         except:
             output_e = all_errors[INTERNAL_SYNTAX_ERR]
-            print(output_e  + " # FROM FIND_ARG FUNCTION")
+            # print(output_e  + " # FROM FIND_ARG FUNCTION")
             return output_e
-        
+    
+    @staticmethod
+    def system_reboot():
+        if os.name == "posix":
+            try:
+                os.system("sudo reboot")
+            except:
+                return "InputP ERROR: CANT REBOOT SYSTEM"
+        elif os.name == "nt":
+            exit()
+    
     @staticmethod        
     def change_menu(key, cur_stat, led1, out1):
+        rv = None
         if key == "button0" and cur_stat["current_menu"] == main_menu_value:
 
             # IP MENU
@@ -1042,15 +1040,21 @@ class InputPFunctions:
 
             # LED TEST
             elif cur_stat["current_row"] == 3:
-                ArduinoFunctions.led_write(led1, out1, 0)
+                ArduinoFunctions.led_write(led1, out1, 0, invert_f = True)
                 time.sleep(1)
-                ArduinoFunctions.led_write(led1, out1, 1)
+                ArduinoFunctions.led_write(led1, out1, 1, invert_f = True)
                 new_menu = cur_stat["current_menu"]
                 new_row = cur_stat["current_row"]
                 
             elif cur_stat["current_row"] == (info_menu_value):
                 new_menu = info_menu_value
                 new_row = 0
+
+            # REBOOT
+            elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 2:
+                new_menu = cur_stat["current_menu"]
+                new_row = cur_stat["current_row"]
+                rv = InputPFunctions.system_reboot()    
 
             #EXIT
             elif cur_stat["current_row"] == len(cur_stat["all_menu_elements"][main_menu_value][0]) - 1:
@@ -1062,4 +1066,5 @@ class InputPFunctions:
             new_row = cur_stat["current_row"]
             new_menu = cur_stat["current_menu"]
 
-        return new_row, new_menu
+        return new_row, new_menu, rv
+        

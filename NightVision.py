@@ -163,7 +163,7 @@ def handle_error_lite(errmsg):
         else:
             return False
 
-def json_read_thread(dummy):        
+def json_read_thread():        
     json_read_thread.finished = False
     settings = DbFunctions.read_settings_on_json(file_s)
 
@@ -183,7 +183,7 @@ def json_read_thread(dummy):
         wait_per = DbFunctions.read_settings_on_json("Waiting Period", file_s)
         auto_mode = DbFunctions.read_settings_on_json("Autonomous Mode", file_s)
         cam_off = DbFunctions.read_settings_on_json("Camera Offset", file_s)
-        is_MM_started = DbFunctions.read_settings_on_json("is MM Started", file_s)
+        is_MM_started = DbFunctions.read_settings_on_json("Match Mode Status", file_s)
         
     json_read_thread.finished = True
 
@@ -268,25 +268,25 @@ def main():
     
     print("VISION PROCESSING STARTED")
     
-    robo_loc, cam_tol, wait_per, auto_mode, cam_off = json_read_thread()        
+    robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread()        
     
     start_t = timeit.default_timer()
     que = queue.Queue()
-    # t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que, "dummy"))
+    # t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que, ""))
     # firsttimethreading = True
     is_MM_started = False
     w_timed = 5
 
 
     while True:
-        # elapsed = timeit.default_timer() - start_t 
+        elapsed = timeit.default_timer() - start_t 
 
         # print(threading.active_count())
 
         if is_MM_started is None or is_MM_started is False:        
             if elapsed >= w_timed:
                 start_t = timeit.default_timer()
-                robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread("dummy")
+                robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread()
                 print("db1")
         
 
@@ -405,7 +405,7 @@ def main():
             print("Not found anything")    
         
         # print("debug 4")
-        
+            
         try:
             if y_error is not None and success == True and pc_mode is None:
                 
