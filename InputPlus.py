@@ -139,9 +139,9 @@ if pc_mode is not None and os.name == "posix":
     from frc_lib7839 import *
 
 
-# if pc_mode is not None:
-#     skip_cam_arg = 1
-#     skip_nt_arg = 1
+if pc_mode is not None:
+    skip_cam_arg = 1
+    skip_nt_arg = 1
 
 elif pc_test_mode is not None:
     pc_mode = 1
