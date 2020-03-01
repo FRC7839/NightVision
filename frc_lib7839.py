@@ -162,13 +162,19 @@ class ArduinoFunctions:
     @staticmethod
     def led_write(led1, out1, st, gnd=True, invert_f = False):
         try:
-            if not invert_f:
-                led1.write(st)
-            else:
-                led1.write(1 - st)
-            if gnd == True:
-                st = 1 - st
-            out1.write(st)
+            if led1 is not None:
+                if not invert_f:
+                    led1.write(st)
+                
+                else:
+                    led1.write(1 - st)
+                
+            if out1 is not None:
+                if gnd == True:
+                    st = 1 - st
+                
+                out1.write(st)
+            
         except:
             ### ERROR ###
             output_e = all_errors[ARDUINO_CONN_ERR]
