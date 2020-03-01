@@ -808,8 +808,11 @@ class CameraFunctions:
         # lower_green = np.array([45, 110, 105])
         # upper_green = np.array([102, 255, 255])
 
-        lower_green = np.array([60, 110, 70])
-        upper_green = np.array([80, 255, 255])
+        # lower_green = np.array([60, 110, 70])
+        # upper_green = np.array([80, 255, 255])
+
+        lower_green = np.array([58, 150, 70])
+        upper_green = np.array([68, 255, 255])
 
         mask = cv2.inRange(hsv, lower_green, upper_green)
         

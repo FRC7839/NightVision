@@ -1207,8 +1207,8 @@ def not_main(stdscr):
         led_red = board.get_pin("d:11:p")
 
         time.sleep(0.5)
-        # iterator= pyfirmata.util.Iterator(board)
-        # iterator.start()
+        iterator= pyfirmata.util.Iterator(board)
+        iterator.start()
         time.sleep(0.5)
 
         if pot1.read() is None:
