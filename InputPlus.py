@@ -772,18 +772,19 @@ def check_arduino_thread():
             try:
                 if type(rv) == list and rv[0] is None and rv[0] == "":
                     # Bulunamadı
-                    check_arduino_thread.rv = True       
+                    check_arduino_thread.rv = False       
 
                 elif type(rv) == str and rv.startswith("InputP"):
                     # ERROR
-                    check_arduino_thread.rv = all_errors[ARDUINO_CONN_LOST]
+                    check_arduino_thread.rv = False
 
                 elif type(rv) == list and rv[0] is not None and type(rv[0]) == str and not rv[0] == "":
                     # bulundu
                     check_arduino_thread.rv = True
 
             except:
-                pass
+                # bulunamadı
+                check_arduino_thread.rv = False
 
             #thread kapama emri kontrolü
             if check_arduino_thread.exitthread:   
@@ -806,7 +807,6 @@ def check_arduino_thread():
     except:
         arduino_check_timer = threading.Timer(0.1, check_arduino_thread_actual, [])
         arduino_check_timer.start()
-
 
 
 def flash_led(led):
@@ -1262,6 +1262,22 @@ def not_main(stdscr):
 
         ##########
 
+        # arduino_check_thread kullanımı
+        # not: lütfen tüm değişkenleri okuma/yazma olaylarını "Try/except" içine alın thread başlamadı ise hata verir
+        # thread başlatmak için: arduino_check_thread()
+        # threadi durdurmak için: arduino_check_thread.exitthread = True (try except içine al)
+        # thread'den değer okumak için (example yerine değerin yazılmasını istediğiniz değişken): example = arduino_check_thread.rv (try except içine al)
+        
+        check_arduino_thread()
+        try:
+            rv = check_arduino_thread.rv
+        except:
+            pass
+        else:
+            if not rv:
+                handle_error(all_errors[ARDUINO_CONN_LOST], stdscr, True)
+        
+        
         for i in cur_stat["all_menu_elements"][main_menu_value][1]:
             if i:
                 canGoToMM = True

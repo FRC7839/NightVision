@@ -948,7 +948,7 @@ class InputPFunctions:
 
             elif str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin") and socket.gethostname() == "frcvision":
                 if os.path.exists("/dev/video0"):
-                    return "CAMERA.PY CONNECTED"
+                    return "CAMERA CONNECTED"
 
                 else:
                     return "CAMERA NOT FOUND"
