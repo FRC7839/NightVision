@@ -644,30 +644,32 @@ def print_error(stdscr, cur_stat, color=2, wait_time=5):
 
 
 def print_cam_offset_edit(stdscr, team_n, cam_offset_pos, cur_stat):
+    # ayarlar menüsünde camera offset'in 3 hanesini tek tek ayarlamak için olan özel kod
     if cam_offset_pos is not None:
-        h, w = stdscr.getmaxyx()
-        cam_offset_pos_list = []
+        h, w = stdscr.getmaxyx() # ekranın genişliğini ve yüksekliğini bulur
+        cam_offset_pos_list = [] 
 
-        for idx, i in enumerate(team_n):
-            y = h // 2
-            x = w // 2
+        for idx, i in enumerate(team_n): # burada team_n yazıyor ama başka kodumu copy-pasteledim aslında o cam_offset
+            y = h // 2 # ekranın yükseklik olarak ortası
+            x = w // 2 # ekranın genişlik olarak ortası
 
-            x -=- 1
+            x -=- 1 # x'e bir ekliyoruz 
 
-            if cur_stat["current_menu"] == arduino_menu_value:
+            if cur_stat["current_menu"] == arduino_menu_value: # eğer ayarlar menüsünde isek
 
-                if idx == 0:
-                    x = x + 4
-                    if cam_offset_pos == 0:
-                        stdscr.attron(curses.color_pair(1))
-                        stdscr.addstr(y, x, i)
+                if idx == 0: # eğer 1. hanede ise
+                    x = x + 4 # x'i 1. hanenin yerini bulmak için değiştir
+                    if cam_offset_pos == 0: # eğer 1. hane seçili ise
+                        stdscr.attron(curses.color_pair(1)) # renk beyaz
+                        stdscr.addstr(y, x, i) # 1. haneyi yazdır
                         stdscr.attroff(curses.color_pair(1))
-                    else:
-                        stdscr.attron(curses.color_pair(3))
-                        stdscr.addstr(y, x, i)
+                    else: # seçili değilse
+                        stdscr.attron(curses.color_pair(3)) # renk normal
+                        stdscr.addstr(y, x, i) # 1. haneyi yazdır
                         stdscr.attroff(curses.color_pair(3))
 
-                if idx == 1:
+                # alttakiler de 1. hane ile aynı prensip ile çalışıyor
+                if idx == 1: # 2. hane
                     x = x + 5
                     if cam_offset_pos == 1:
                         stdscr.attron(curses.color_pair(1))
@@ -678,7 +680,7 @@ def print_cam_offset_edit(stdscr, team_n, cam_offset_pos, cur_stat):
                         stdscr.addstr(y, x, i)
                         stdscr.attroff(curses.color_pair(3))
 
-                if idx == 2:
+                if idx == 2: # 3. hane
                     x = x + 6
                     if cam_offset_pos == 2:
                         stdscr.attron(curses.color_pair(1))
@@ -689,17 +691,18 @@ def print_cam_offset_edit(stdscr, team_n, cam_offset_pos, cur_stat):
                         stdscr.addstr(y, x, i)
                         stdscr.attroff(curses.color_pair(3))
 
-
-                x = w // 2
-                x = x - 9
+                # burası kaldırıldı
+                x = w // 2 # x'i yeniden hesaplıyor
+                x = x - 9 
                 stdscr.attron(curses.color_pair(3))
                 # stdscr.addstr(y, x, "TEAM NUMBER: ")
                 stdscr.attroff(curses.color_pair(3))
 
-                stdscr.refresh()
+                stdscr.refresh() # ekranı yeniliyor
 
 
 def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
+    # print_cam_offset_edit ile aynısı, sadece konumu farklı ve 4 haneli
     if team_no_select is not None:
         h, w = stdscr.getmaxyx()
         for idx, i in enumerate(team_n):
@@ -765,39 +768,39 @@ def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
 def check_arduino_thread():
     # Devamlı olarak arduino'nun bağlantısını kontrol eden threaded kod.
     # not: threaded kodlardan beynim yok olmaya başladı
-    check_arduino_thread.exitthread = False
+    check_arduino_thread.exitthread = False # bu fonksiyon kodun herhangi bir yerinde True olduğunda thread durucak kapa emri olarak kullanıyorum.
 
     # threaded olarak çalışacak fonksiyon
-    def check_arduino_thread_actual():
-        check_arduino_thread.threadopen = True
-        check_arduino_thread.exitthread = False
-        while True:        
-            rv = ArduinoFunctions.check_ports()
+    def check_arduino_thread_actual(): #thread ile çalışacak kod
+        check_arduino_thread.threadopen = True # thread'in açık olduğunu belirtiyor ki  birden fazla thread açılmasın
+        check_arduino_thread.exitthread = False # kapatma emrinin kapalı olduğunu kontrol ediyor
+        while True: # asıl döngü
+            rv = ArduinoFunctions.check_ports() # portları kontrol eden fonksiyon
             try:
-                if type(rv) == list and rv[0] is None and rv[0] == "":
+                if type(rv) == list and rv[0] is None and rv[0] == "": # eğer liste boşsa false döndür
                     # Bulunamadı
                     check_arduino_thread.rv = False       
 
-                elif type(rv) == str and rv.startswith("InputP"):
+                elif type(rv) == str and rv.startswith("InputP"): # eğer check_ports fonkisyonu error döndürdü ise false döndür
                     # ERROR
                     check_arduino_thread.rv = False
 
-                elif type(rv) == list and rv[0] is not None and type(rv[0]) == str and not rv[0] == "":
+                elif type(rv) == list and rv[0] is not None and type(rv[0]) == str and not rv[0] == "": # eğer boş değilse true döndür
                     # bulundu
                     check_arduino_thread.rv = True
 
-            except:
+            except: # eğer error verirse false döndür
                 # bulunamadı
                 check_arduino_thread.rv = False
 
             #thread kapama emri kontrolü
-            if check_arduino_thread.exitthread:   
+            if check_arduino_thread.exitthread:    
                 check_arduino_thread.exitthread = False                 
                 break
 
-            time.sleep(5)
+            time.sleep(5) # thread fazla yüklemesin diye bekleme
         
-        check_arduino_thread.threadopen = False
+        check_arduino_thread.threadopen = False # eğer threadin dışına çıkarsa threadin artık açık olmadığını söylüyor
 
 
 
@@ -805,16 +808,18 @@ def check_arduino_thread():
     # Threadi çalıştıran kod. 
     # timer kullanmamın sebebi bunu yazarken henüz threading'in nasıl çalıştığını bilmiyordum 
     try:
-        if not check_arduino_thread.threadopen :
+        if not check_arduino_thread.threadopen: # eğer bir thread açık değilse aç
             arduino_check_timer = threading.Timer(0.1, check_arduino_thread_actual, [])
             arduino_check_timer.start()
-    except:
+    except: # eğer error verdiyse threadopen henüz verilmemiştir o yüzden yeni thread aç
         arduino_check_timer = threading.Timer(0.1, check_arduino_thread_actual, [])
         arduino_check_timer.start()
 
 
 def flash_led(led):
-    flash_led.exitthread = False
+    # obje olarak led verdiğin zaman dur komutuna kadar o ledi yakıp sönüyor
+    # kodun geri kalanı check_arduino_thread() ile aynı mantıkla çalışıyor
+    flash_led.exitthread = False 
     def flash_led_actual(led):
         flash_led.flashthreadopen = True
         while True:
@@ -836,45 +841,47 @@ def flash_led(led):
 
 
 def print_current_menu(stdscr, cur_stat, led_blue = None, led_camera = None):
+    # genel olarak her menüyü (panic mode ve match mode gibi istisnalar dışında) yazdıran fonksiyon
+    # curses'ın screen objesini ve içinde menü elemanları olan cur_stat'a ihtiyacı var
     firsttime = True
 
-    if type(cur_stat["current_menu_elements"][0]) is list:
-        cur_stat["current_menu_elements"] = cur_stat["current_menu_elements"][0]
+    if type(cur_stat["current_menu_elements"][0]) is list: #eğer elemanlar listesi başka bir listenin içerisindeeyse
+        cur_stat["current_menu_elements"] = cur_stat["current_menu_elements"][0] # onları listeden çıkar
 
-    stdscr.clear()
-    h, w = stdscr.getmaxyx()
+    stdscr.clear() # ekranı temizle
+    h, w = stdscr.getmaxyx() # ekranın enini ve boyunu al
 
-    for idx, row in enumerate(cur_stat["current_menu_elements"]):
-        if cur_stat["current_menu_status"][idx]:
+    for idx, row in enumerate(cur_stat["current_menu_elements"]): # menü elemanlarındaki her elemanın üzerinden gider
+        if cur_stat["current_menu_status"][idx]: # eğer eleman doğru ise yeşil
             colornumber = 3
 
-        elif not cur_stat["current_menu_status"][idx]:
+        elif not cur_stat["current_menu_status"][idx]: # yanlış ise kırmızı
             colornumber = 2
 
-        else:
+        else: # başka ise normal 
             colornumber = 4
 
-        x = w // 2 - (len(row) + 1) // 2
+        x = w // 2 - (len(row) + 1) // 2 # elemanın uzunluğuna göre x'i ve y'yi ayarlıyor
         y = h // 2 - (len(cur_stat["current_menu_elements"]) + 1) // 2 + idx
 
-        if idx == cur_stat["current_row"]:
+        if idx == cur_stat["current_row"]: # eğer o eleman seçili ise beyaz
             stdscr.attron(curses.color_pair(1))
             stdscr.addstr(y, x, row)
             stdscr.attroff(curses.color_pair(1))
 
-        else:
+        else: # değilse olması gereken renk.
             stdscr.attron(curses.color_pair(colornumber))
             stdscr.addstr(y, x, row)
             stdscr.attroff(curses.color_pair(colornumber))
 
-        if firsttime:
+        if firsttime: # eğer ilk seferse y'i bir azalt
             firsty = y - 1
             firsttime = False
         elif not firsttime:
             pass
 
-    for i in cur_stat["all_menu_elements"][main_menu_value][1]:
-        if i:
+    for i in cur_stat["all_menu_elements"][main_menu_value][1]: # tüm elemanların True mu false mı olduğunu arıyor
+        if i: 
             match_message = " ## MATCH MODE CAN BE STARTED ## "
             match_message_color = 4
             if not led_blue is None and not led_camera is None:
@@ -888,13 +895,15 @@ def print_current_menu(stdscr, cur_stat, led_blue = None, led_camera = None):
                 flash_led(led_blue)
             break
 
-    firstx = w // 2 - (len(match_message) + 1) // 2
+        # eğer hepsi doğru ise match mode can be started, eğer bir tanesi bile yanlış ise match mode cannot be started diyor
+
+    firstx = w // 2 - (len(match_message) + 1) // 2 
 
     stdscr.attron(curses.color_pair(match_message_color))
     stdscr.addstr(firsty - 1, firstx, match_message)
     stdscr.attroff(curses.color_pair(match_message_color))
 
-    teamname = "FRC7839 "
+    teamname = "FRC7839 " #ekranın sağ üstünde ismimizi yazdırma olayı
     namex = w - len(teamname)
     namey = 0
 
@@ -902,25 +911,26 @@ def print_current_menu(stdscr, cur_stat, led_blue = None, led_camera = None):
     stdscr.addstr(namey, namex, teamname)
     stdscr.attroff(curses.color_pair(3))
 
-    stdscr.refresh()
+    stdscr.refresh() # ekranı yenilemek
 
 
 def print_menu_for_match(stdscr, m_menu_elements):
-    stdscr.clear()
-    h, w = stdscr.getmaxyx()
+    stdscr.clear() #ekranı temizle
+    h, w = stdscr.getmaxyx() # en ve boy al
 
-    for idx, row in enumerate(m_menu_elements):
-        x = w // 2 - (len(row) + 1) // 2
+    for idx, row in enumerate(m_menu_elements): #verilen değerlerde
+        x = w // 2 - (len(row) + 1) // 2 # y ve x hesaplamaları
         y = h // 2 - (len(m_menu_elements) + 1) // 2 + idx
 
-        stdscr.attron(curses.color_pair(4))
+        stdscr.attron(curses.color_pair(4)) #ekrana ekle
         stdscr.addstr(y, x, row)
         stdscr.attroff(curses.color_pair(4))
 
-    stdscr.refresh()
+    stdscr.refresh() # ekranı yenile
 
 
 def cursor_handler(key, cur_stat):
+    # eğer bir menüde aşağıya gidilmek isterse bunu gerçekleştiren ve en altta ise yukarıya atan kod.
     # Imlec Asagi
     current_row = cur_stat["current_row"]
 
@@ -930,7 +940,7 @@ def cursor_handler(key, cur_stat):
 
         current_row += 1
 
-    # Imlec Dongu
+    # Imlec Dongu (yeniden en yukarıya çıkması)
     elif (
         current_row == (len(cur_stat["current_menu_elements"]) - 1) and key == "button1"
     ):
@@ -950,8 +960,9 @@ def set_current_menu(cur_stat, all_menu_elements):
 
 
 def return_to_menu(key, cur_stat, stdscr):
+    # bir menüdeyken en alttakı tuşa basıldı ise ana menüye geri atan kod.
     # Ana Menuye Cikma
-    settings = None
+    settings = None 
     if (
         (key == "button0")
         and cur_stat["current_menu"] != 0
@@ -963,7 +974,7 @@ def return_to_menu(key, cur_stat, stdscr):
         settings = DbFunctions.get_setting(file_s)
         handle_error(settings, stdscr, PanicMenu=True)
 
-    # write settings icin
+    # write settings'de write settings butonuna bastığında da ana menüye atan kod
     if (
         (key == "button0")
         and cur_stat["current_menu"] == arduino_menu_value
@@ -979,43 +990,53 @@ def return_to_menu(key, cur_stat, stdscr):
 
 
 def background_setup(stdscr, cur_stat=None, PanicMode=False):
-    if PanicMode == True:
-        stdscr.bkgd(" ", curses.color_pair(2))
+    #herhangi bir menüde iken tüm değerler True iken arkaplanı yeşil, değilken kırmızı yapan kod
+    if PanicMode == True: 
+        stdscr.bkgd(" ", curses.color_pair(2)) #burası arkaplanı ayarlayan curses fonksiyonu
 
     elif cur_stat is not None and cur_stat["current_menu"] == 0:
         for i in cur_stat["current_menu_status"]:
             if i:
                 stdscr.bkgd(" ", curses.color_pair(3))
+                bruh = 1
 
             elif not i:
+                bruh = 0
                 stdscr.bkgd(" ", curses.color_pair(2))
                 break
+
+    if bruh == 1:
+        flash_led.exitthread = True
+
 
     elif cur_stat is not None and cur_stat["current_menu"] != 0:
         stdscr.bkgd(" ", curses.color_pair(4))
 
 
 def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings, team_ip2, led_blue = None, led_camera = None):
-    new_all_menu_elements = cur_stat["all_menu_elements"]
+    # ekranda bir değişiklik yapıldığında gerekli değişiklikler yapılıp yeniden print_menu yapan kod
+    new_all_menu_elements = cur_stat["all_menu_elements"] 
 
-    new_all_menu_elements[main_menu_value] = get_first_menu_values(team_ip2)
-    new_all_menu_elements[ip_menu_value] = get_ip_menu_values(
-        team_ip2, InputPFunctions.get_ipaddr()
+    new_all_menu_elements[main_menu_value] = get_first_menu_values(team_ip2) # ana menü değerlerini yeniden alıyor
+    new_all_menu_elements[ip_menu_value] = get_ip_menu_values( # ip menüsü değerlerini yeniden alıyor
+        team_ip2, InputPFunctions.get_ipaddr() # ip adresini yeniden kontrol ediyor
     )
-    new_all_menu_elements[arduino_menu_value] = get_arduino_menu_values(settings)
-    new_all_menu_elements[camera_menu_value] = get_cam_menu_values()
+    new_all_menu_elements[arduino_menu_value] = get_arduino_menu_values(settings) # ayarlar menüsü değerlerini yeniden alıyor
+    new_all_menu_elements[camera_menu_value] = get_cam_menu_values() # camera menüsü değerlerini yeniden alıyor
 
     # cur_stat["all_menu_elements"] = new_all_menu_elements
     # cur_stat["current_menu_elements"] = new_all_menu_elements[c"ur_stat["current_menu"]]
 
     # Background seysi
-    background_setup(stdscr, cur_stat)
+    background_setup(stdscr, cur_stat) 
 
     # Background ayarlandiktan sonra menu yazdirildi
     print_current_menu(stdscr, cur_stat, led_blue, led_camera)
 
+    # ayarlar menüsü için team_no olayı
     print_team_no_edit(stdscr, settings["Team Number"], team_no_pos, cur_stat)
 
+    # ayarlar menüsü için camera_offset olayı
     print_cam_offset_edit(stdscr, settings["Camera Offset"], cam_offset_pos, cur_stat)
 
     return new_all_menu_elements
@@ -1045,10 +1066,13 @@ def refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings,
 
 
 def handle_error(err_msg, stdscr=None, PanicMenu=True, clean=False):
-    if type(err_msg) == str:
-        if str(err_msg).startswith("InputP"):
-            err_type = None
-
+    # bir değer verildiğinde error olup olmadığını kontrol eden kod.
+    # eğer panicmenu açık ise bir error olduğunu fark ettiğinde panic moda geçiyor.
+    if type(err_msg) == str: # eğer verilen değer string ise
+        if str(err_msg).startswith("InputP"): # ve error ise
+            err_type = None 
+            
+            # error tipini bulmak için olan kod
             if err_msg in [all_errors[READ_ERR], all_errors[WRITE_ERR]]:
                 err_type = "FILE"
 
@@ -1059,28 +1083,29 @@ def handle_error(err_msg, stdscr=None, PanicMenu=True, clean=False):
             ]:  #
                 err_type = "ARDUINO"
 
-            background_setup(stdscr, None, PanicMode=True)
+            background_setup(stdscr, None, PanicMode=True) # arkaplanı kırmızı yapıyor
 
-            if test_mode is not None:
-                raise Exception(str(err_msg))
+            if test_mode is not None: # eğer testmodu açık ise 
+                raise Exception(str(err_msg)) # hata verdiriyor, panic moduna girmiyor
 
-            else:
-                if PanicMenu:
+            else: # eğer test mode kapalı ise
+                if PanicMenu: #eğer panic modu açıksa pnic moduna giriyor
                     match_mode(
                         stdscr, PanicMenu=True, errmsg=err_msg, err_type=err_type
                     )
 
-                else:
+                else: # eğer panic modu kapalı ise sadece ekrana error mesajını alta yazdırıyor
                     if not clean:
                         print_info(stdscr, err_msg, color=2)
 
-                return True
+                return True # error olduğu için true döndürüyor
 
-        else:
+        else: # eğer error değilse false döndürüyor
             return False
 
 
 def set_tip(team_number):
+    # ip kontrol için takım numarasını alıp kontrol ettiği ip değerini ayarlayan kod
     team_ip2 = team_number
 
     if len(team_ip2) == 3:
@@ -1093,6 +1118,7 @@ def set_tip(team_number):
 
 
 def not_main(stdscr):
+    flash_led.exitthread = True
     # region while dongusune kadar olan gereksiz seyler
 
     # region Settings okuma
@@ -1100,10 +1126,10 @@ def not_main(stdscr):
     handle_error(settings, stdscr, PanicMenu=True)
     # endregion
 
-    team_ip2 = set_tip(settings["Team Number"])
+    team_ip2 = set_tip(settings["Team Number"]) #takım numarasına göre ip ayarlıyor
 
-    all_menu_elements = []
-    all_menu_elements.append(get_first_menu_values(team_ip2))
+    all_menu_elements = [] # her menünün elemanlarını alıyor
+    all_menu_elements.append(get_first_menu_values(team_ip2)) 
     all_menu_elements.append(get_ip_menu_values(team_ip2, InputPFunctions.get_ipaddr()))
     all_menu_elements.append(get_arduino_menu_values(settings))
     all_menu_elements.append(get_cam_menu_values(None))
@@ -1131,11 +1157,9 @@ def not_main(stdscr):
     # 3 = GREEN
     # 4 = NORMAL
 
-    # region curses background set
-
+    # region curses renklerini ayarlayan kısım
     curses.curs_set(0)
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-
     curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
     curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_GREEN)
     curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
@@ -1153,39 +1177,41 @@ def not_main(stdscr):
     key = None
 
 
-
+    # ekranı yazdır
     refresh_screen(stdscr, key, team_no_pos, cam_offset_pos, cur_stat, settings, team_ip2)
 
     # time.sleep(1)
     # region arduino import
 
+    # kod başlarken importing arduino mesajı verir
     # board = pyfirmata.ArduinoNano("COM4")
     errortimer = threading.Timer(0.1, print_error, args=[stdscr, "InputP: Importing Arduino...", 3])
     errortimer.start()
 
 
-
+    # sonradan arasındaki farkı bulup ne kadar zaman geçtiğini anlamak için şimdiki zamanı alır
     start_t = timeit.default_timer()
     ###
 
-    com_ports = ArduinoFunctions.check_ports()
+    com_ports = ArduinoFunctions.check_ports() # com portları alır
 
-    if type(com_ports) == list:
-        board = ArduinoFunctions.import_arduino(com_ports)
+    if type(com_ports) == list: # eğer com port'lara birşey takılı ise
+        board = ArduinoFunctions.import_arduino(com_ports) # arduinoyu import et
 
-    else:
-        board = all_errors[ARDUINO_CONN_ERR]
+    else: # yoksa error ver
+        board = all_errors[ARDUINO_CONN_ERR] 
 
     ###
+    # geçen zamanı bul
     elapsed = timeit.default_timer() - start_t
-
+    #eğer 5 saniyeden az sürdü ise 5 saniyeyi tamamla
     if elapsed < 5:
         time.sleep(5 - elapsed)
-
+        # error mesajı ver
         errortimer = threading.Timer(0.1, print_error, args=[stdscr, None])
         errortimer.start()
 
-
+    # eğer arduino import edildi ise
     if not type(board) == str:
 
         # swt1 = board.get_pin("a:1:i")
@@ -1196,6 +1222,7 @@ def not_main(stdscr):
         # but2 = board.get_pin("d:7:i")
         # led1 = board.get_pin("d:11:p")
         
+        # Tüm arduino pinlerin tanımlaması
         pot1 = board.get_pin("a:0:i")
         swt1 = board.get_pin("d:5:i")
         but1 = board.get_pin("d:6:i")
@@ -1206,14 +1233,17 @@ def not_main(stdscr):
         led_green = board.get_pin("d:10:p")
         led_red = board.get_pin("d:11:p")
 
+        # butonların basıldığını anlamak için iteratörleri çalıştırır
         time.sleep(0.5)
         iterator= pyfirmata.util.Iterator(board)
         iterator.start()
         time.sleep(0.5)
 
+        # eğer potansiyometreden değer okuyamazsa iteratör hata verdi demektir
         if pot1.read() is None:
             handle_error(all_errors[ARDUINO_INPUT_ERR], stdscr, PanicMenu=True)
         
+    # eğer board str ise arduino import başarısız olmuş demektir
     elif type(board) == str:
         handle_error(board, stdscr)
 
@@ -1225,17 +1255,16 @@ def not_main(stdscr):
 
     # endregion
 
-    rv = ArduinoFunctions.led_write(led_blue, led_camera, 1.0)
-    handle_error(rv, stdscr, PanicMenu=True)
+    rv = ArduinoFunctions.led_write(led_blue, led_camera, 1.0) 
+    handle_error(rv, stdscr, PanicMenu=True) # led ayarlamasından error mu döndü kontrol eder
 
     while True:
 
+        # eğer sadece bakacağın menülerde ise row'u çıkış butonuna kitler
         if cur_stat["current_menu"] == ip_menu_value:
             cur_stat["current_row"] = 4
-
         elif cur_stat["current_menu"] == camera_menu_value:
             cur_stat["current_row"] = 1
-
         elif cur_stat["current_menu"] == info_menu_value:
             cur_stat["current_row"] = 4
 
@@ -1245,21 +1274,21 @@ def not_main(stdscr):
             stdscr, key, team_no_pos, cam_offset_pos, cur_stat,settings, team_ip2, led_blue, led_camera,
         )
         
-        key, ports = ArduinoFunctions.key_get(
+        key, ports = ArduinoFunctions.key_get( # arduino'dan değer alır
             but1, but2, pot1, wait_time_for_get_key
         )
 
-        if key is None:
-            isKeyError = True
+        if key is None: # eğer None döndürürse
+            isKeyError = True # hata verdi demektir
         else:
             isKeyError = False
 
-        handle_error(ports, stdscr, PanicMenu=True)
+        handle_error(ports, stdscr, PanicMenu=True) # hatalı mı kontrol
 
         if key is None:
             continue
 
-        handle_error(key, stdscr, PanicMenu=True)
+        handle_error(key, stdscr, PanicMenu=True) # hata var mı kontrol
 
         # Imlec hareketleri degiskenlere yazildi
         cur_stat["current_row"] = cursor_handler(key, cur_stat)
@@ -1272,20 +1301,19 @@ def not_main(stdscr):
         # threadi durdurmak için: arduino_check_thread.exitthread = True (try except içine al)
         # thread'den değer okumak için (example yerine değerin yazılmasını istediğiniz değişken): example = arduino_check_thread.rv (try except içine al)
         
-        check_arduino_thread()
+        check_arduino_thread() # arduino takılımı diye kontrol eden thread başlar
         try:
-            rv = check_arduino_thread.rv
+            rv = check_arduino_thread.rv # arduino takılı mı
         except:
             pass
         else:
             if not rv:
-                handle_error(all_errors[ARDUINO_CONN_LOST], stdscr, True)
+                handle_error(all_errors[ARDUINO_CONN_LOST], stdscr, True) # error verdi mi kontrol
         
         
-        for i in cur_stat["all_menu_elements"][main_menu_value][1]:
+        for i in cur_stat["all_menu_elements"][main_menu_value][1]: # eğer menüdeki herşey True ise Match Mod'a girebilir hale getirir
             if i:
                 canGoToMM = True
-
             elif not i:
                 canGoToMM = False
                 break

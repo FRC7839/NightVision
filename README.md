@@ -105,19 +105,19 @@ hdmi_cvt 800 480 60 6 0 0 0
 ```
 Bunları ekledikten sonra raspberry'yi yeniden başlatırsanız ekranın tamamını kullanabilirsiniz.
 
-# Gerekli Kodları Rasberry Pi'a Yüklemek
+# Gerekli Python Librarylerinin Kurulumu
 
 Öncelikle python için kurmamız gereken birkaç kütüphane var. Bu kütüphaneleri Raspberry'ye kurmak için `pip3 install -r requirements.txt` kodunu terminale girebilirsiniz. 
 
-Kodları hem bilgisayarınıza hem de Raspberry'ye yüklemeniz gerekiyor.
+# Arayüz Kodlarını Rasberry Pi'a Yüklemek
+
+Kodları Raspberry pi'a yüklemek içi frcvision işletim sisteminin file upload özelliğini kullanacağız.
  
- **1. Raspberry'ye kurmak için:** 
-```
-git clone https://github.com/FRC7839/NightVision
-```
- **2. Windows'a yüklemek için:** 
+ **Kodları Windows'a indirmek için:** 
  
  Kodların hemen yukarısında `Clone or Download` yazısına tıklayarak veya [buradan](https://github.com/FRC7839/NightVision/archive/test.zip) zip uzantısında sıkıştırılmış halde indirebilirsiniz.
+
+frcvision.local adresinden file upload seçeneğini kullanarak frc_lib7839.py ve InputPlus.py dosyasını Raspberry pi'ınıza yükleyin
 
 # Arayüzün Otomatik Olarak Çalışmasını Sağlamak
 Raspberry Pi her çalıştığında arayüzün de çalışmasını sağlamak için `/home/pi` klasörü içinde bulunan `.bashrc` dosyasında değişiklik yapmamız gerekiyor. Dosyanın sonuna:
@@ -130,11 +130,20 @@ python3 NightVision/InputP.py
 kodlarını ekleyin. Bu kodları `.bashrc` dosyasına eklemek her SSH bağlantısı yaptığınızda da bu programın çalışacağı anlamına geliyor. 
 Tabii ki bu bizim istemediğimiz bir şey fakat SSH sürekli kullandığımız bir şey olmadığından çözme gereği duymadık. SSH bağlantılarını açtığınızda <kbd>Ctrl</kbd> + <kbd>c</kbd> tuşlarına basmak programın çalışmasını önleyecektir 
 
+Arayüz ile Kamera kodunun iletişim kurabilmesi için JSON dosyalarını kullanıyoruz. Fakat frcvision Raspberry'yi read-only modunda çalıştırıyor. Bunu önlemek için
+`sudo nano /etc/rc.local` komutunu girerek rc.local dosyasında exit komutunun üstüne şu komutları ekleyelim:
+
+```shell
+echo TUNA'YI ÇOK KISKANIYORUM
+```
+
 # Görüntü İşleme Algoritmasını Yüklemek
 
 Görüntü işleme algoritmasını yüklemek için yukarıdaki gibi aynı internette olmanız gerekiyor. Internet tarayıcınız üzerinden http://frcvision.local adresine gidin. (**Sistem üzerinde değişiklik yapabilmek için <kbd>Writeable</kbd> özelliğini aktif ettiğinizden emin olun**)
 
 ![Uploading Algorithm](https://i.ibb.co/B6hknnJ/1.png?v=4&s)
+
+Görüntü işleme algoritması, eğer bilgisayar modu açık değilse ve işletim sistemimiz linux ise Arayüzden gelen ayarları settings.json dosyası aracılığıyla elde ederek NetworkTables yardımıyla paylaşır.  
 
 # Bilgisayar Testleri İçin Görüntü İşleme Algoritmasının Kullanımı 
 #### NOT: Biz bitirene kadar kullanıp test etmek çok yardımcı olabilir
@@ -143,7 +152,7 @@ Bilgisayarda görüntü işleme algoritmasını kullanabilmek için NightVision 
 
 Kodu indirdikten sonra <kbd>Windows</kbd> + <kbd>R</kbd> tuş kombinasyonuna basıp Çalıştır'ı açtıktan sonra `cmd` yazın ve <kbd>Enter</kbd> tuşuna basın. Açılan komut satırından NightVision dosyalarını çıkarttığınız yere geçmeniz gerekiyor. Bulunduğunuz yeri öğrenmek için `pwd` komutunu kullanabilirsiniz. Bulunduğunuz klasör içindeki dosya ve klasörleri görmek için ise `dir` komutunu kullanın. Belirttiğiniz klasörün içine girmenizi sağlayan komut ise `cd` komududur. Eğer `dir` komutunu girdiğinizde cmd'nin size verdiği çıktının içinde `NightVision.py` ve `frc_lib7839.py` dosyalarını görebiliyorsanız doğru yere gelmişsiniz demektir.
 
-Python kodlarının çalışması için gerekli kütüphaneleri bilgisayara da kurmamız gerekiyor. Bunun için ise aşağıdaki kodları komut konsoluna(cmd) girmeniz yeterli. 
+Python kodlarının çalışması için gerekli kütüphaneleri bilgisayara da kurmamız gerekiyor. Bunun için ise aşağıdaki kodları komut konsoluna (cmd) girmeniz yeterli. Eğer farklı bir python environmentı kullanıyorsanız (conda gibi) önce yüklemek istediğiniz environmente girmeyi unutmayın.
 
 ```
 py -3 -m pip install -r requirements1.txt
@@ -177,6 +186,10 @@ Bu argüman bilgisayar için resim üzerinden test modunu açar. Eğer yüklemek
 
 **--team-number (takım-numarası)**:
 
-Bu argüman modemin dağıttığı ip adreslerine dayanarak modeme bağlı olup olmadığımızı anlamak için yazılmış fonksiyonların çalışmasını sağlar. Modemin verilen takım numarasına göre konfigüre edilmiş olması gerekmektedir. Raspberry Pi üzerinde bu argümanı giremediğimiz için bu argümanı kullanma ihtiyacınız yok.
+Bu argüman modemin dağıttığı ip adreslerine dayanarak modeme bağlı olup olmadığımızı anlamak için yazılmış fonksiyonların çalışmasını sağlar. Modemin verilen takım numarasına göre konfigüre edilmiş olması gerekmektedir. Raspberry Pi üzerinde bu argümanı giremediğimiz için bu argümanı kullanma ihtiyacınız yok. Arayüz kullanan kişiler bu ayarı "SETTINGS" menüsünden yapabilirler
 
 Örnek Kullanım: `py -3 NightVision.py --team-number "7839"`
+
+# InputPlus.py Arayüzünün Kullanımı
+
+InputPlus.py, Robotun maçtaki konumunu, kameranın error toleransını, otonom modunu, diğer robotlarla çarpışmamak için bekleme süresini, takım numarasını ve eğer kullanıyorsanız uzaklık sensörü ile kamera arasındaki farkı roborioya networktables yardımıyla göndermek için hazırlanmış bir programdır.
