@@ -204,8 +204,6 @@ Bu argüman modemin dağıttığı ip adreslerine dayanarak modeme bağlı olup 
 
 # InputPlus.py Arayüzünün Kullanımı
 
-InputPlus.py, Robotun maçtaki konumunu, kameranın error toleransını, otonom modunu, diğer robotlarla çarpışmamak için bekleme süresini, takım numarasını ve eğer kullanıyorsanız uzaklık sensörü ile kamera arasındaki farkı roborioya networktables yardımıyla göndermek için hazırlanmış bir programdır. Eğer tüm ayarlar doğru yapılmışsa arayüzün Raspberry üzerinde otomatik olaraak başlaması gerekmektedir. 
+`InputPlus.py`, robotun maçtaki konumunu, kameranın hata toleransını, otonom modunu, diğer robotlarla çarpışmamak için bekleme süresini, takım numarasını ve eğer kullanıyorsanız uzaklık sensörü ile kamera arasındaki farkı Roborio'ya networktables yardımıyla göndermek için hazırlanmış bir yazılımdır. Eğer tüm ayarlar doğru yapılmışsa arayüzün Raspberry üzerinde otomatik olaraak başlaması gerekmektedir. 
 
-Dikkat: Eğer Not COnnected To Radio hatası alıyorsanız SETTINGS menüsünden Takım Numaranızı Modeminizi konfigüre ederken girdiğinizle aynı şekilde girdiğinize emin olun 
-
-
+&#10071; **Eğer `Not Connected To Radio` hatası alıyorsanız SETTINGS menüsünden takım numaranızı, modeminizi konfigüre ederken girdiğinizle aynı şekilde girdiğinize emin olun**
