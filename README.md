@@ -81,7 +81,7 @@ dd bs=4M if=frcvision-dosyasının-konumu of=/dev/sd-kart-konumu conv=fsync stat
 
 ### Ağ bağlantısının yapılması
 
-Raspberry Pi'a bilgisayardan bağlanmak için onunla aynı ağ üzerinde olmamız gerekiyor. Fakat FRCVision işletim sistemi FRC sahasında robot bağlantılarında kesinti yaşanmasını önlemek için raspberry'nin WiFi özelliğini kapatıyor. Bu nedenle kurulum yaparken bir WiFi adaptörü kullanmak kullanışlı oluyor. Fakat ethernet kablosu da kullanabilirsiniz. Raspberry'yi ethernet kablosuyla bilgisayara bağlayabilirsiniz fakat bu her zaman çalışmayabilir ayrıca birkaç programın kurulumunu yapmak için internete ihtiyacımız olacak. Bu nedenle Raspberry'yi ethernet kablosuyla internete bağladıktan sonra bilgisayarınızı da aynı ağa bağlayın. 
+Raspberry Pi'a bilgisayardan bağlanmak için onunla aynı ağ üzerinde olmamız gerekiyor. Fakat FRCVision işletim sistemi FRC sahasında robot bağlantılarında kesinti yaşanmasını önlemek için raspberry'nin WiFi özelliğini kapatıyor. Bu nedenle kurulum yaparken bir WiFi adaptörü kullanmak kullanışlı oluyor. Fakat ethernet kablosu da kullanabilirsiniz. Raspberry'yi ethernet kablosuyla bilgisayara bağlayabilirsiniz fakat bu her zaman çalışmayabilir ayrıca birkaç programın kurulumunu yapmak için internete ihtiyacımız olacak. Bu nedenle Raspberry'yi ethernet kablosuyla internete bağladıktan sonra bilgisayarınızı da aynı ağa bağlayın.
 
 ### FRCVision arayüzüne ulaşma
 
@@ -206,4 +206,83 @@ Bu argüman modemin dağıttığı ip adreslerine dayanarak modeme bağlı olup 
 
 `InputPlus.py`, robotun maçtaki konumunu, kameranın hata toleransını, otonom modunu, diğer robotlarla çarpışmamak için bekleme süresini, takım numarasını ve eğer kullanıyorsanız uzaklık sensörü ile kamera arasındaki farkı Roborio'ya networktables yardımıyla göndermek için hazırlanmış bir yazılımdır. Eğer tüm ayarlar doğru yapılmışsa arayüzün Raspberry üzerinde otomatik olaraak başlaması gerekmektedir. 
 
-&#10071; **Eğer `Not Connected To Radio` hatası alıyorsanız SETTINGS menüsünden takım numaranızı, modeminizi konfigüre ederken girdiğinizle aynı şekilde girdiğinize emin olun**
+&#10071; **Modeminize doğru bir şekilde bağlandığınız halde `Not Connected To Radio` hatası alıyorsanız SETTINGS menüsünden takım numaranızı, modeminizi konfigüre ederken girdiğinizle aynı şekilde girdiğinize emin olun**
+
+# Roborio Üzerinden NetworkTables ile Verilerin Alınması
+
+NetworkTables genel olarak **Python-Roborio-SmartDashboard** haberleşmesi üzerine yazılmış kullanımı kolay bir modüldür. NightVision yazılımında Roborio'ya veriler NetworkTables ile gönderilmektedir. Ancak bu verilerin Roborio üzerinden yakalanabilmesi için bazı ayarların yapılması gerekmekte. Basit bir otonom uygulaması ile bu ayarların nasıl yapılması gerektiğini anlatacağım.
+
+```Java
+package edu.wpi.first.wpilibj.templates;
+
+import edu.wpi.first.wpilij.TimedRobot;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.PWMVictorSPX;
+
+
+public class NetworkTablesOrnegi extends TimedRobot {
+
+    NetworkTable table = inst.getTable("imgProc");
+
+    NetworkTableEntry robotLocation;
+    NetworkTableEntry cameraTolerance;
+    NetworkTableEntry waitingPeriod;
+    NetworkTableEntry autonomousMode;
+    NetworkTableEntry yError;
+    NetworkTableEntry cam_offset;      
+    
+    DifferentialDrive robotDrive;
+
+    public void robotInit() {
+        NetworkTableInstance inst = NetworkTableInstance.getDefault();
+
+        NetworkTable table = inst.getTable("imgProc");
+
+        DifferentialDrive robotDrive = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1));
+    }
+
+    public void teleopPeriodic() {
+    }
+                                                     
+    public void autonomousPeriodic() {        
+    }
+                                                     
+    public void autonomousInit() {
+    }
+                                                     
+    public void autonomousPeriodic() {
+        cameraTolerance = visionTable.getEntry("Cam Tol");
+        yError = visionTable.getEntry("yerror");
+        
+        if (!yError.contains("NF")) {
+            i_yError = Integer.parseInt(yError);
+            i_camTol = Integer.parseInt(camTol);
+
+            double max_speed = 60;
+            double min_speed = 45;
+
+            double left_cur_turn = ((i_yError - i_camTol) * (max_speed - min_speed) / (320 - i_camTol) + min_speed) / -100;
+            double right_cur_turn = ((i_yError + i_camTol) * (max_speed - min_speed) / (-320 + i_camTol) + min_speed) / 100;
+
+            if (i_yError >= i_camTol) {
+                robotDrive.arcadeDrive(0, left_cur_turn); // Hedef solda 
+            }
+
+            else if (i_yError <= -i_camTol) { 
+                robotDrive.arcadeDrive(0, right_cur_turn); // Hedef sağda
+            }
+        
+            else {
+                robotDrive.arcadeDrive(0, 0); // Hedef ortalandı
+            }
+        }
+    
+        else { // Hedef bulunamadı
+          robotDrive.arcadeDrive(0, .6);
+        }
+    }
+}
+```
