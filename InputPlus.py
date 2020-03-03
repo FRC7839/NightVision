@@ -181,14 +181,15 @@ def match_mode(
     err_type=None,
     isReadError=False
 ):
-    if not PanicMenu:
-        try:
+    # match mode, sadece durum raporu veren menü
+    if not PanicMenu: # eğer error'suz başlatılmışsa
+        try: # eğer açıksa yanıp sönen tüm led'leri kapat
             if flash_led.flashthreadopen:
                 flash_led.exitthread = True
         except:
             pass
-        led_blue.write(0)
-        led_green.write(1)
+        led_blue.write(0) # mavi led kapalı
+        led_green.write(1) # yeşil led açık
         led_control = {}
         # Ana yer
         while True:
@@ -241,12 +242,13 @@ def match_mode(
                 handle_error(all_errors[READ_ERR], stdscr, PanicMenu=True)
 
             try:
-                if flash_led.flashthreadopen:
+                if flash_led.flashthreadopen: # eğer yanip sönen işik varsa kapatiyor
                     flash_led.exitthread = True 
             except:
                 pass
 
-            if led_control["Led Status"] in ["True", True]:
+            # led ayarlari
+            if led_control["Led Status"] in ["True", True]: 
                 ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
 
 
@@ -257,6 +259,7 @@ def match_mode(
             else:
                 ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
 
+            # ekrana yazdıran fonksiyon
             print_menu_for_match(stdscr, m_menu_elements)
             
             time.sleep(3)
@@ -270,31 +273,31 @@ def match_mode(
 
                 settings["Match Mode Status"] = False
 
-                try:
+                try: # eğer yanıp sönen led varsa kapat
                     if flash_led.flashthreadopen:
                         flash_led.exitthread = True 
                 except:
                     pass
-
+                # çıkmadan ayarları kaydet
                 rv = DbFunctions.save_settings(file_s, settings)
                 handle_error(rv, stdscr, PanicMenu=True)
 
                 break
 
     ### KERNEL PANIC ###
-    else:
+    else: # panic modu açıksa
 
-        try:
+        try: # eğer yanıp sönen led var ise kapat
             if flash_led.flashthreadopen:
-                flash_led.exitthread = True
+                flash_led.exitthread = Truek
         except:
             pass
-
+        # arduino bağlandı mı kontrol etmek için ön hazırlık
         cp_p = ArduinoFunctions.check_ports()
         cp_c = cp_p
         
         try:
-            led_red.write(1)
+            led_red.write(1) # kırmızı ışığı yak
         except:
             pass
         
@@ -305,7 +308,7 @@ def match_mode(
             led_control = {}
             settings = {}
 
-            for i in range(len(lc_names)):
+            for i in range(len(lc_names)): 
                 led_control[lc_names[i]] = lc_defaults[i]
 
             for i in range(len(setting_names)):
@@ -344,29 +347,25 @@ def match_mode(
         errortimer = threading.Timer(0.1, print_error, args=[stdscr, errmsg])
         errortimer.start()
 
-        while True:
+        while True: # ana loop    
+            print_menu_for_match(stdscr, m_menu_elements) # ekrana yazdır
+            time.sleep(1) 
 
-                    
-                    
-                    
-            print_menu_for_match(stdscr, m_menu_elements)
-            time.sleep(1)
-
-            if type(errmsg) == str and errmsg.startswith("InputP"):
-                print_info(stdscr, errmsg, color=2)
+            if type(errmsg) == str and errmsg.startswith("InputP"): # eğer error mesajı verilmiş ise
+                print_info(stdscr, errmsg, color=2) # ekrana yazdır
                 errmsg = None
 
-            background_setup(stdscr, None, PanicMode=True)
+            background_setup(stdscr, None, PanicMode=True) # arka planı kırmızı yapmak
 
-            if type(err_type) == str and err_type == "ARDUINO":
-                rv2 = ArduinoFunctions.check_ports()
+            if type(err_type) == str and err_type == "ARDUINO": # eğer arduino error ise
+                rv2 = ArduinoFunctions.check_ports() # portlari yeniden kontrol et
 
                 try:
-                    if swt1.read() is None and rv2 != all_errors[ARDUINO_CONN_LOST]:
-                        isReadError = True
+                    if swt1.read() is None and rv2 != all_errors[ARDUINO_CONN_LOST]: # eğer switch error veriyor ve arduino bağlantısı bozuk
+                        isReadError = True                                           # değilse iterator/read error
                     else:
                         isReadError = False
-                except:
+                except: # eğer swt objesi yoksa
                     if rv2 != all_errors[ARDUINO_CONN_LOST]:
                         isReadError = True
                     else:
@@ -377,7 +376,7 @@ def match_mode(
                 #     not_main(stdscr)
 
                 cp_c = ArduinoFunctions.check_ports()
-                if cp_c != cp_p:
+                if cp_c != cp_p: # eğer şimdiki portlar önceden farklı ise yeni arduino bağlanmış demektir
                     cp_p = cp_c
                     
                     if cp_c is not None and type(cp_c) == list and type(cp_c[0]) == str and not cp_c[0] == "":
@@ -385,59 +384,60 @@ def match_mode(
                             led_red.write(0)
                         except:
                             pass
-                        not_main(stdscr)
+                        not_main(stdscr) # arduino'yu yeniden import etmeyi dene
 
 def get_first_menu_values(team_ip2):
-    ipaddr_func = InputPFunctions.get_ipaddr()
-    check_cam_func = InputPFunctions.check_cam()
+    # ana menü için değerleri hazırlayan kod
+    ipaddr_func = InputPFunctions.get_ipaddr() # bağlı ipadresini alma
+    check_cam_func = InputPFunctions.check_cam() # camera bağlı mı kontrol
 
     mainmenu = []
     mainmenucheck = []
 
-    if skip_nt_arg is not None:
+    if skip_nt_arg is not None: # eğer network skip aktif ise atla
         mainmenu.append("SKIPPED NETWORK CHECKING")
         mainmenucheck.append(True)
 
-    elif ipaddr_func.startswith("127"):
+    elif ipaddr_func.startswith("127"): # eğer localhost ise bağlamadı yaz
         mainmenu.append("IP ADRESS: NOT CONNECTED")
         mainmenucheck.append(False)  ## False
 
-    elif not ipaddr_func.startswith("10." + team_ip2):
+    elif not ipaddr_func.startswith("10." + team_ip2): # eğer takım radyosundan farklı bir yere bağlandıysa uyarı ver
         mainmenu.append("NOT CONNECTED TO RADIO")
         mainmenucheck.append(False)  ## False
 
-    else:
+    else: # başarılı şekilde bağlandı
         mainmenu.append("IP ADRESS: " + ipaddr_func)
         mainmenucheck.append(True)
 
-    mainmenu.append("SETTINGS")
+    mainmenu.append("SETTINGS") # settings menüsü için button
     mainmenucheck.append(True)
 
-    if skip_cam_arg is not None:
+    if skip_cam_arg is not None: # eğer kamera kontrol skip aktif ise atla
         mainmenu.append("SKIPPED CAMERA CHECKING")
         mainmenucheck.append(True)
 
     elif (
-        check_cam_func == "CAMERA CONNECTED"
+        check_cam_func == "CAMERA CONNECTED" # eğer bağlı ise yada windows'ta ise
         or check_cam_func == "TRUE BECAUSE WINDOWS"
     ):
-        mainmenu.append(check_cam_func)
+        mainmenu.append(check_cam_func) # başarılı!
         mainmenucheck.append(True)
 
     else:
         mainmenu.append(str(check_cam_func))
         mainmenucheck.append(False)  ## False
 
-    mainmenu.append("LED TEST")
+    mainmenu.append("LED TEST") # led test button
     mainmenucheck.append(True)
 
-    mainmenu.append("INFO")
+    mainmenu.append("INFO") # info menüsü button
     mainmenucheck.append(True)
 
-    mainmenu.append("REBOOT")
+    mainmenu.append("REBOOT") # linux'da bilgisayarı yeniden başlatan kod
     mainmenucheck.append(True)
 
-    mainmenu.append("EXIT")
+    mainmenu.append("EXIT") # çıkış butonu
     mainmenucheck.append(True)
 
     return [mainmenu, mainmenucheck]
@@ -447,10 +447,11 @@ def get_ip_menu_values(
     team_ip2,
     ipaddr_func=InputPFunctions.get_ipaddr(),
 ):
+    # ip menüsü için değerleri ayarlayan kod
     mainmenu = []
     mainmenu_status = []
 
-    if skip_nt_arg is not None:
+    if skip_nt_arg is not None: # eğer network skip aktif ise atla
         mainmenu.append(" ## SKIPPED NETWORK CHECKING ## ")
         mainmenu_status.append(False)
 
@@ -458,11 +459,11 @@ def get_ip_menu_values(
         mainmenu.append("")
         mainmenu_status.append(False)
 
-    mainmenu.append("HOSTNAME: " + str(socket.gethostname()))
-    mainmenu.append("IP ADRESS: " + ipaddr_func)
+    mainmenu.append("HOSTNAME: " + str(socket.gethostname())) # PC'nin ismi
+    mainmenu.append("IP ADRESS: " + ipaddr_func) # ip adress
     mainmenu.append("RADIO IP RANGE: 10." + team_ip2 + ".0/24")
 
-    mainmenu.append("OK")
+    mainmenu.append("OK") # çıkış butonuu
 
     if str(socket.gethostname()) != "frcvision":
         mainmenu_status[0] = False
@@ -605,9 +606,10 @@ def print_info(stdscr, input_str, color=3):
 
 
 def print_error(stdscr, cur_stat, color=2, wait_time=5):
-    starttime = time.perf_counter()
-    while True:
-        if type(cur_stat) == str:
+    # verilen error mesajunu verilen zaman (genellikle 5 sn) kadar en üste yazan kod
+    starttime = time.perf_counter() # başlama zamanı
+    while True: 
+        if type(cur_stat) == str: # eğer error mesajı direkt verildiyse direk yazdır
             errmsg = cur_stat
             if errmsg is not None:
                 h, w = stdscr.getmaxyx()
@@ -618,7 +620,7 @@ def print_error(stdscr, cur_stat, color=2, wait_time=5):
                 stdscr.attroff(curses.color_pair(color))
                 stdscr.refresh()
 
-        elif cur_stat is not None:
+        elif cur_stat is not None: # eğer sözlük olarak verildiyse içinden alıp yazdır
             errmsg = cur_stat["current_error"]
 
             if errmsg is not None:
@@ -630,7 +632,7 @@ def print_error(stdscr, cur_stat, color=2, wait_time=5):
                 stdscr.attroff(curses.color_pair(2))
                 stdscr.refresh()
 
-        elif cur_stat is None:
+        elif cur_stat is None: # eğer ilisi de değilse boş yazdır
             h, w = stdscr.getmaxyx()
             x = (w // 2) - (1 // 2)
             y = h - 1
@@ -638,7 +640,7 @@ def print_error(stdscr, cur_stat, color=2, wait_time=5):
             stdscr.addstr(y, x, "")
             stdscr.attroff(curses.color_pair(2))
             stdscr.refresh()
-        timenow = time.perf_counter()
+        timenow = time.perf_counter() # verilen zamanı geçiyorsa kapat
         if timenow - starttime > wait_time:
             break
 
@@ -1321,17 +1323,17 @@ def not_main(stdscr):
         # Mac Modu
         if (
             canGoToMM == True
-            and ArduinoFunctions.map_x(pot1.read(), 0, 1, 0, max_v) == 0
+            and ArduinoFunctions.map_x(pot1.read(), 0, 1, 0, max_v) == 0 # eğer potansiyometre en solda ve switch de solda ise 
             and ArduinoFunctions.map_xi(swt1.read(), 0, 1, 0, max_v) == max_v
             and cur_stat["current_menu"] == main_menu_value
         ):
-            match_mode(stdscr, settings, led_blue, led_camera, led_red, led_green, swt1, pot1, isKeyError)
+            match_mode(stdscr, settings, led_blue, led_camera, led_red, led_green, swt1, pot1, isKeyError) # match mode başlat
 
         # region arduino menu ozel
-        if cur_stat["current_menu"] == 2:
+        if cur_stat["current_menu"] == 2: # eğer arudino menüsünde ise potansiyomentre'den değer okuyan yer
             if (
-                key not in ["button1", "button0", "switch on", "switch off"]
-                and cur_stat["current_row"] == 0
+                key not in ["button1", "button0", "switch on", "switch off"] 
+                and cur_stat["current_row"] == 0 # eğer robo_loc'da ise
             ):
                 settings["Robot Location"] = ArduinoFunctions.get_robo_loc_from_inp(
                     key, max_v
@@ -1339,19 +1341,19 @@ def not_main(stdscr):
 
             elif (
                 key not in ["button1", "button0", "switch on", "switch off"]
-                and cur_stat["current_row"] == 1
+                and cur_stat["current_row"] == 1 # cam_tol'de ise
             ):
                 settings["Camera Tolerance"] = str(key)
 
             elif (
                 key not in ["button1", "button0", "switch on", "switch off"]
-                and cur_stat["current_row"] == 2
+                and cur_stat["current_row"] == 2 # waiting_period'da ise
             ):
                 settings["Waiting Period"] = str(key // 2)
 
             elif (
                 key not in ["button1", "button0", "switch on", "switch off"]
-                and cur_stat["current_row"] == 3
+                and cur_stat["current_row"] == 3 # autonomus_mod'da ise
             ):
                 settings["Autonomous Mode"] = str(
                     ArduinoFunctions.map_x(key, 0, max_v, 0, 5)
@@ -1365,22 +1367,22 @@ def not_main(stdscr):
 
             # Team degistirme seysi
             if cur_stat["current_row"] == 5:
-                if key == "button0":
+                if key == "button0": # buton0'a bastığında sonraki haneye geçer
                     if team_no_pos < 4:
                         team_no_pos += 1
 
                     if team_no_pos >= 4:
                         team_no_pos = 0
 
-                if type(key) == int:
+                if type(key) == int: # eğer potansiyometre değeri ise o haneye atar
                     settings["Team Number"] = (
                         settings["Team Number"][0:team_no_pos]
                         + str(ArduinoFunctions.map_x(key, 0, max_v, 0, 9))
                         + settings["Team Number"][(team_no_pos + 1) : 4]
                     )
 
-            if cur_stat["current_row"] == 4:
-                if key == "button0":
+            if cur_stat["current_row"] == 4: 
+                if key == "button0": # buton0'a bastığında sonraki haneye geçer
                     if cam_offset_pos < 3:
                         cam_offset_pos += 1
 
@@ -1405,7 +1407,7 @@ def not_main(stdscr):
                 cam_offset_pos = 9  # 9 sadece 0 ile 3 arasinda olmayan bir deger olarak
 
 
-            # Write tusu
+            # Write tusu, ayarları JSON dosyasına yazar
             if key == "button0" and cur_stat["current_row"] == 6:
 
                 rv = DbFunctions.save_settings(file_s, settings)
@@ -1422,11 +1424,12 @@ def not_main(stdscr):
         # endregion
 
         # Menu degistirme olaylari
-        cur_stat["current_row"], cur_stat["current_menu"], rv = InputPFunctions.change_menu(
+        cur_stat["current_row"], cur_stat["current_menu"], rv = InputPFunctions.change_menu( 
             key, cur_stat, led_green, led_camera
         )
         handle_error(rv, stdscr, PanicMenu=False, clean=False)
         
+        # ana menüye dönme
         cur_stat["current_row"], cur_stat["current_menu"], sett = return_to_menu(
             key, cur_stat, stdscr
         )
@@ -1434,7 +1437,7 @@ def not_main(stdscr):
             cur_stat["current_menu_elements"],
             cur_stat["current_menu_status"],
         ) = set_current_menu(cur_stat, all_menu_elements)
-
+        # team_ip'yi yeniden hesaplama
         team_ip2 = set_tip(settings["Team Number"])
 
         if sett is not None and not type(sett) == 4:
