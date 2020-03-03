@@ -237,7 +237,7 @@ public class NetworkTablesOrnegi extends TimedRobot {
 
         NetworkTable table = inst.getTable("imgProc");
 
-        private final DifferentialDrive robotDrive = new DifferentialDrive(new PWMVictorSPX(kLeftMotorPort), new PWMVictorSPX(kRightMotorPort));
+        private final DifferentialDrive robotDrive = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1));
     }
 
     public void teleopPeriodic() {
