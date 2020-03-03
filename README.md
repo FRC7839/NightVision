@@ -219,6 +219,9 @@ import edu.wpi.first.wpilij.TimedRobot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.PWMVictorSPX;
+
 
 public class NetworkTablesOrnegi extends TimedRobot {
 
@@ -229,15 +232,16 @@ public class NetworkTablesOrnegi extends TimedRobot {
     NetworkTableEntry waitingPeriod;
     NetworkTableEntry autonomousMode;
     NetworkTableEntry yError;
-    NetworkTableEntry cam_offset;        
-                                                     
+    NetworkTableEntry cam_offset;      
+    
+    DifferentialDrive robotDrive;
 
     public void robotInit() {
         NetworkTableInstance inst = NetworkTableInstance.getDefault();
 
         NetworkTable table = inst.getTable("imgProc");
 
-        private final DifferentialDrive robotDrive = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1));
+        DifferentialDrive robotDrive = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1));
     }
 
     public void teleopPeriodic() {
@@ -252,7 +256,7 @@ public class NetworkTablesOrnegi extends TimedRobot {
     public void autonomousPeriodic() {
         cameraTolerance = visionTable.getEntry("Cam Tol");
         yError = visionTable.getEntry("yerror");
-                                          
+        
         if (!yError.contains("NF")) {
             i_yError = Integer.parseInt(yError);
             i_camTol = Integer.parseInt(camTol);
