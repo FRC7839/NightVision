@@ -138,20 +138,21 @@ ip_menu_value = 1
 class ArduinoFunctions:
     @staticmethod
     def check_ports():
+        # tüm comport'ları arduino için kontrol eden kod
         try:
-            comlist = serial.tools.list_ports.comports()
+            comlist = serial.tools.list_ports.comports() # port'ları tarıyor
             connected = []
             for element in comlist:
-                if os.name == "nt":
+                if os.name == "nt": # windows
                     connected.append(element.device)
-                elif os.name == "posix" and str(element.device).startswith("/dev/ttyUSB"):
+                elif os.name == "posix" and str(element.device).startswith("/dev/ttyUSB"): # linux
                     connected.append(element.device)
                     
-            if len(connected) > 0:
+            if len(connected) > 0: # eğer bulunduysa bulunanları döndür
                 return connected
 
             else:
-                return all_errors[ARDUINO_CONN_LOST]
+                return all_errors[ARDUINO_CONN_LOST] # bulunamazsa hata döndür
             
         except:
             ### ERROR ###
@@ -161,16 +162,17 @@ class ArduinoFunctions:
     
     @staticmethod
     def led_write(led1, out1, st, gnd=True, invert_f = False):
-        try:
-            if led1 is not None:
-                if not invert_f:
+        # arduino'daki ledleri kontrol eden kod
+        try: 
+            if led1 is not None: # eğer led objesi verilmiş ise
+                if not invert_f: # verilen değeri gir
                     led1.write(st)
                 
                 else:
                     led1.write(1 - st)
                 
-            if out1 is not None:
-                if gnd == True:
+            if out1 is not None: # eğer camera led girilmiş ise 
+                if gnd == True: # verilen değeri gir
                     st = 1 - st
                 
                 out1.write(st)
@@ -184,11 +186,12 @@ class ArduinoFunctions:
     ### ERROR PROOF ### (Raise)
     @staticmethod
     def import_arduino(com_ports):
+        # verilen com_port'dan arduino import eden kod
         try:
-            if type(com_ports) == list:
+            if type(com_ports) == list: # eğer birden fazla verilmiş ise
                 for i in range(len(com_ports)):
                     try:
-                        board = pyfirmata.ArduinoNano(str(com_ports[i]))
+                        board = pyfirmata.ArduinoNano(str(com_ports[i])) # tek tek dene, başarılı olursan döndür
 
                     except:
                         pass
@@ -196,7 +199,7 @@ class ArduinoFunctions:
                     else:
                         return board
             
-            elif type(com_ports) == str:
+            elif type(com_ports) == str: # tek bir tane ise onu import et
                 try:
                     board = pyfirmata.ArduinoNano(str(com_ports[i]))
                     
@@ -227,6 +230,7 @@ class ArduinoFunctions:
     ### ERROR PROOF ### (Raise)
     @staticmethod
     def map_x(value, min_v, max_v, min_wv, max_wv):
+        # verilen değerleri istenilen 2 değer arasına getirir
         try:
             if value is not None:
                 if value <= max_v and value >= min_v:
@@ -259,6 +263,7 @@ class ArduinoFunctions:
     ### ERROR PROOF ### (Raise)
     @staticmethod
     def map_xi(value, min_v, max_v, min_wv, max_wv):
+        # mapx'in terse çevirilmiş hali
         try:
             if value is not None:
                 value = max_v - value
@@ -294,6 +299,8 @@ class ArduinoFunctions:
     def key_get(
         digital_input1, digital_input2, analog_input1, wait_time=0.11, func=None, *args
     ):
+        # arduino'dan değer toplayan kod
+        # bir button basıldığında yada potansiyometrenin değerinde değişiklik olduğunda bu değeri döndürür
         try:
             key = None
             rv = None
@@ -318,18 +325,18 @@ class ArduinoFunctions:
                     # print(pot1 + " # FROM KEY_GET FUNCTION")
                     return pot1, None
 
-                elif (but1 != but1_p) and but1 > 0 and (not (but2 > 0)):
+                elif (but1 != but1_p) and but1 > 0 and (not (but2 > 0)): # eğer but1 önceki değerine eşit değilse onu döndür
                     but1 = but1_p
                     key = "button0"
 
-                elif (but2 != but2_p) and but2 > 0 and (not (but1 > 0)):
+                elif (but2 != but2_p) and but2 > 0 and (not (but1 > 0)): # eğer but2 önceki değerine eşit değilse onu döndür
                     but2 = but2_p
                     key = "button1"
 
-                elif pot1_p != pot1:
+                elif pot1_p != pot1: # eğer potansiyometre önceki değerine eşit değilse onu döndür
                     key = pot1
 
-                if func is not None:
+                if func is not None: # eğer error verirse belli zaman bekle
                     #
                     start_t = timeit.default_timer()
 
@@ -343,14 +350,14 @@ class ArduinoFunctions:
                         return None, rv
                     
                     else:
-                        if type(rv) == str and rv.startswith("InputP"):
+                        if type(rv) == str and rv.startswith("InputP"): 
                             key = None
                             return key, rv
                     
                     elapsed = timeit.default_timer() - start_t
                     #
 
-                    if elapsed > wait_time:
+                    if elapsed > wait_time: # eğer keçen zaman bekleme zamanından azsa bekle.
                         pass
 
                     else:
@@ -370,7 +377,7 @@ class ArduinoFunctions:
                     
                     return key, rv
 
-                but1 = digital_input1.read()
+                but1 = digital_input1.read() # arduino değer okuma
                 but2 = digital_input2.read()
                 pot1 = ArduinoFunctions.map_x(analog_input1.read(), 0, 1, 0, 30)
         except:
@@ -388,6 +395,7 @@ class ArduinoFunctions:
         func = None,
         *args
     ):
+    ##### KULLANILMIYOR #####
         try:
             aLastState = outputA.read()
             counter = 0
@@ -395,7 +403,7 @@ class ArduinoFunctions:
             rv = None
             # Normalde encoder icin caldigim kodda vardi. Silmeyi dusundum ama encoder icin biraz sikinti yaratiyor. cidden
             
-            if aLastState is None:
+            if aLastState is None: 
                 key = all_errors[ARDUINO_INPUT_ERR]
                         
             while True: 
@@ -472,8 +480,9 @@ class ArduinoFunctions:
     ### ERROR PROOF ### (Handle)
     @staticmethod
     def get_robo_loc_from_inp(potan, max_v):
+        # potansiyometre'den gelen değeri robo_loc için kullanılabilecek hale getiren kod
         try:
-            i1 = ArduinoFunctions.map_x(potan, 0, max_v, 0, 2)
+            i1 = ArduinoFunctions.map_x(potan, 0, max_v, 0, 2) # istenen değere getiriyor
 
             ### GOT ERROR ###
             if str(i1).startswith("InputP"):
@@ -482,7 +491,8 @@ class ArduinoFunctions:
                 # print(i1 + " # FROM GET_ROBO_LOC FUNCTION")
                 return i1
 
-            elif i1 == 0:
+            # istenen değere getirildikten sonra konrol
+            elif i1 == 0: 
                 return "LEFT"
 
             elif i1 == 1:
@@ -504,10 +514,9 @@ class DbFunctions:
     ### ERROR PROOF ### (Raise)
     @staticmethod
     def write_settings_to_json(input_dictionary=None, file=file_s, reset=False):
+        # verilen ayar değerlerini ortak JSON dosyasına yazar.
         try:
             if reset == True:
-                
-
                 if input_dictionary is None and file == file_s:
                     settings = {}
                     
@@ -564,6 +573,7 @@ class DbFunctions:
     ### ERROR PROOF ### (Raise)
     @staticmethod
     def read_settings_on_json(wanted_setting=None, file=file_s):
+        # ortak JSON dosyasından ayarları okuyor
         try:
             try:
                 with open(file, "r") as p:
@@ -594,6 +604,7 @@ class DbFunctions:
     ### ERROR PROOF ### (Handle)
     @staticmethod
     def save_settings(file=file_s, *args):
+        # write_settings_to_json gibi ancak error'ları önlüyor
         try:
             for settings in args:
                 c_s = DbFunctions.read_settings_on_json(file=file)
@@ -632,6 +643,7 @@ class DbFunctions:
     
     @staticmethod
     def get_setting(file=file_s, setting_name=None):
+        # read_settings_on_json gibi ancak error'ları önlüyor
         try:
             if not (setting_name in setting_names) and file == file_s and setting_name is not None:
                 ### ERROR ###
@@ -718,6 +730,7 @@ class DbFunctions:
 
 ### OK ###
 class ServerFunctions:
+    ##### BU FONKSIYONLAR ARTIK KULLANILMIYOR #####
     ### OK ###
     @staticmethod
     def check_server(port):
