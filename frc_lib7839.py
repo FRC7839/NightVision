@@ -898,9 +898,7 @@ class CameraFunctions:
             and cv2.contourArea(cnt) > 250
         ):
             rect_ratio = rect_width / rect_height
-            if 1 > rect_ratio > 0:
-                return True, "Loading Area"
-            elif 1 <= rect_ratio <= 10:
+            if 1.7 <= rect_ratio <= 2.5:
                 return True, "Target Area"
         else:
             return False, ""
@@ -947,8 +945,19 @@ class InputPFunctions:
                 return socket.gethostbyname(socket.gethostname())
 
             elif str(sys.platform).startswith("linux") or str(sys.platform).startswith("cygwin"):
-                ipaddress = os.popen("hostname -I").read()
-                return ipaddress
+                ip = os.popen("hostname -I").read()
+            
+                if ip is not None or (type(ip) == str and ip != ""):
+                    ip = ip.split(" ")
+                    for i in ip:
+                        if i.startswith("10"):
+                            return i
+                    return ip[0]
+                
+                
+                else:
+                    return None                
+                
         except:
             ### ERROR ###
             output_e = all_errors[INTERNAL_SYNTAX_ERR]

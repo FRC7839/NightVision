@@ -109,7 +109,7 @@ Bu bölümde kullanışlı olabileceğni düşündüğüm tek şey WiFi bölüm�
 ### Interfacing Options 
 Öncelikle SSH'i seçerek enable etmeniz gerekiyor. Ekran satın almadıysanız ve arayüz kullanmayacaksınız bile kamera etrafına yerleştireceğiniz ledleri açıp kapatabilmek için bir arduino kullanmanız gerekiyor. Eğer ledi kapatmayı düşünmüyorsanız Arduino ile Raspberry arasında bir iletişime ihtiyacınız olmuyor ve Serial seçeneğini etkinleştirmek de anlamsız kalıyor. Fakat arayüz yapmayı hedefliyorsanız veya ledi kapatıp açmayı istiyorsanız Serial seçeneğini etkinleştirmeniz gerekiyor.
 
-Eğer Rpi için 5"lik ekran aldıysanız `/boot/config.txt` dosyasında birkaç değişiklik yapmamız gerekecek. Ekranın tamamını kullanmak için `/boot/config.txt` dosyanın içinde `#hdmi_driver=2` kısmının altına şunları ekleyin:
+Eğer Rpi için 5"lik ekran aldıysanız `/boot/config.txt` dosyasında birkaç değişiklik yapmamız gerekecek. Ekranın tamamını kullanmak için `/boot/config.txt` dosyanın içinde `#hdmi_drive=2` kısmının altına şunları ekleyin:
 ```shell
 hdmi_group=2
 hdmi_mode=87
@@ -146,7 +146,8 @@ Arayüz ile Kamera kodunun iletişim kurabilmesi için JSON dosyalarını kullan
 `sudo nano /etc/rc.local` komutunu girerek rc.local dosyasında exit komutunun üstüne şu komutları ekleyelim:
 
 ```shell
-echo TUNA'YI ÇOK KISKANIYORUM
+sudo mount -o rw,remount /
+sudo mount -o rw,remount /boot
 ```
 
 # Görüntü İşleme Algoritmasını Yüklemek
