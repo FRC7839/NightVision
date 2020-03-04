@@ -1,10 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
-#define PIN        6 
+#define PIN        4
 #define NUMPIXELS 12 
-
-
-
 
 /*
   Firmata is a generic protocol for communicating with microcontrollers

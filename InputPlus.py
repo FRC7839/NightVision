@@ -990,6 +990,7 @@ def return_to_menu(key, cur_stat, stdscr):
 
 
 def background_setup(stdscr, cur_stat=None, PanicMode=False):
+    bruh = None
     #herhangi bir menüde iken tüm değerler True iken arkaplanı yeşil, değilken kırmızı yapan kod
     if PanicMode == True: 
         stdscr.bkgd(" ", curses.color_pair(2)) #burası arkaplanı ayarlayan curses fonksiyonu
@@ -1005,7 +1006,7 @@ def background_setup(stdscr, cur_stat=None, PanicMode=False):
                 stdscr.bkgd(" ", curses.color_pair(2))
                 break
 
-    if bruh == 1:
+    if bruh is not None and bruh == 1:
         flash_led.exitthread = True
 
 
@@ -1204,7 +1205,8 @@ def not_main(stdscr):
     ###
     # geçen zamanı bul
     elapsed = timeit.default_timer() - start_t
-    #eğer 5 saniyeden az sürdü ise 5 saniyeyi tamamla
+    
+    #eğer 5 saniyeden az sürdü ise 5 saniyeyi tamamla (Çoğunlukla çok daha uzun sürüyor)
     if elapsed < 5:
         time.sleep(5 - elapsed)
         # error mesajı ver
