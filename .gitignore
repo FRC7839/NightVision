@@ -5,3 +5,4 @@
 .image_examples
 .led_control.json
 .settings.json
+.gitignore
