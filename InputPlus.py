@@ -188,35 +188,36 @@ def match_mode(
                 flash_led.exitthread = True
         except:
             pass
+        
         led_blue.write(0) # mavi led kapalı
         led_green.write(1) # yeşil led açık
-        led_control = {}
         # Ana yer
         while True:
             # Dosyadan okumayi dene
-            led_control = DbFunctions.get_setting(file_lc)  # led control dosyasindan ayari cekiyor
-            handle_error(led_control, stdscr, PanicMenu=True)
+            #settings = DbFunctions.get_setting(file_s)  # led control dosyasindan ayari cekiyor
+            #handle_error(led_control, stdscr, PanicMenu=True)
 
             settings["Match Mode Status"] = True
-
+            handle_error(settings, stdscr, PanicMenu=True)
+            
             m_menu_elements = []  # Menu elementleri arrayi
             m_menu_elements.append(" ## MATCH MODE STARTED ## ")  # Title
 
             # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
-            if led_control["Led Status"] is not None and led_control["Led Status"] in [
+            if settings["Led Status"] is not None and settings["Led Status"] in [
                 True,
                 False,
                 "True",
                 "False",
             ]:
                 m_menu_elements.append(
-                    " ## LED CONTROL : " + str(led_control["Led Status"]) + " ## "
+                    " ## LED CONTROL : " + str(settings["Led Status"]) + " ## "
                 )
 
             # Eger kapali ya da acik alamazsa error veriyor.
             else:
                 m_menu_elements.append(" ## LED CONTROL FAILED ## ")
-                led_control["Led Status"] = True
+                settings["Led Status"] = True
 
             try:
                 # Menunun geri kalani, durum reporu veriyor.
@@ -248,11 +249,11 @@ def match_mode(
                 pass
 
             # led ayarlari
-            if led_control["Led Status"] in ["True", True]: 
+            if settings["Led Status"] in ["True", True]: 
                 ArduinoFunctions.led_write(led_green, led_camera, 1)  # on
 
 
-            elif led_control["Led Status"] in ["False", False]:
+            elif settings["Led Status"] in ["False", False]:
                 ArduinoFunctions.led_write(None, led_camera, 0)  # off
                 flash_led(led_green)
 
@@ -289,7 +290,7 @@ def match_mode(
 
         try: # eğer yanıp sönen led var ise kapat
             if flash_led.flashthreadopen:
-                flash_led.exitthread = Truek
+                flash_led.exitthread = True
         except:
             pass
         # arduino bağlandı mı kontrol etmek için ön hazırlık
@@ -302,33 +303,28 @@ def match_mode(
             pass
         
         settings = DbFunctions.get_setting(file_s)
-        led_control = DbFunctions.get_setting(file_lc)  # led control dosyasindan ayari cekiyor
 
-        if handle_error(led_control, stdscr, PanicMenu=False) or handle_error(settings, stdscr, PanicMenu=False):
-            led_control = {}
+        if handle_error(settings, stdscr, PanicMenu=False):
             settings = {}
 
-            for i in range(len(lc_names)): 
-                led_control[lc_names[i]] = lc_defaults[i]
-
-            for i in range(len(setting_names)):
-                settings[setting_names[i]] = setting_defaults[i]
-
+            for i in range(len(setting_names)): 
+                setting_control[setting_names[i]] = setting_defaults[i]
+                
             f_err = True
 
         m_menu_elements = []  # Menu elementleri arrayi
         m_menu_elements.append(" ## PANIC MODE STARTED ## ")  # Title
 
         # LED Bilgisayar tarafindan kontrol ediliyor ve menu bunu gosteriyor
-        if led_control["Led Status"] is not None and led_control["Led Status"] in [True,False,"True","False",]:
-            m_menu_elements.append(" ## LED CONTROL : " + str(led_control["Led Status"]) + " ## ")
+        if settings["Led Status"] is not None and settings["Led Status"] in [True,False,"True","False",]:
+            m_menu_elements.append(" ## LED CONTROL : " + str(settings["Led Status"]) + " ## ")
 
         # Eger kapali yada acik alamazsa error veriyor.
         else:
             m_menu_elements.append(" ## LED CONTROL FAILED ## ")
 
             led_control["Led Status"] = True
-            rv = DbFunctions.save_settings(file_lc, led_control)  # Olmazsa yapacak bir sey yok
+            rv = DbFunctions.save_settings(file_s, settings)  # Olmazsa yapacak bir sey yok
             handle_error(rv, stdscr, PanicMenu=False)
 
         if settings is not None:

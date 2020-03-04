@@ -15,11 +15,9 @@ import os
 global wait_time_for_get_key
 global setting_defaults
 global setting_names
-global lc_defaults
 global all_errors
 global all_infos
-global lc_names
-global file_lc
+global file_s
 global file_s
 global max_v
 
@@ -67,7 +65,8 @@ setting_names = [
     "Autonomous Mode",
     "Team Number",
     "Camera Offset",
-    "Match Mode Status"
+    "Match Mode Status",
+    "Led Status"
 ]
 
 setting_defaults = [
@@ -78,17 +77,8 @@ setting_defaults = [
     "1",
     "7839",
     "666",
+    True, 
     True
-]
-
-lc_names = [
-    "Led Status",
-    "Match Mode Status"
-]
-
-lc_defaults = [
-    True,
-    False
 ]
 
 # Arduinodan deger aldiktan sonraki bekleme suresi
@@ -98,7 +88,7 @@ wait_time_for_get_key = 0.115
 file_s = "settings.json"
 
 # Led kontrulunun yapilmasini saglayacak dosya ama muhtemelen kullanmayacagiz
-file_lc = "led_control.json"
+# file_s = "led_control.json"
 
 # Potansiyometreden okunan degerin kaca bolunecegi
 # Kamera toleransini degistirmek ve ayarlarin hassasiyetini arttirmak icin arttirilabilir
@@ -526,14 +516,14 @@ class DbFunctions:
                         except KeyError:
                             settings[setting_names[i]] = setting_defaults[i]
                 
-                elif input_dictionary is None and file == file_lc:
+                elif input_dictionary is None and file == file_s:
                     lc_set = {} 
                     
-                    for i in range(len(lc_names)):
+                    for i in range(len(setting_names)):
                         try:
-                            lc_set[lc_names[i]]
+                            lc_set[setting_names[i]]
                         except KeyError:
-                            lc_set[lc_names[i]] = lc_defaults[i]
+                            lc_set[setting_names[i]] = setting_defaults[i]
                             
                     settings = lc_set
 
@@ -678,14 +668,14 @@ class DbFunctions:
                         except KeyError:
                             c_s[setting_names[i]] = setting_defaults[i]
                 
-                elif file == file_lc:
+                elif file == file_s:
                     lc_set = {} 
                     
-                    for i in range(len(lc_names)):
+                    for i in range(len(setting_names)):
                         try:
-                            c_s[lc_names[i]]
+                            c_s[setting_names[i]]
                         except KeyError:
-                            c_s[lc_names[i]] = lc_defaults[i]
+                            c_s[setting_names[i]] = setting_defaults[i]
                     
                             
                 rv2 = DbFunctions.write_settings_to_json(c_s, file=file)
