@@ -1,2 +1,0 @@
-pyfirmata 
-windows-curses

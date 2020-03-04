@@ -165,10 +165,12 @@ Bilgisayarda görüntü işleme algoritmasını kullanabilmek için NightVision 
 
 Kodu indirdikten sonra <kbd>Windows</kbd> + <kbd>R</kbd> tuş kombinasyonuna basıp Çalıştır'ı açtıktan sonra `cmd` yazın ve <kbd>Enter</kbd> tuşuna basın. Açılan komut satırından NightVision dosyalarını çıkarttığınız yere geçmeniz gerekiyor. Bulunduğunuz yeri öğrenmek için `pwd` komutunu kullanabilirsiniz. Bulunduğunuz klasör içindeki dosya ve klasörleri görmek için ise `dir` komutunu kullanın. Belirttiğiniz klasörün içine girmenizi sağlayan komut ise `cd` komududur. Eğer `dir` komutunu girdiğinizde cmd'nin size verdiği çıktının içinde `NightVision.py` ve `frc_lib7839.py` dosyalarını görebiliyorsanız doğru yere gelmişsiniz demektir.
 
-Python kodlarının çalışması için gerekli kütüphaneleri bilgisayara da kurmamız gerekiyor. Bunun için ise aşağıdaki kodları komut konsoluna (cmd) girmeniz yeterli. Eğer farklı bir python environmentı kullanıyorsanız (conda gibi) önce yüklemek istediğiniz environmente girmeyi unutmayın.
-
-```
-py -3 -m pip install -r requirements1.txt
+Python kodlarının çalışması için gerekli kütüphaneleri bilgisayara da kurmamız gerekiyor. Gerekli kütüphaneler :
+```shell
+windows-curses
+numpy
+opencv
+pyfirmata
 ```
 
 ### Argümanlar
