@@ -87,6 +87,9 @@ Raspberry Pi'a bilgisayardan bağlanmak için onunla aynı ağ üzerinde olmamı
 
 http://frcvision.local adresine gidin ve sistem üzerinde değişiklik yapabilmek için <kbd>Writable</kbd> butonuna basın. http://frcvision.local adresi her zaman çalışmayabilir. Aynı internet üzerinde ağ taraması yaparak ([Nmap](https://nmap.org/download.html) veya [Advanced Ip Scanner](https://www.advanced-ip-scanner.com/tr/) gibi programlarla) Raspberry'nin local ip adresini bulup direkt o ip adresini tarayıcınızın URL kısmına o ip adresini yapıştırarak düzenlemeleir yapmak için FRCVision sisteminin arayüzüne girebilirsiniz.
 
+### Raspberry Pi'ın Ip Ayarlarının Yapılması
+
+
 ### SSH aracılığıyla Raspberry Pi'a bağlanma
 
 Rpi'a SSH ile bağlanmak için [Putty](https://www.putty.org/) kullanıyorum. Hostname kısmına `pi@frcvision.local` (Eğer tarayıcınızda frcvision.local çalışmadıysa pi@tarayıcıda-kullandığınız-ip-adresi) yazdıktan sonra opena basın. Açılan ekranda SSH bağlantısı için şifreyi soracak. Varsayılan şifre `raspberry`' dir. `sudo raspi-config` komutu yardımıyla şifre değiştirme dahil çoğu işlemi gerçekleştireceğiz.

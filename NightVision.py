@@ -167,7 +167,7 @@ def json_read_thread():
     json_read_thread.finished = False
     settings = DbFunctions.read_settings_on_json(file_s)
 
-    print("bunu görmüyorsan kayra sakattır")
+    # print("bunu görmüyorsan kayra sakattır")
     
     if handle_error_lite(settings) == True:
         settings = {}
@@ -274,20 +274,25 @@ def main():
     que = queue.Queue()
     # t = threading.Thread(target=lambda q, arg1: q.put(json_read_thread(arg1)), args=(que, ""))
     # firsttimethreading = True
-    is_MM_started = False
+    # is_MM_started = False
     w_timed = 5
-
+    m_timed = 20
 
     while True:
         elapsed = timeit.default_timer() - start_t 
 
-        # print(threading.active_count())
 
-        if is_MM_started is None or is_MM_started is False:        
+        if is_MM_started is None or str(is_MM_started) == "False":        
             if elapsed >= w_timed:
                 start_t = timeit.default_timer()
                 robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread()
                 print("db1")
+        
+        elif str(is_MM_started) == "True":        
+            if elapsed >= m_timed:
+                start_t = timeit.default_timer()
+                robo_loc, cam_tol, wait_per, auto_mode, cam_off, is_MM_started = json_read_thread()
+                print("db2")
         
 
             

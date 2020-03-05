@@ -41,6 +41,28 @@ global main_menu_value
 global info_menu_value
 global ip_menu_value
 
+
+global pot1_str
+global swt1_str
+global but1_str
+global but2_str
+
+global cam_str
+global blue_str
+global green_str
+global red_str
+
+pot1_str = "a:0:i"
+swt1_str = "d:5:i"
+but1_str = "d:6:i"
+but2_str = "d:7:i"
+
+cam_str = "d:3:o"
+blue_str = "d:9:p"
+green_str = "d:10:p"
+red_str = "d:11:p"
+
+
 INTERNAL_KEY_GET_FUNC_ERR = "INTERNAL_KEY_GET_FUNCTION_ERROR"
 SERVER_ALREADY_STARTED_ERR = "SERVER_ALREADY_STARTED_ERROR"
 ARDUINO_CONN_LOST = "ARDUINO_CONNECTION_LOST"

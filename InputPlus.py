@@ -1223,15 +1223,16 @@ def not_main(stdscr):
         # led1 = board.get_pin("d:11:p")
         
         # Tüm arduino pinlerin tanımlaması
-        pot1 = board.get_pin("a:0:i")
-        swt1 = board.get_pin("d:5:i")
-        but1 = board.get_pin("d:6:i")
-        but2 = board.get_pin("d:7:i")
         
-        led_camera = board.get_pin("d:3:o")
-        led_blue = board.get_pin("d:9:p")
-        led_green = board.get_pin("d:10:p")
-        led_red = board.get_pin("d:11:p")
+        
+        pot1 = board.get_pin(pot1_str)
+        swt1 = board.get_pin(swt1_str)
+        but1 = board.get_pin(but1_str)
+        but2 = board.get_pin(but2_str)
+        led_camera = board.get_pin(cam_str)
+        led_blue = board.get_pin(blue_str)
+        led_green = board.get_pin(green_str)
+        led_red = board.get_pin(red_str)
 
         # butonların basıldığını anlamak için iteratörleri çalıştırır
         time.sleep(0.5)
