@@ -282,6 +282,7 @@ def main():
     m_timed = 20
 
     while True:
+        y_error = None
         elapsed = timeit.default_timer() - start_t 
 
 

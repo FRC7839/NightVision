@@ -906,12 +906,10 @@ class CameraFunctions:
         if (
             rect_width
             and rect_height
-            and not horizontal_friction
-            and not vertical_friction
             and cv2.contourArea(cnt) > 250
         ):
             rect_ratio = rect_width / rect_height
-            if 1.7 <= rect_ratio <= 2.5:
+            if 1.3 <= rect_ratio <= 4:
                 return True, "Target Area"
         else:
             return False, ""
