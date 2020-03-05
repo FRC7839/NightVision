@@ -891,16 +891,10 @@ class CameraFunctions:
 
         horizontal_friction = False
         vertical_friction = False
-
-        left_corner = None
-        right_corner = None
         
         for x_coord in x_list:
             horizontal_friction = bool(not (5 <= x_coord <= 635))
-            
-            right_corner = bool(635 <= x_coord)
-            left_corner = bool(5 >= x_coord)
-            
+
             if horizontal_friction:
                 break
 
@@ -939,8 +933,8 @@ class CameraFunctions:
         target_height = 300
         camera_angle = 75
         target_angle = (180 - center1y) / 180 * 43.30
-            camera_angle + target_angle
         distance = (target_height - camera_height) / math.tan(
+            camera_angle + target_angle
         )
         y_error = 320 - center1x
         return True, y_error, distance
