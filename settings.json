@@ -6,5 +6,6 @@
     "Autonomous Mode": "1",
     "Team Number": "7839",
     "Camera Offset": "000",
-    "Match Mode Status": false
+    "Match Mode Status": false,
+    "Led Status": true
 }

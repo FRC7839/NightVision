@@ -112,8 +112,8 @@ pc_test_image = InputPFunctions.find_arg("--pc-test-image", num=True)
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 cam_num = InputPFunctions.find_arg("--pc-mode")
 
-pc_mode = 1
-cam_num = "http://10.78.39.97:1181/stream.mjpg"
+# pc_mode = 1
+# cam_num = "http://10.78.39.97:1181/stream.mjpg"
 
 image_mode = InputPFunctions.find_arg("--test-image", num=True)
 

@@ -134,6 +134,7 @@ pc_test_mode = InputPFunctions.find_arg("--pc-test-mode", num=True)
 test_mode = InputPFunctions.find_arg("--test-mode", num=True)
 pc_mode = InputPFunctions.find_arg("--pc-mode", num=True)
 match_mode_can_be_started = False
+check_arduino_thread_rv = True
 
 
 if os.name == "nt":
@@ -198,6 +199,10 @@ def match_mode(
             #handle_error(led_control, stdscr, PanicMenu=True)
 
             settings["Match Mode Status"] = True
+            # çıkmadan ayarları kaydet
+            rv3 = DbFunctions.save_settings(file_s, settings)
+            handle_error(rv3, stdscr, PanicMenu=True)
+
             handle_error(settings, stdscr, PanicMenu=True)
             
             m_menu_elements = []  # Menu elementleri arrayi
@@ -764,12 +769,14 @@ def print_team_no_edit(stdscr, team_n, team_no_select, cur_stat):
 
 
 def check_arduino_thread():
+    global check_arduino_thread_rv
     # Devamlı olarak arduino'nun bağlantısını kontrol eden threaded kod.
     # not: threaded kodlardan beynim yok olmaya başladı
     check_arduino_thread.exitthread = False # bu fonksiyon kodun herhangi bir yerinde True olduğunda thread durucak kapa emri olarak kullanıyorum.
 
     # threaded olarak çalışacak fonksiyon
     def check_arduino_thread_actual(): #thread ile çalışacak kod
+        global check_arduino_thread_rv
         check_arduino_thread.threadopen = True # thread'in açık olduğunu belirtiyor ki  birden fazla thread açılmasın
         check_arduino_thread.exitthread = False # kapatma emrinin kapalı olduğunu kontrol ediyor
         while True: # asıl döngü
@@ -777,26 +784,26 @@ def check_arduino_thread():
             try:
                 if type(rv) == list and rv[0] is None and rv[0] == "": # eğer liste boşsa false döndür
                     # Bulunamadı
-                    check_arduino_thread.rv = False       
+                    check_arduino_thread_rv = False       
 
                 elif type(rv) == str and rv.startswith("InputP"): # eğer check_ports fonkisyonu error döndürdü ise false döndür
                     # ERROR
-                    check_arduino_thread.rv = False
+                    check_arduino_thread_rv = False
 
                 elif type(rv) == list and rv[0] is not None and type(rv[0]) == str and not rv[0] == "": # eğer boş değilse true döndür
                     # bulundu
-                    check_arduino_thread.rv = True
+                    check_arduino_thread_rv = True
 
             except: # eğer error verirse false döndür
                 # bulunamadı
-                check_arduino_thread.rv = False
+                check_arduino_thread_rv = False
 
             #thread kapama emri kontrolü
             if check_arduino_thread.exitthread:    
                 check_arduino_thread.exitthread = False                 
                 break
 
-            time.sleep(5) # thread fazla yüklemesin diye bekleme
+            time.sleep(1) # thread fazla yüklemesin diye bekleme
         
         check_arduino_thread.threadopen = False # eğer threadin dışına çıkarsa threadin artık açık olmadığını söylüyor
 
@@ -1258,9 +1265,11 @@ def not_main(stdscr):
 
     rv = ArduinoFunctions.led_write(led_blue, led_camera, 1.0) 
     handle_error(rv, stdscr, PanicMenu=True) # led ayarlamasından error mu döndü kontrol eder
-
+    check_arduino_thread() # arduino takılımı diye kontrol eden thread başlar<< 
+    time.sleep(0.5)
+    
     while True:
-
+    
         # eğer sadece bakacağın menülerde ise row'u çıkış butonuna kitler
         if cur_stat["current_menu"] == ip_menu_value:
             cur_stat["current_row"] = 4
@@ -1302,15 +1311,6 @@ def not_main(stdscr):
         # threadi durdurmak için: arduino_check_thread.exitthread = True (try except içine al)
         # thread'den değer okumak için (example yerine değerin yazılmasını istediğiniz değişken): example = arduino_check_thread.rv (try except içine al)
         
-        check_arduino_thread() # arduino takılımı diye kontrol eden thread başlar
-        try:
-            rv = check_arduino_thread.rv # arduino takılı mı
-        except:
-            pass
-        else:
-            if not rv:
-                handle_error(all_errors[ARDUINO_CONN_LOST], stdscr, True) # error verdi mi kontrol
-        
         
         for i in cur_stat["all_menu_elements"][main_menu_value][1]: # eğer menüdeki herşey True ise Match Mod'a girebilir hale getirir
             if i:
@@ -1318,7 +1318,7 @@ def not_main(stdscr):
             elif not i:
                 canGoToMM = False
                 break
-        pass
+        pass            
         # Mac Modu
         if (
             canGoToMM == True
@@ -1327,7 +1327,6 @@ def not_main(stdscr):
             and cur_stat["current_menu"] == main_menu_value
         ):
             match_mode(stdscr, settings, led_blue, led_camera, led_red, led_green, swt1, pot1, isKeyError) # match mode başlat
-
         # region arduino menu ozel
         if cur_stat["current_menu"] == 2: # eğer arudino menüsünde ise potansiyomentre'den değer okuyan yer
             if (
@@ -1422,6 +1421,7 @@ def not_main(stdscr):
 
         # endregion
 
+
         # Menu degistirme olaylari
         cur_stat["current_row"], cur_stat["current_menu"], rv = InputPFunctions.change_menu( 
             key, cur_stat, led_green, led_camera
@@ -1442,6 +1442,14 @@ def not_main(stdscr):
         if sett is not None and not type(sett) == 4:
             settings = sett
 
+        try:
+            rv = check_arduino_thread_rv # arduino takılı mı
+        except:
+            pass
+        else:
+            if not rv:
+                handle_error(all_errors[ARDUINO_CONN_LOST], stdscr, True) # error verdi mi kontrol
+        
 try:
     curses.wrapper(not_main)
 except KeyboardInterrupt:
