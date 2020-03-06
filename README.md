@@ -1,15 +1,3 @@
-```shell
-TO DO
-RC.LOCAL DOSAYSININ KOMUTLARINI DÜZENLEME
-STATIC IP ALIMI
-FILE UPLOAD fotoğraflar 
-ARAYÜZ kullanım
-Network Tables ile birleştirme
-.gitignore düzenleme
-devreleri yenileme
-```
-
-
 # NightVision
 ***Vision proccessing codes for FRC 2020 by FRC 7839***
 
