@@ -368,7 +368,13 @@ def match_mode(
                         isReadError = False
                 except: # eğer swt objesi yoksa
                     if rv2 != all_errors[ARDUINO_CONN_LOST]:
-                        isReadError = True
+                        try:
+                            DbFunctions.save_settings()
+
+                        except:
+                            isReadError = True
+                        else:
+                            isReadError = False
                     else:
                         isReadError = False
 
@@ -1200,7 +1206,7 @@ def not_main(stdscr):
     ###
 
     com_ports = ArduinoFunctions.check_ports() # com portları alır
-
+    time.sleep(1)
     if type(com_ports) == list: # eğer com port'lara birşey takılı ise
         board = ArduinoFunctions.import_arduino(com_ports) # arduinoyu import et
 
@@ -1215,8 +1221,8 @@ def not_main(stdscr):
     if elapsed < 5:
         time.sleep(5 - elapsed)
         # error mesajı ver
-        errortimer = threading.Timer(0.1, print_error, args=[stdscr, None])
-        errortimer.start()
+        # errortimer = threading.Timer(0.1, print_error, args=[stdscr, None])
+        # errortimer.start()
 
     # eğer arduino import edildi ise
     if not type(board) == str:
@@ -1458,3 +1464,4 @@ except KeyboardInterrupt:
             flash_led.exitthread = True 
     except:
         pass
+    
