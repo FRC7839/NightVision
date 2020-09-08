@@ -1,0 +1,11 @@
+{
+    "isTunaPro": true,
+    "Robot Location": "MIDDLE",
+    "Camera Tolerance": "15",
+    "Waiting Period": "0",
+    "Autonomous Mode": "1",
+    "Team Number": "7839",
+    "Camera Offset": "000",
+    "Match Mode Status": false,
+    "Led Status": true
+}
