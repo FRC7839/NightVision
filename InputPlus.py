@@ -47,7 +47,7 @@
 
 # Match mode da iken led_camera kapatılmak istenirse yeşil led yanıp sönebilir (KAYRA)
 
-# BLUETOOTH COM PORT HATASI 
+# BLUETOOTH COM PORT HATASI - bluetooth kapa mal (gelecekteki tuna)
 
 # MATCH MODE BASLATILABILIR OLMASINA RAGMEN MAVI LED YANIP SONUYOR
 

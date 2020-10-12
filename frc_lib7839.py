@@ -213,7 +213,7 @@ class ArduinoFunctions:
             
             elif type(com_ports) == str: # tek bir tane ise onu import et
                 try:
-                    board = pyfirmata.ArduinoNano(str(com_ports[i]))
+                    board = pyfirmata.ArduinoNano(str(com_ports))
                     
                 except:
                     pass                
